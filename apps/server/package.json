@@ -1,0 +1,17 @@
+{
+  "name": "@theapp/server",
+  "version": "0.0.0",
+  "types": "./src/index.ts",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile dist/server src/index.ts"
+  },
+  "dependencies": {
+    "elysia": "catalog:"
+  },
+  "devDependencies": {
+    "@theapp/typescript-config": "workspace:*",
+    "bun-types": "catalog:"
+  },
+  "module": "src/index.js"
+}
