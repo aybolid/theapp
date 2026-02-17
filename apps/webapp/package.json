@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@elysiajs/eden": "^1.4.8",
+    "@tanstack/react-form": "^1.28.3",
     "@theapp/server": "workspace:*",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",
