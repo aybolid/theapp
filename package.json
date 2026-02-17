@@ -19,6 +19,10 @@
   ],
   "catalog": {
     "elysia": "latest",
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3"
   }
 }

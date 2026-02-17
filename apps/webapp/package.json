@@ -1,0 +1,30 @@
+{
+  "name": "webapp",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@elysiajs/eden": "^1.4.8",
+    "@theapp/server": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "bun-types": "catalog:",
+    "@vitejs/plugin-react": "^5.1.1",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "vite": "^8.0.0-beta.13",
+    "@theapp/typescript-config": "workspace:*",
+    "elysia": "catalog:"
+  },
+  "overrides": {
+    "vite": "^8.0.0-beta.13"
+  }
+}

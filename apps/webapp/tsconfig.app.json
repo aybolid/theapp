@@ -1,0 +1,14 @@
+{
+  "extends": "@theapp/typescript-config/base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "types": ["vite/client"],
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@theapp/webapp/*": ["./src/*"],
+      "@theapp/server/*": ["../server/src/*"]
+    }
+  },
+  "include": ["src"]
+}
