@@ -1,12 +1,50 @@
 import type { Treaty } from "@elysiajs/eden";
-import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
+import {
+  queryOptions,
+  type UseMutationOptions,
+  type UseSuspenseQueryOptions,
+  useMutation,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import type {
   SigninBody,
   SigninOk,
   SignupBody,
   SignupCreated,
+  UserResponse,
 } from "@theapp/server/schemas";
 import { server } from "../api";
+
+export const meQueryOptions = queryOptions<
+  UserResponse,
+  Treaty.Error<typeof server.api.auth.me.get>
+>({
+  queryKey: ["me"],
+  enabled: document.cookie.includes("sessionToken"),
+  queryFn: async () => {
+    const resp = await server.api.auth.me.get();
+    if (resp.error) {
+      throw resp.error;
+    } else {
+      return resp.data;
+    }
+  },
+});
+
+export function useMeSuspenseQuery(
+  options?: Omit<
+    UseSuspenseQueryOptions<
+      UserResponse,
+      Treaty.Error<typeof server.api.auth.me.get>
+    >,
+    "queryFn" | "queryKey"
+  >,
+) {
+  return useSuspenseQuery({
+    ...meQueryOptions,
+    ...options,
+  });
+}
 
 export function useSignupMutation(
   options?: Omit<

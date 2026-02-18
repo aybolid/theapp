@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { signinBodySchema } from "@theapp/server/schemas";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -27,7 +27,10 @@ export const Route = createFileRoute("/_no_auth/signin")({
 });
 
 function RouteComponent() {
+  const router = useRouter();
+
   const signinMutation = useSigninMutation({
+    onSuccess: () => router.invalidate(),
     onError: (err) => {
       const issues =
         err.status === 422
