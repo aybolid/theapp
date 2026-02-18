@@ -15,6 +15,7 @@ import { setZodIssuesAsFieldErrors } from "./lib/forms";
 
 export const App: FC = () => {
   const form = useForm({
+    formId: "echo-form",
     defaultValues: {
       message: "",
     },

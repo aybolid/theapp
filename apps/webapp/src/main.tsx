@@ -1,5 +1,7 @@
 import "@theapp/ui/globals.css";
 
+import { TanStackDevtools } from "@tanstack/react-devtools";
+import { formDevtoolsPlugin } from "@tanstack/react-form-devtools";
 import { App } from "@theapp/webapp/app";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -11,5 +13,6 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <App />
+    <TanStackDevtools plugins={[formDevtoolsPlugin()]} />
   </StrictMode>,
 );

@@ -1,5 +1,6 @@
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
+import { devtools } from "@tanstack/devtools-vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
 
@@ -16,12 +17,13 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      devtools(),
+      tailwindcss(),
       react({
         babel: {
           plugins: [["babel-plugin-react-compiler"]],
         },
       }),
-      tailwindcss(),
     ],
     resolve: {
       alias: {

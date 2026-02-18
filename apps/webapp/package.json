@@ -11,7 +11,10 @@
   "dependencies": {
     "@elysiajs/eden": "^1.4.8",
     "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/devtools-vite": "^0.5.1",
+    "@tanstack/react-devtools": "^0.9.6",
     "@tanstack/react-form": "^1.28.3",
+    "@tanstack/react-form-devtools": "^0.2.16",
     "@theapp/server": "workspace:*",
     "@theapp/ui": "workspace:*",
     "react": "catalog:",
