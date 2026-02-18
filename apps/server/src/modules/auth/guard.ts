@@ -33,8 +33,8 @@ export const authGuard = (app: Elysia) =>
       const now = Date.now();
 
       const session = await ctx.db.query.sessions.findFirst({
-        where: { sessionId: { eq: sessionId } },
-        with: { user: true },
+        where: { id: { eq: sessionId } },
+        with: { user: { with: { profile: true } } },
       });
       if (!session) {
         sessionToken.remove();
@@ -48,7 +48,7 @@ export const authGuard = (app: Elysia) =>
         sessionToken.remove();
         await ctx.db
           .delete(ctx.schema.sessions)
-          .where(eq(ctx.schema.sessions.sessionId, sessionId));
+          .where(eq(ctx.schema.sessions.id, sessionId));
         throw ctx.status(401, "Session expired");
       }
 

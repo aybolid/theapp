@@ -42,9 +42,16 @@ export const auth = new Elysia({
         PASSWORD_ALGORITHM,
       );
 
-      await ctx.db
-        .insert(ctx.schema.users)
-        .values({ email: ctx.body.email, passwordHash });
+      await ctx.db.transaction(async (tx) => {
+        const [createdUser] = await tx
+          .insert(ctx.schema.users)
+          .values({ email: ctx.body.email, passwordHash })
+          .returning();
+        if (!createdUser) {
+          throw new Error("Failed to create user");
+        }
+        await tx.insert(ctx.schema.profiles).values({ userId: createdUser.id });
+      });
 
       return ctx.status(201, "User created");
     },
@@ -78,9 +85,9 @@ export const auth = new Elysia({
       const secretHash = await hashSecret(secret);
 
       await ctx.db.insert(ctx.schema.sessions).values({
-        sessionId,
+        id: sessionId,
         secretHash: Buffer.from(secretHash),
-        userId: candidate.userId,
+        userId: candidate.id,
       });
 
       const token = `${sessionId}${SESSION_TOKEN_DELIMITER}${secret}`;
@@ -122,7 +129,7 @@ export const auth = new Elysia({
       ctx.cookie.sessionToken.remove();
       await ctx.db
         .delete(ctx.schema.sessions)
-        .where(eq(ctx.schema.sessions.sessionId, ctx.session.sessionId));
+        .where(eq(ctx.schema.sessions.id, ctx.session.id));
       return ctx.status(200, "User signed out");
     },
     {
@@ -138,7 +145,7 @@ export const auth = new Elysia({
       ctx.cookie.sessionToken.remove();
       await ctx.db
         .delete(ctx.schema.sessions)
-        .where(eq(ctx.schema.sessions.userId, ctx.user.userId));
+        .where(eq(ctx.schema.sessions.userId, ctx.user.id));
       return ctx.status(200, "User signed out");
     },
     {

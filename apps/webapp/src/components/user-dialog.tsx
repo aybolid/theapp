@@ -105,7 +105,7 @@ export const UserDialog: FC<PropsWithChildren> = ({ children }) => {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col items-center justify-center">
-                <h2 className="font-medium">Unknown User</h2>
+                <h2 className="font-medium">{meQuery.data.profile.name}</h2>
                 <p className="text-muted-foreground text-xs">
                   {meQuery.data.email}
                 </p>
@@ -115,7 +115,7 @@ export const UserDialog: FC<PropsWithChildren> = ({ children }) => {
               <h3 className="text-muted-foreground">Profile details</h3>
               <ItemGroup className="gap-2 pt-4">
                 <Item variant="outline">
-                  <NameForm defaultValue="Unknown Name" />
+                  <NameForm defaultValue={meQuery.data.profile.name} />
                 </Item>
                 {profileDetails.map((detail) => (
                   <Item key={detail.title} variant="outline">
