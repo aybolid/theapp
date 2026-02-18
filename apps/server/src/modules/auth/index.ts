@@ -3,6 +3,7 @@ import {
   signinBadRequestSchema,
   signinBodySchema,
   signinOkSchema,
+  signoutOkSchema,
   signupBodySchema,
   signupCreatedSchema,
   singupConflictErrorSchema,
@@ -12,6 +13,7 @@ import {
   generateSecureRandomString,
   hashSecret,
 } from "@theapp/server/utils/crypto";
+import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import { authGuard, SESSION_TOKEN_DELIMITER } from "./guard";
 
@@ -111,6 +113,39 @@ export const auth = new Elysia({
       response: { 200: userResponseSchema },
       detail: {
         description: "Get the current user.",
+      },
+    },
+  )
+  .post(
+    "/signout",
+    async (ctx) => {
+      ctx.cookie.sessionToken.remove();
+      await ctx.db
+        .delete(ctx.schema.sessions)
+        .where(eq(ctx.schema.sessions.sessionId, ctx.session.sessionId));
+      return ctx.status(200, "User signed out");
+    },
+    {
+      response: { 200: signoutOkSchema },
+      detail: {
+        description: "Sign out the current user.",
+      },
+    },
+  )
+  .post(
+    "/signout/all",
+    async (ctx) => {
+      ctx.cookie.sessionToken.remove();
+      await ctx.db
+        .delete(ctx.schema.sessions)
+        .where(eq(ctx.schema.sessions.userId, ctx.user.userId));
+      return ctx.status(200, "User signed out");
+    },
+    {
+      response: { 200: signoutOkSchema },
+      detail: {
+        description:
+          "Sign out the current user and delete all related sessions.",
       },
     },
   );

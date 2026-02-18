@@ -9,6 +9,7 @@ import {
 import type {
   SigninBody,
   SigninOk,
+  SignoutOk,
   SignupBody,
   SignupCreated,
   UserResponse,
@@ -84,6 +85,52 @@ export function useSigninMutation(
     mutationKey: ["signin"],
     mutationFn: async (data: SigninBody) => {
       const resp = await server.api.auth.signin.post(data);
+      if (resp.error) {
+        throw resp.error;
+      } else {
+        return resp.data;
+      }
+    },
+    ...options,
+  });
+}
+
+export function useSignoutMutation(
+  options?: Omit<
+    UseMutationOptions<
+      SignoutOk,
+      Treaty.Error<typeof server.api.auth.signout.post>
+    >,
+    "mutationKey" | "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationKey: ["signout"],
+    mutationFn: async () => {
+      const resp = await server.api.auth.signout.post();
+      if (resp.error) {
+        throw resp.error;
+      } else {
+        return resp.data;
+      }
+    },
+    ...options,
+  });
+}
+
+export function useSignoutAllMutation(
+  options?: Omit<
+    UseMutationOptions<
+      SignoutOk,
+      Treaty.Error<typeof server.api.auth.signout.all.post>
+    >,
+    "mutationKey" | "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationKey: ["signout", "all"],
+    mutationFn: async () => {
+      const resp = await server.api.auth.signout.all.post();
       if (resp.error) {
         throw resp.error;
       } else {

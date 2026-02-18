@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
+import { Button } from "@theapp/ui/components/button";
+import { UserDialog } from "@theapp/webapp/components/user-dialog";
 
 export const Route = createFileRoute("/_auth/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const meQuery = useMeSuspenseQuery();
-  return <pre>{JSON.stringify(meQuery.data, null, 2)}</pre>;
+  return (
+    <UserDialog>
+      <Button>Hello</Button>
+    </UserDialog>
+  );
 }

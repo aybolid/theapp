@@ -49,3 +49,7 @@ export const userResponseSchema = z.object({
 });
 
 export type UserResponse = z.infer<typeof userResponseSchema>;
+
+export const signoutOkSchema = z.literal("User signed out");
+
+export type SignoutOk = z.infer<typeof signoutOkSchema>;

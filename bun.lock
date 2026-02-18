@@ -43,6 +43,7 @@
         "@tanstack/react-router-devtools": "^1.161.1",
         "@theapp/server": "workspace:*",
         "@theapp/ui": "workspace:*",
+        "dayjs": "^1.11.19",
         "react": "catalog:",
         "react-dom": "catalog:",
         "zod": "catalog:",
