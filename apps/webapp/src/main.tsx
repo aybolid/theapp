@@ -1,10 +1,30 @@
 import "@theapp/ui/globals.css";
 
-import { TanStackDevtools } from "@tanstack/react-devtools";
-import { formDevtoolsPlugin } from "@tanstack/react-form-devtools";
-import { App } from "@theapp/webapp/app";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { routeTree } from "./routeTree.gen";
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
+const router = createRouter({
+  routeTree,
+  context: {
+    queryClient,
+  },
+  defaultPreload: "intent",
+  defaultPreloadStaleTime: 0,
+  scrollRestoration: true,
+});
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
 
 const root = document.getElementById("root");
 if (!root) {
@@ -12,7 +32,8 @@ if (!root) {
 }
 createRoot(root).render(
   <StrictMode>
-    <App />
-    <TanStackDevtools plugins={[formDevtoolsPlugin()]} />
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   </StrictMode>,
 );
