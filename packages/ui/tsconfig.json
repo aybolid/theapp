@@ -1,0 +1,12 @@
+{
+  "extends": "@theapp/typescript-config/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@theapp/ui/*": ["./src/*"]
+    }
+  },
+  "include": ["."],
+  "exclude": ["node_modules"]
+}

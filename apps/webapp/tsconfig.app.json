@@ -9,7 +9,8 @@
     "baseUrl": ".",
     "paths": {
       "@theapp/webapp/*": ["./src/*"],
-      "@theapp/server/*": ["../server/src/*"]
+      "@theapp/server/*": ["../server/src/*"],
+      "@theapp/ui/*": ["../../packages/ui/src/*"]
     }
   },
   "include": ["src"]
