@@ -20,7 +20,12 @@ const api = new Elysia({ prefix: "/api" }).use(auth).post(
 );
 
 const app = new Elysia()
-  .use(openapi({ mapJsonSchema: { zod: z.toJSONSchema } }))
+  .use(
+    openapi({
+      mapJsonSchema: { zod: z.toJSONSchema },
+      scalar: { agent: { disabled: true } },
+    }),
+  )
   .use(api)
   .listen(PORT);
 console.log(`Server is running at ${app.server?.hostname}:${app.server?.port}`);
