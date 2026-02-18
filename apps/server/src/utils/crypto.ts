@@ -1,5 +1,6 @@
 /** Human readable alphabet (a-z, 0-9 without l, o, 0, 1 to avoid confusion) */
 const HUMAN_READABLE_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
+const SECRET_HASH_ALGORITHM: AlgorithmIdentifier = "SHA-256";
 
 export function generateSecureRandomString(): string {
   // Generate 24 bytes = 192 bits of entropy.
@@ -8,17 +9,19 @@ export function generateSecureRandomString(): string {
   crypto.getRandomValues(bytes);
 
   let id = "";
-  for (let i = 0; i < bytes.length; i++) {
+  for (const byte of bytes) {
     // >> 3 "removes" the right-most 3 bits of the byte
-    // biome-ignore lint/style/noNonNullAssertion: i is < bytes.length
-    id += HUMAN_READABLE_ALPHABET[bytes[i]! >> 3];
+    id += HUMAN_READABLE_ALPHABET[byte >> 3];
   }
   return id;
 }
 
 export async function hashSecret(secret: string): Promise<Uint8Array> {
   const secretBytes = new TextEncoder().encode(secret);
-  const secretHashBuffer = await crypto.subtle.digest("SHA-256", secretBytes);
+  const secretHashBuffer = await crypto.subtle.digest(
+    SECRET_HASH_ALGORITHM,
+    secretBytes,
+  );
   return new Uint8Array(secretHashBuffer);
 }
 
