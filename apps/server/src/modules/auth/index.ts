@@ -1,4 +1,5 @@
-import { dbPlugin } from "@theapp/server/db/plugin";
+import { db } from "@theapp/server/db";
+import { schema } from "@theapp/server/db/schema";
 import {
   signinBadRequestSchema,
   signinBodySchema,
@@ -26,11 +27,10 @@ export const auth = new Elysia({
     tags: ["auth"],
   },
 })
-  .use(dbPlugin)
   .post(
     "/signup",
     async (ctx) => {
-      const isEmailAvailable = !(await ctx.db.query.users.findFirst({
+      const isEmailAvailable = !(await db.query.users.findFirst({
         where: { email: { eq: ctx.body.email } },
       }));
       if (!isEmailAvailable) {
@@ -42,17 +42,15 @@ export const auth = new Elysia({
         PASSWORD_ALGORITHM,
       );
 
-      await ctx.db.transaction(async (tx) => {
+      await db.transaction(async (tx) => {
         const [createdUser] = await tx
-          .insert(ctx.schema.users)
-          .values({ email: ctx.body.email, passwordHash })
+          .insert(schema.users)
+          .values({ email: ctx.body.email.toLowerCase(), passwordHash })
           .returning();
         if (!createdUser) {
           throw new Error("Failed to create user");
         }
-        await tx
-          .insert(ctx.schema.profiles)
-          .values({ userId: createdUser.userId });
+        await tx.insert(schema.profiles).values({ userId: createdUser.userId });
       });
 
       return ctx.status(201, "User created");
@@ -66,7 +64,7 @@ export const auth = new Elysia({
   .post(
     "/signin",
     async (ctx) => {
-      const candidate = await ctx.db.query.users.findFirst({
+      const candidate = await db.query.users.findFirst({
         where: { email: { eq: ctx.body.email } },
       });
       if (!candidate) {
@@ -86,7 +84,7 @@ export const auth = new Elysia({
       const secret = generateSecureRandomString();
       const secretHash = await hashSecret(secret);
 
-      await ctx.db.insert(ctx.schema.sessions).values({
+      await db.insert(schema.sessions).values({
         sessionId,
         secretHash: Buffer.from(secretHash),
         userId: candidate.userId,
@@ -128,10 +126,10 @@ export const auth = new Elysia({
   .post(
     "/signout",
     async (ctx) => {
-      ctx.cookie.sessionToken.remove();
-      await ctx.db
-        .delete(ctx.schema.sessions)
-        .where(eq(ctx.schema.sessions.sessionId, ctx.session.sessionId));
+      ctx.cookie.sessionToken?.remove();
+      await db
+        .delete(schema.sessions)
+        .where(eq(schema.sessions.sessionId, ctx.session.sessionId));
       return ctx.status(200, "User signed out");
     },
     {
@@ -144,10 +142,10 @@ export const auth = new Elysia({
   .post(
     "/signout/all",
     async (ctx) => {
-      ctx.cookie.sessionToken.remove();
-      await ctx.db
-        .delete(ctx.schema.sessions)
-        .where(eq(ctx.schema.sessions.userId, ctx.user.userId));
+      ctx.cookie.sessionToken?.remove();
+      await db
+        .delete(schema.sessions)
+        .where(eq(schema.sessions.userId, ctx.user.userId));
       return ctx.status(200, "User signed out");
     },
     {

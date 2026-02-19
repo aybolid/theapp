@@ -1,7 +1,8 @@
-import { dbPlugin } from "@theapp/server/db/plugin";
+import { db } from "@theapp/server/db";
+import { schema } from "@theapp/server/db/schema";
 import { constantTimeEqual, hashSecret } from "@theapp/server/utils/crypto";
 import { eq } from "drizzle-orm";
-import Elysia, { t } from "elysia";
+import Elysia from "elysia";
 
 /** Delimiter used to separate parts of the session token (session id and secret). */
 export const SESSION_TOKEN_DELIMITER = ".";
@@ -9,14 +10,15 @@ export const SESSION_TOKEN_DELIMITER = ".";
 const SESSION_EXPIRES_IN_SECONDS = 60 * 60 * 24;
 
 export const authGuard = new Elysia({ name: "auth-guard" })
-  .use(dbPlugin)
-  .guard({
-    cookie: t.Cookie({
-      sessionToken: t.String(),
-    }),
-  })
   .derive(async (ctx) => {
     const sessionToken = ctx.cookie.sessionToken;
+
+    if (!sessionToken) {
+      throw ctx.status(401, "Session token not found");
+    }
+    if (typeof sessionToken.value !== "string") {
+      throw ctx.status(401, "Invalid session token");
+    }
 
     const tokenParts = sessionToken.value.split(SESSION_TOKEN_DELIMITER);
     if (tokenParts.length !== 2) {
@@ -30,7 +32,7 @@ export const authGuard = new Elysia({ name: "auth-guard" })
 
     const now = Date.now();
 
-    const session = await ctx.db.query.sessions.findFirst({
+    const session = await db.query.sessions.findFirst({
       where: { sessionId: { eq: sessionId } },
       with: { user: { with: { profile: true } } },
     });
@@ -44,9 +46,9 @@ export const authGuard = new Elysia({ name: "auth-guard" })
       SESSION_EXPIRES_IN_SECONDS * 1000
     ) {
       sessionToken.remove();
-      await ctx.db
-        .delete(ctx.schema.sessions)
-        .where(eq(ctx.schema.sessions.sessionId, sessionId));
+      await db
+        .delete(schema.sessions)
+        .where(eq(schema.sessions.sessionId, sessionId));
       throw ctx.status(401, "Session expired");
     }
 

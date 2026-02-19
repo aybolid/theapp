@@ -1,5 +1,6 @@
 import z from "zod";
 import { zDate } from "../utils/zod";
+import { profileResponseSchema } from "./profiles";
 
 export const signupBodySchema = z.object({
   email: z.email(),
@@ -46,13 +47,7 @@ export const userResponseSchema = z.object({
   email: z.email(),
   createdAt: zDate,
   updatedAt: zDate,
-  profile: z.object({
-    profileId: z.uuidv7(),
-    userId: z.uuidv7(),
-    name: z.string(),
-    createdAt: zDate,
-    updatedAt: zDate,
-  }),
+  profile: profileResponseSchema,
 });
 
 export type UserResponse = z.infer<typeof userResponseSchema>;

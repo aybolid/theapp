@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@theapp/ui/components/button";
-import { UserDialog } from "@theapp/webapp/components/user-dialog";
+import { UserAccountDialog } from "@theapp/webapp/components/user-account-dialog";
 
 export const Route = createFileRoute("/_auth/")({
   component: RouteComponent,
@@ -8,8 +8,8 @@ export const Route = createFileRoute("/_auth/")({
 
 function RouteComponent() {
   return (
-    <UserDialog>
+    <UserAccountDialog>
       <Button>Hello</Button>
-    </UserDialog>
+    </UserAccountDialog>
   );
 }

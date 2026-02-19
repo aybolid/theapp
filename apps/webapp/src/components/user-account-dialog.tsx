@@ -1,5 +1,11 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
+import {
+  type ProfileResponse,
+  profilesPatchBodySchema,
+  type UserResponse,
+} from "@theapp/server/schemas";
 import { Avatar, AvatarFallback } from "@theapp/ui/components/avatar";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -49,9 +55,17 @@ import {
 } from "@theapp/ui/icons/lucide";
 import dayjs from "dayjs";
 import type { FC, PropsWithChildren } from "react";
-import { useMeSuspenseQuery, useSignoutMutation } from "../lib/query/auth";
+import z from "zod";
+import { extractZodIssuesFromValidationError } from "../lib/api";
+import { setZodIssuesAsFieldErrors } from "../lib/forms";
+import {
+  meQueryOptions,
+  useMeSuspenseQuery,
+  useSignoutMutation,
+} from "../lib/query/auth";
+import { useUpdateProfile } from "../lib/query/profiles";
 
-export const UserDialog: FC<PropsWithChildren> = ({ children }) => {
+export const UserAccountDialog: FC<PropsWithChildren> = ({ children }) => {
   const router = useRouter();
   const meQuery = useMeSuspenseQuery();
 
@@ -115,7 +129,7 @@ export const UserDialog: FC<PropsWithChildren> = ({ children }) => {
               <h3 className="text-muted-foreground">Profile details</h3>
               <ItemGroup className="gap-2 pt-4">
                 <Item variant="outline">
-                  <NameForm defaultValue={meQuery.data.profile.name} />
+                  <NameForm profile={meQuery.data.profile} />
                 </Item>
                 {profileDetails.map((detail) => (
                   <Item key={detail.title} variant="outline">
@@ -147,11 +161,60 @@ export const UserDialog: FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-const NameForm: FC<{ defaultValue: string }> = ({ defaultValue }) => {
+const nameSchema = z.object({
+  name: profilesPatchBodySchema.shape.name.nonoptional(),
+});
+
+const NameForm: FC<{ profile: ProfileResponse }> = ({ profile }) => {
+  const queryClient = useQueryClient();
+
+  const updateMutation = useUpdateProfile(profile.profileId, {
+    onSuccess: (profile) => {
+      form.setFieldValue("name", profile.name);
+      queryClient.setQueryData<UserResponse>(
+        meQueryOptions.queryKey,
+        (prev) => {
+          if (!prev) return undefined;
+          const clone = structuredClone(prev);
+          clone.profile.name = profile.name;
+          return clone;
+        },
+      );
+      queryClient.invalidateQueries(meQueryOptions);
+    },
+    onError: (err) => {
+      const issues =
+        err.status === 422
+          ? extractZodIssuesFromValidationError(err.value)
+          : null;
+
+      switch (err.status) {
+        // biome-ignore lint/suspicious/noFallthroughSwitchClause: expected fallthrough
+        case 422:
+          if (issues) {
+            setZodIssuesAsFieldErrors(form, issues);
+            break;
+          }
+        default:
+          form.setErrorMap({
+            onSubmit: {
+              fields: { name: { message: "An unknown error occurred" } },
+            },
+          });
+      }
+    },
+  });
+
   const form = useForm({
     formId: "name-form",
-    defaultValues: { name: defaultValue },
+    validators: {
+      onSubmit: nameSchema,
+    },
+    defaultValues: { name: profile.name },
+    onSubmit: ({ value }) => updateMutation.mutate(value),
   });
+
+  const isBusy = updateMutation.isPending || form.state.isSubmitting;
 
   return (
     <form
@@ -181,14 +244,15 @@ const NameForm: FC<{ defaultValue: string }> = ({ defaultValue }) => {
                     aria-invalid={isInvalid}
                     placeholder="Your name"
                   />
-                  {field.state.value.trim() !== defaultValue && (
+                  {field.state.value.trim() !== profile.name && (
                     <InputGroupAddon align="inline-end">
                       <InputGroupButton
                         title="Save"
                         type="submit"
                         variant="default"
+                        disabled={isBusy}
                       >
-                        <Check />
+                        {isBusy ? <Spinner /> : <Check />}
                       </InputGroupButton>
                     </InputGroupAddon>
                   )}
