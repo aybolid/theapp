@@ -42,12 +42,12 @@ export const signinOkSchema = z.literal("User signed in");
 export type SigninOk = z.infer<typeof signinOkSchema>;
 
 export const userResponseSchema = z.object({
-  id: z.uuidv7(),
+  userId: z.uuidv7(),
   email: z.email(),
   createdAt: zDate,
   updatedAt: zDate,
   profile: z.object({
-    id: z.uuidv7(),
+    profileId: z.uuidv7(),
     userId: z.uuidv7(),
     name: z.string(),
     createdAt: zDate,

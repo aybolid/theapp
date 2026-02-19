@@ -50,7 +50,9 @@ export const auth = new Elysia({
         if (!createdUser) {
           throw new Error("Failed to create user");
         }
-        await tx.insert(ctx.schema.profiles).values({ userId: createdUser.id });
+        await tx
+          .insert(ctx.schema.profiles)
+          .values({ userId: createdUser.userId });
       });
 
       return ctx.status(201, "User created");
@@ -85,9 +87,9 @@ export const auth = new Elysia({
       const secretHash = await hashSecret(secret);
 
       await ctx.db.insert(ctx.schema.sessions).values({
-        id: sessionId,
+        sessionId,
         secretHash: Buffer.from(secretHash),
-        userId: candidate.id,
+        userId: candidate.userId,
       });
 
       const token = `${sessionId}${SESSION_TOKEN_DELIMITER}${secret}`;
@@ -129,7 +131,7 @@ export const auth = new Elysia({
       ctx.cookie.sessionToken.remove();
       await ctx.db
         .delete(ctx.schema.sessions)
-        .where(eq(ctx.schema.sessions.id, ctx.session.id));
+        .where(eq(ctx.schema.sessions.sessionId, ctx.session.sessionId));
       return ctx.status(200, "User signed out");
     },
     {
@@ -145,7 +147,7 @@ export const auth = new Elysia({
       ctx.cookie.sessionToken.remove();
       await ctx.db
         .delete(ctx.schema.sessions)
-        .where(eq(ctx.schema.sessions.userId, ctx.user.id));
+        .where(eq(ctx.schema.sessions.userId, ctx.user.userId));
       return ctx.status(200, "User signed out");
     },
     {

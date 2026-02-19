@@ -7,5 +7,6 @@
     "paths": {
       "@theapp/server/*": ["src/*"]
     }
-  }
+  },
+  "include": ["."]
 }

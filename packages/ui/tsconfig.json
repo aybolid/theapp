@@ -7,6 +7,5 @@
       "@theapp/ui/*": ["./src/*"]
     }
   },
-  "include": ["."],
-  "exclude": ["node_modules"]
+  "include": ["."]
 }
