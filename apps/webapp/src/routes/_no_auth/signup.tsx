@@ -4,6 +4,7 @@ import { signupBodySchema } from "@theapp/server/schemas";
 import { Button } from "@theapp/ui/components/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -18,6 +19,7 @@ import {
 } from "@theapp/ui/components/field";
 import { Input } from "@theapp/ui/components/input";
 import { Spinner } from "@theapp/ui/components/spinner";
+import { ThemeMenu } from "@theapp/webapp/components/theme-menu";
 import { extractZodIssuesFromValidationError } from "@theapp/webapp/lib/api";
 import { setZodIssuesAsFieldErrors } from "@theapp/webapp/lib/forms";
 import { useSignupMutation } from "@theapp/webapp/lib/query/auth";
@@ -96,6 +98,9 @@ function RouteComponent() {
           <CardDescription>
             Enter your details below to get started.
           </CardDescription>
+          <CardAction>
+            <ThemeMenu />
+          </CardAction>
         </CardHeader>
         <form
           className="contents"

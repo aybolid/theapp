@@ -132,7 +132,7 @@ export const UserAccountDialog: FC<PropsWithChildren> = ({ children }) => {
                   <NameForm profile={meQuery.data.profile} />
                 </Item>
                 {profileDetails.map((detail) => (
-                  <Item key={detail.title} variant="outline">
+                  <Item key={detail.title} variant="muted">
                     <ItemMedia variant="icon">
                       <detail.icon />
                     </ItemMedia>
