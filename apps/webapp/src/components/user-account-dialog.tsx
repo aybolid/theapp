@@ -1,11 +1,18 @@
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { QueryErrorResetBoundary, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import {
   type ProfileResponse,
   profilesPatchBodySchema,
+  type UserAgentData,
   type UserResponse,
 } from "@theapp/server/schemas";
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@theapp/ui/components/alert";
 import { Avatar, AvatarFallback } from "@theapp/ui/components/avatar";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -37,6 +44,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@theapp/ui/components/item";
+import { Skeleton } from "@theapp/ui/components/skeleton";
 import { Spinner } from "@theapp/ui/components/spinner";
 import {
   Tabs,
@@ -45,6 +53,8 @@ import {
   TabsTrigger,
 } from "@theapp/ui/components/tabs";
 import {
+  AlertIcon,
+  AuthorizedIcon,
   Login01Icon,
   Logout01Icon,
   Mail01Icon,
@@ -57,16 +67,19 @@ import {
   type IconSvgElement,
 } from "@theapp/ui/icons/huge-react";
 import dayjs from "dayjs";
-import type { ComponentProps, FC } from "react";
+import { type ComponentProps, type FC, Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import z from "zod";
 import { extractZodIssuesFromValidationError } from "../lib/api";
 import { setZodIssuesAsFieldErrors } from "../lib/forms";
 import {
   meQueryOptions,
   useMeSuspenseQuery,
+  useSignoutAllMutation,
   useSignoutMutation,
 } from "../lib/query/auth";
 import { useUpdateProfile } from "../lib/query/profiles";
+import { useSessionsSuspenseQuery } from "../lib/query/sessions";
 
 export const UserAccountDialog: FC<{
   render: NonNullable<ComponentProps<typeof DialogTrigger>["render"]>;
@@ -150,6 +163,38 @@ export const UserAccountDialog: FC<{
               </ItemGroup>
             </div>
           </TabsContent>
+          <TabsContent value="security">
+            <h3 className="text-muted-foreground">Active sessions</h3>
+            <QueryErrorResetBoundary>
+              {({ reset }) => (
+                <ErrorBoundary
+                  onReset={reset}
+                  fallbackRender={({ resetErrorBoundary }) => (
+                    <Alert variant="destructive" className="my-4">
+                      <HugeiconsIcon icon={AlertIcon} strokeWidth={2} />
+                      <AlertTitle>Something went wrong!</AlertTitle>
+                      <AlertDescription>
+                        Failed to fetch active sessions.
+                      </AlertDescription>
+                      <AlertAction>
+                        <Button
+                          variant="outline"
+                          size="xs"
+                          onClick={resetErrorBoundary}
+                        >
+                          Retry
+                        </Button>
+                      </AlertAction>
+                    </Alert>
+                  )}
+                >
+                  <Suspense fallback={<Skeleton className="my-4 p-8" />}>
+                    <SessionsList />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            </QueryErrorResetBoundary>
+          </TabsContent>
         </Tabs>
         <DialogFooter>
           <Button
@@ -167,6 +212,54 @@ export const UserAccountDialog: FC<{
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+};
+
+const SessionsList = () => {
+  const router = useRouter();
+  const sessionsQuery = useSessionsSuspenseQuery();
+
+  const signoutAllMutation = useSignoutAllMutation({
+    onSettled: () => router.invalidate(),
+  });
+
+  return (
+    <>
+      <ItemGroup className="gap-2 py-4">
+        {sessionsQuery.data.map((session) => {
+          const formatted = formatUserAgent(session.uaData);
+          return (
+            <Item
+              key={session.sessionId}
+              variant={session.isCurrent ? "outline" : "muted"}
+            >
+              <ItemMedia variant="icon">
+                <HugeiconsIcon icon={AuthorizedIcon} strokeWidth={2} />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{formatted.primary}</ItemTitle>
+                <ItemDescription className="text-xs">
+                  {formatted.full} -{" "}
+                  {dayjs(session.createdAt).format("MMMM DD, YYYY")}
+                </ItemDescription>
+              </ItemContent>
+            </Item>
+          );
+        })}
+      </ItemGroup>
+      <Button
+        variant="destructive"
+        onClick={() => signoutAllMutation.mutate()}
+        disabled={signoutAllMutation.isPending}
+      >
+        {signoutAllMutation.isPending ? (
+          <Spinner />
+        ) : (
+          <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />
+        )}
+        <span>Sign Out All</span>
+      </Button>
+    </>
   );
 };
 
@@ -279,3 +372,24 @@ const NameForm: FC<{ profile: ProfileResponse }> = ({ profile }) => {
     </form>
   );
 };
+
+function formatUserAgent(uaData: UserAgentData) {
+  const { browser, os, device } = uaData;
+
+  const deviceName = device.model
+    ? `${device.vendor ? `${device.vendor} ` : ""}${device.model}`
+    : device.type === "mobile" || device.type === "tablet"
+      ? device.type.charAt(0).toUpperCase() + device.type.slice(1)
+      : "Desktop";
+
+  const browserName = browser.name || "Unknown Browser";
+
+  const osName = os.name
+    ? `${os.name}${os.version ? ` ${os.version}` : ""}`
+    : "Unknown OS";
+
+  return {
+    primary: `${browserName} on ${deviceName}`,
+    full: `${browserName} on ${osName} (${deviceName})`,
+  };
+}

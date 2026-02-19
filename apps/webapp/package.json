@@ -24,6 +24,7 @@
     "dayjs": "^1.11.19",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-error-boundary": "^6.1.1",
     "zod": "catalog:"
   },
   "devDependencies": {

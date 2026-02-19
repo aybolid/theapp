@@ -14,9 +14,11 @@ import {
   generateSecureRandomString,
   hashSecret,
 } from "@theapp/server/utils/crypto";
+import { parseUserAgent } from "@theapp/server/utils/ua";
 import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import { authGuard, SESSION_TOKEN_DELIMITER } from "./guard";
+import { sessions } from "./sessions";
 
 const PASSWORD_ALGORITHM: Parameters<(typeof Bun)["password"]["hash"]>[1] =
   "argon2id";
@@ -27,6 +29,7 @@ export const auth = new Elysia({
     tags: ["auth"],
   },
 })
+  .use(sessions)
   .post(
     "/signup",
     async (ctx) => {
@@ -84,10 +87,13 @@ export const auth = new Elysia({
       const secret = generateSecureRandomString();
       const secretHash = await hashSecret(secret);
 
+      const uaData = parseUserAgent(ctx.request);
+
       await db.insert(schema.sessions).values({
         sessionId,
         secretHash: Buffer.from(secretHash),
         userId: candidate.userId,
+        uaData: uaData ?? undefined,
       });
 
       const token = `${sessionId}${SESSION_TOKEN_DELIMITER}${secret}`;

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
+import type { UserAgentData } from "../schemas";
 
 const uuidv7pk = () => pg.uuid().primaryKey().default(sql`uuidv7()`);
 
@@ -29,6 +30,11 @@ export const sessions = pg.pgTable("sessions", {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
+  uaData: pg
+    .jsonb()
+    .$type<UserAgentData>()
+    .notNull()
+    .default({ ua: "", browser: {}, cpu: {}, device: {}, engine: {}, os: {} }),
   createdAt: timestamps.createdAt,
 });
 
