@@ -144,7 +144,6 @@ function RouteComponent() {
                         onChange={(e) => field.handleChange(e.target.value)}
                         aria-invalid={isInvalid}
                         type="password"
-                        placeholder="••••••••"
                       />
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
@@ -160,7 +159,7 @@ function RouteComponent() {
               </FieldGroup>
             )}
             <FieldGroup>
-              <Button disabled={isBusy}>
+              <Button disabled={isBusy} type="submit">
                 {isBusy && <Spinner />}
                 <span>Sign in</span>
               </Button>

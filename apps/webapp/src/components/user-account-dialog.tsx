@@ -45,16 +45,19 @@ import {
   TabsTrigger,
 } from "@theapp/ui/components/tabs";
 import {
-  Check,
-  Lock,
-  LogIn,
-  LogOut,
-  type LucideIcon,
-  Mail,
-  User,
-} from "@theapp/ui/icons/lucide";
+  Login01Icon,
+  Logout01Icon,
+  Mail01Icon,
+  SecurityIcon,
+  Tick01Icon,
+  User02Icon,
+} from "@theapp/ui/icons/huge";
+import {
+  HugeiconsIcon,
+  type IconSvgElement,
+} from "@theapp/ui/icons/huge-react";
 import dayjs from "dayjs";
-import type { FC, PropsWithChildren } from "react";
+import type { ComponentProps, FC } from "react";
 import z from "zod";
 import { extractZodIssuesFromValidationError } from "../lib/api";
 import { setZodIssuesAsFieldErrors } from "../lib/forms";
@@ -65,7 +68,9 @@ import {
 } from "../lib/query/auth";
 import { useUpdateProfile } from "../lib/query/profiles";
 
-export const UserAccountDialog: FC<PropsWithChildren> = ({ children }) => {
+export const UserAccountDialog: FC<{
+  render: NonNullable<ComponentProps<typeof DialogTrigger>["render"]>;
+}> = ({ render }) => {
   const router = useRouter();
   const meQuery = useMeSuspenseQuery();
 
@@ -75,24 +80,24 @@ export const UserAccountDialog: FC<PropsWithChildren> = ({ children }) => {
 
   const profileDetails: {
     title: string;
-    icon: LucideIcon;
+    icon: IconSvgElement;
     render: string;
   }[] = [
     {
       title: "Email",
-      icon: Mail,
+      icon: Mail01Icon,
       render: meQuery.data.email,
     },
     {
       title: "Member since",
-      icon: LogIn,
+      icon: Login01Icon,
       render: dayjs(meQuery.data.createdAt).format("MMMM D, YYYY"),
     },
   ];
 
   return (
     <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger render={render} />
       <DialogContent>
         <Tabs defaultValue="profile" className="contents">
           <DialogHeader>
@@ -102,11 +107,11 @@ export const UserAccountDialog: FC<PropsWithChildren> = ({ children }) => {
             </DialogDescription>
             <TabsList>
               <TabsTrigger value="profile">
-                <User />
+                <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
                 <span>Profile</span>
               </TabsTrigger>
               <TabsTrigger value="security">
-                <Lock />
+                <HugeiconsIcon icon={SecurityIcon} strokeWidth={2} />
                 <span>Security</span>
               </TabsTrigger>
             </TabsList>
@@ -115,7 +120,7 @@ export const UserAccountDialog: FC<PropsWithChildren> = ({ children }) => {
             <div className="flex flex-col items-center justify-center gap-2 py-4">
               <Avatar className="size-16">
                 <AvatarFallback>
-                  <User />
+                  <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col items-center justify-center">
@@ -134,7 +139,7 @@ export const UserAccountDialog: FC<PropsWithChildren> = ({ children }) => {
                 {profileDetails.map((detail) => (
                   <Item key={detail.title} variant="muted">
                     <ItemMedia variant="icon">
-                      <detail.icon />
+                      <HugeiconsIcon icon={detail.icon} strokeWidth={2} />
                     </ItemMedia>
                     <ItemContent>
                       <ItemTitle>{detail.title}</ItemTitle>
@@ -152,7 +157,11 @@ export const UserAccountDialog: FC<PropsWithChildren> = ({ children }) => {
             disabled={signoutMutation.isPending}
             onClick={() => signoutMutation.mutate()}
           >
-            {signoutMutation.isPending ? <Spinner /> : <LogOut />}
+            {signoutMutation.isPending ? (
+              <Spinner />
+            ) : (
+              <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />
+            )}
             <span>Sign Out</span>
           </Button>
         </DialogFooter>
@@ -252,7 +261,11 @@ const NameForm: FC<{ profile: ProfileResponse }> = ({ profile }) => {
                         variant="default"
                         disabled={isBusy}
                       >
-                        {isBusy ? <Spinner /> : <Check />}
+                        {isBusy ? (
+                          <Spinner />
+                        ) : (
+                          <HugeiconsIcon icon={Tick01Icon} strokeWidth={2} />
+                        )}
                       </InputGroupButton>
                     </InputGroupAddon>
                   )}

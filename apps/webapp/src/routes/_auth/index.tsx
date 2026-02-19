@@ -10,9 +10,7 @@ export const Route = createFileRoute("/_auth/")({
 function RouteComponent() {
   return (
     <>
-      <UserAccountDialog>
-        <Button>Hello</Button>
-      </UserAccountDialog>
+      <UserAccountDialog render={<Button>Hello</Button>} />
       <ThemeMenu />
     </>
   );
