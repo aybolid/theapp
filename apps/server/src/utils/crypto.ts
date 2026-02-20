@@ -1,8 +1,40 @@
+import { type JWTVerifyResult, jwtVerify, SignJWT } from "jose";
+
 /** Human readable alphabet (a-z, 0-9 without l, o, 0, 1 to avoid confusion) */
 const HUMAN_READABLE_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
 const SECRET_HASH_ALGORITHM: AlgorithmIdentifier = "SHA-256";
 
 const PASSWORD_ALGORITHM = "argon2id";
+
+const JWT_SECRET_VAR = process.env.JWT_SECRET;
+if (!JWT_SECRET_VAR) {
+  throw new Error("JWT_SECRET environment variable is not set");
+}
+
+const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_VAR);
+
+export function signAuthJwt(
+  payload: {
+    userId: string;
+    sessionId: string;
+  },
+  expirationSeconds: number,
+): Promise<string> {
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(Date.now() / 1000 + expirationSeconds)
+    .setIssuedAt()
+    .sign(JWT_SECRET);
+}
+
+export function verifyAuthJwt(token: string): Promise<
+  JWTVerifyResult<{
+    userId: string;
+    sessionId: string;
+  }>
+> {
+  return jwtVerify(token, JWT_SECRET);
+}
 
 export function hashPassword(password: string): Promise<string> {
   return Bun.password.hash(password, PASSWORD_ALGORITHM);

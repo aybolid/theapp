@@ -17,7 +17,7 @@ export abstract class SessionService {
       userId: string;
       uaData: UserAgentData | null;
     },
-  ): Promise<string> {
+  ): Promise<{ sessionId: string; token: string }> {
     const sessionId = generateSecureRandomString();
     const secret = generateSecureRandomString();
     const secretHash = await hashSecret(secret);
@@ -29,7 +29,10 @@ export abstract class SessionService {
       uaData: data.uaData ?? undefined,
     });
 
-    return `${sessionId}${SESSION_TOKEN_DELIMITER}${secret}`;
+    return {
+      sessionId,
+      token: `${sessionId}${SESSION_TOKEN_DELIMITER}${secret}`,
+    };
   }
 
   static async updateSession(
@@ -52,6 +55,7 @@ export abstract class SessionService {
     return db.query.sessions.findMany({
       where: { userId: userId },
       columns: { secretHash: false },
+      orderBy: { lastUsedAt: "desc" },
     });
   }
 
@@ -59,13 +63,15 @@ export abstract class SessionService {
     db: DatabaseConnection,
     sessionId: string,
   ): Promise<void> {
-    db.delete(schema.sessions).where(eq(schema.sessions.sessionId, sessionId));
+    await db
+      .delete(schema.sessions)
+      .where(eq(schema.sessions.sessionId, sessionId));
   }
 
   static async deleteSessionsByUserId(
     db: DatabaseConnection,
     userId: string,
   ): Promise<void> {
-    db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
+    await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
   }
 }

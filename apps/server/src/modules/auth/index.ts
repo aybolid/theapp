@@ -10,12 +10,16 @@ import {
   userNotFoundErrorSchema,
   userResponseSchema,
 } from "@theapp/server/schemas";
-import { hashPassword, verifyPassword } from "@theapp/server/utils/crypto";
+import {
+  hashPassword,
+  signAuthJwt,
+  verifyPassword,
+} from "@theapp/server/utils/crypto";
 import { parseUserAgent } from "@theapp/server/utils/ua";
 import Elysia from "elysia";
 import { ProfileService } from "../profiles/service";
 import { UserService } from "../users/service";
-import { authGuard } from "./guard";
+import { authGuard, JWT_EXPIRATION_SECONDS } from "./guard";
 import { AuthService } from "./service";
 import { sessions } from "./sessions";
 import { SessionService } from "./sessions/service";
@@ -81,15 +85,30 @@ export const auth = new Elysia({
         throw ctx.status(400, "Invalid email or password");
       }
 
-      const token = await SessionService.createSession(db, {
+      const { sessionId, token } = await SessionService.createSession(db, {
         userId: candidate.userId,
         uaData: parseUserAgent(ctx.request),
       });
+
+      const jwt = await signAuthJwt(
+        {
+          sessionId,
+          userId: candidate.userId,
+        },
+        JWT_EXPIRATION_SECONDS,
+      );
 
       ctx.cookie.sessionToken?.set({
         httpOnly: true,
         sameSite: "lax",
         value: token,
+        path: "/",
+      });
+      ctx.cookie.authToken?.set({
+        httpOnly: true,
+        sameSite: "lax",
+        value: jwt,
+        path: "/",
       });
 
       return ctx.status(200, "User signed in");
@@ -99,7 +118,7 @@ export const auth = new Elysia({
       response: { 400: signinBadRequestSchema, 200: signinOkSchema },
       detail: {
         description:
-          "Sign in an existing user. Successful request will result in a session cookie being set.",
+          "Sign in an existing user. Successful request will result in a auth cookies being set.",
       },
     },
   )
@@ -122,6 +141,7 @@ export const auth = new Elysia({
     "/signout",
     async (ctx) => {
       ctx.cookie.sessionToken?.remove();
+      ctx.cookie.authToken?.remove();
       await SessionService.deleteSessionById(db, ctx.sessionId);
       return ctx.status(200, "User signed out");
     },
@@ -136,6 +156,7 @@ export const auth = new Elysia({
     "/signout/all",
     async (ctx) => {
       ctx.cookie.sessionToken?.remove();
+      ctx.cookie.authToken?.remove();
       await SessionService.deleteSessionsByUserId(db, ctx.userId);
       return ctx.status(200, "User signed out");
     },

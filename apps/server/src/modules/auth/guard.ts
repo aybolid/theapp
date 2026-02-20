@@ -1,5 +1,10 @@
 import { db } from "@theapp/server/db";
-import { constantTimeEqual, hashSecret } from "@theapp/server/utils/crypto";
+import {
+  constantTimeEqual,
+  hashSecret,
+  signAuthJwt,
+  verifyAuthJwt,
+} from "@theapp/server/utils/crypto";
 import Elysia from "elysia";
 import { SessionService } from "./sessions/service";
 
@@ -9,9 +14,24 @@ export const SESSION_TOKEN_DELIMITER = ".";
 const INACTIVITY_TIMEOUT_SECONDS = 60 * 60 * 24 * 10;
 /** 1 hour */
 const ACTIVITY_UPDATE_INTERVAL_SECONDS = 60 * 60;
+/** 1 minute */
+export const JWT_EXPIRATION_SECONDS = 60;
 
 export const authGuard = new Elysia({ name: "auth-guard" })
-  .derive(async (ctx) => {
+  .derive(async (ctx): Promise<{ userId: string; sessionId: string }> => {
+    const authJwt = ctx.cookie.authToken;
+    if (authJwt && typeof authJwt.value === "string") {
+      try {
+        const result = await verifyAuthJwt(authJwt.value);
+        return {
+          userId: result.payload.userId,
+          sessionId: result.payload.sessionId,
+        };
+      } catch {
+        authJwt.remove();
+      }
+    }
+
     const sessionToken = ctx.cookie.sessionToken;
 
     if (!sessionToken) {
@@ -56,6 +76,21 @@ export const authGuard = new Elysia({ name: "auth-guard" })
       sessionToken.remove();
       throw ctx.status(401, "Invalid session token");
     }
+
+    const jwt = await signAuthJwt(
+      {
+        userId: session.userId,
+        sessionId: session.sessionId,
+      },
+      JWT_EXPIRATION_SECONDS,
+    );
+
+    ctx.cookie.authToken?.set({
+      httpOnly: true,
+      sameSite: "lax",
+      value: jwt,
+      path: "/",
+    });
 
     if (
       now.getTime() - session.lastUsedAt.getTime() >=
