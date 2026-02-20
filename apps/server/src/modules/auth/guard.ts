@@ -1,8 +1,7 @@
 import { db } from "@theapp/server/db";
-import { schema } from "@theapp/server/db/schema";
 import { constantTimeEqual, hashSecret } from "@theapp/server/utils/crypto";
-import { eq } from "drizzle-orm";
 import Elysia from "elysia";
+import { SessionService } from "./sessions/service";
 
 /** Delimiter used to separate parts of the session token (session id and secret). */
 export const SESSION_TOKEN_DELIMITER = ".";
@@ -48,9 +47,7 @@ export const authGuard = new Elysia({ name: "auth-guard" })
       INACTIVITY_TIMEOUT_SECONDS * 1000
     ) {
       sessionToken.remove();
-      await db
-        .delete(schema.sessions)
-        .where(eq(schema.sessions.sessionId, sessionId));
+      await SessionService.deleteSessionById(db, sessionId);
       throw ctx.status(401, "Session expired");
     }
 
@@ -65,10 +62,11 @@ export const authGuard = new Elysia({ name: "auth-guard" })
       ACTIVITY_UPDATE_INTERVAL_SECONDS * 1000
     ) {
       session.lastUsedAt = now;
-      await db
-        .update(schema.sessions)
-        .set({ lastUsedAt: now })
-        .where(eq(schema.sessions.sessionId, sessionId));
+      await SessionService.updateSession(
+        db,
+        { sessionId },
+        { lastUsedAt: now },
+      );
     }
 
     return { userId: session.userId, sessionId: session.sessionId };

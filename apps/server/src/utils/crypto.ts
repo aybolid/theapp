@@ -2,6 +2,19 @@
 const HUMAN_READABLE_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
 const SECRET_HASH_ALGORITHM: AlgorithmIdentifier = "SHA-256";
 
+const PASSWORD_ALGORITHM = "argon2id";
+
+export function hashPassword(password: string): Promise<string> {
+  return Bun.password.hash(password, PASSWORD_ALGORITHM);
+}
+
+export function verifyPassword(data: {
+  hash: string;
+  password: string;
+}): Promise<boolean> {
+  return Bun.password.verify(data.password, data.hash, PASSWORD_ALGORITHM);
+}
+
 export function generateSecureRandomString(): string {
   // Generate 24 bytes = 192 bits of entropy.
   // We're only going to use 5 bits per byte so the total entropy will be 192 * 5 / 8 = 120 bits

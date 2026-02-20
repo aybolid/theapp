@@ -1,5 +1,4 @@
 import { db } from "@theapp/server/db";
-import { schema } from "@theapp/server/db/schema";
 import {
   signinBadRequestSchema,
   signinBodySchema,
@@ -11,18 +10,15 @@ import {
   userNotFoundErrorSchema,
   userResponseSchema,
 } from "@theapp/server/schemas";
-import {
-  generateSecureRandomString,
-  hashSecret,
-} from "@theapp/server/utils/crypto";
+import { hashPassword, verifyPassword } from "@theapp/server/utils/crypto";
 import { parseUserAgent } from "@theapp/server/utils/ua";
-import { eq } from "drizzle-orm";
 import Elysia from "elysia";
-import { authGuard, SESSION_TOKEN_DELIMITER } from "./guard";
+import { ProfileService } from "../profiles/service";
+import { UserService } from "../users/service";
+import { authGuard } from "./guard";
+import { AuthService } from "./service";
 import { sessions } from "./sessions";
-
-const PASSWORD_ALGORITHM: Parameters<(typeof Bun)["password"]["hash"]>[1] =
-  "argon2id";
+import { SessionService } from "./sessions/service";
 
 export const auth = new Elysia({
   prefix: "/auth",
@@ -34,27 +30,31 @@ export const auth = new Elysia({
   .post(
     "/signup",
     async (ctx) => {
-      const isEmailAvailable = !(await db.query.users.findFirst({
-        where: { email: { eq: ctx.body.email } },
-      }));
+      const isEmailAvailable = await AuthService.checkEmailAvailability(
+        db,
+        ctx.body.email,
+      );
       if (!isEmailAvailable) {
         throw ctx.status(409, "Email already in use");
       }
 
-      const passwordHash = await Bun.password.hash(
-        ctx.body.password,
-        PASSWORD_ALGORITHM,
-      );
+      const passwordHash = await hashPassword(ctx.body.password);
 
       await db.transaction(async (tx) => {
-        const [createdUser] = await tx
-          .insert(schema.users)
-          .values({ email: ctx.body.email.toLowerCase(), passwordHash })
-          .returning();
+        const createdUser = await UserService.createUser(tx, {
+          email: ctx.body.email,
+          passwordHash,
+        });
         if (!createdUser) {
           throw new Error("Failed to create user");
         }
-        await tx.insert(schema.profiles).values({ userId: createdUser.userId });
+        const createdProfile = await ProfileService.createProfile(
+          tx,
+          createdUser.userId,
+        );
+        if (!createdProfile) {
+          throw new Error("Failed to create profile");
+        }
       });
 
       return ctx.status(201, "User created");
@@ -68,36 +68,23 @@ export const auth = new Elysia({
   .post(
     "/signin",
     async (ctx) => {
-      const candidate = await db.query.users.findFirst({
-        where: { email: { eq: ctx.body.email } },
-      });
+      const candidate = await UserService.getUserByEmail(db, ctx.body.email);
       if (!candidate) {
         throw ctx.status(400, "Invalid email or password");
       }
 
-      const isValidPassword = await Bun.password.verify(
-        ctx.body.password,
-        candidate.passwordHash,
-        PASSWORD_ALGORITHM,
-      );
+      const isValidPassword = await verifyPassword({
+        hash: candidate.passwordHash,
+        password: ctx.body.password,
+      });
       if (!isValidPassword) {
         throw ctx.status(400, "Invalid email or password");
       }
 
-      const sessionId = generateSecureRandomString();
-      const secret = generateSecureRandomString();
-      const secretHash = await hashSecret(secret);
-
-      const uaData = parseUserAgent(ctx.request);
-
-      await db.insert(schema.sessions).values({
-        sessionId,
-        secretHash: Buffer.from(secretHash),
+      const token = await SessionService.createSession(db, {
         userId: candidate.userId,
-        uaData: uaData ?? undefined,
+        uaData: parseUserAgent(ctx.request),
       });
-
-      const token = `${sessionId}${SESSION_TOKEN_DELIMITER}${secret}`;
 
       ctx.cookie.sessionToken?.set({
         httpOnly: true,
@@ -120,14 +107,8 @@ export const auth = new Elysia({
   .get(
     "/me",
     async (ctx) => {
-      const user = await db.query.users.findFirst({
-        where: { userId: { eq: ctx.userId } },
-        columns: { passwordHash: false },
-        with: { profile: true },
-      });
-      if (!user) {
-        throw ctx.status(404, "User not found");
-      }
+      const user = await UserService.getUserById(db, ctx.userId);
+      if (!user) throw ctx.status(404, "User not found");
       return ctx.status(200, user);
     },
     {
@@ -141,9 +122,7 @@ export const auth = new Elysia({
     "/signout",
     async (ctx) => {
       ctx.cookie.sessionToken?.remove();
-      await db
-        .delete(schema.sessions)
-        .where(eq(schema.sessions.sessionId, ctx.sessionId));
+      await SessionService.deleteSessionById(db, ctx.sessionId);
       return ctx.status(200, "User signed out");
     },
     {
@@ -157,9 +136,7 @@ export const auth = new Elysia({
     "/signout/all",
     async (ctx) => {
       ctx.cookie.sessionToken?.remove();
-      await db
-        .delete(schema.sessions)
-        .where(eq(schema.sessions.userId, ctx.userId));
+      await SessionService.deleteSessionsByUserId(db, ctx.userId);
       return ctx.status(200, "User signed out");
     },
     {

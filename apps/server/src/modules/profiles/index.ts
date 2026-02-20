@@ -1,14 +1,13 @@
 import { db } from "@theapp/server/db";
-import { schema } from "@theapp/server/db/schema";
 import {
   profileResponseSchema,
   profilesPatchBodySchema,
   profilesPatchNotFoundErrorSchema,
   profilesPatchParamsSchema,
 } from "@theapp/server/schemas";
-import { and, eq } from "drizzle-orm";
 import Elysia from "elysia";
 import { authGuard } from "../auth/guard";
+import { ProfileService } from "./service";
 
 export const profiles = new Elysia({
   prefix: "/profiles",
@@ -20,16 +19,11 @@ export const profiles = new Elysia({
   .patch(
     "/:profileId",
     async (ctx) => {
-      const [updatedProfile] = await db
-        .update(schema.profiles)
-        .set({ name: ctx.body.name?.trim() })
-        .where(
-          and(
-            eq(schema.profiles.profileId, ctx.params.profileId),
-            eq(schema.profiles.userId, ctx.user.userId),
-          ),
-        )
-        .returning();
+      const updatedProfile = await ProfileService.updateProfile(
+        db,
+        { profileId: ctx.params.profileId, userId: ctx.userId },
+        { name: ctx.body.name },
+      );
       if (!updatedProfile) {
         throw ctx.status(404, "Profile not found");
       }
