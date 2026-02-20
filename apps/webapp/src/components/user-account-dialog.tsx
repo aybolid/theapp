@@ -249,6 +249,10 @@ const SessionsList = () => {
                   {formatted.full} -{" "}
                   {dayjs(session.createdAt).format("MMMM DD, YYYY")}
                 </ItemDescription>
+                <ItemDescription className="text-xs">
+                  Last used:{" "}
+                  {dayjs(session.lastUsedAt).format("MMMM DD, YYYY, HH:mm:ss")}
+                </ItemDescription>
               </ItemContent>
             </Item>
           );

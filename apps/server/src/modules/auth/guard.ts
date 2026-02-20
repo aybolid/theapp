@@ -11,7 +11,7 @@ import { SessionService } from "./sessions/service";
 /** Delimiter used to separate parts of the session token (session id and secret). */
 export const SESSION_TOKEN_DELIMITER = ".";
 /** 10 days */
-const INACTIVITY_TIMEOUT_SECONDS = 60 * 60 * 24 * 10;
+export const INACTIVITY_TIMEOUT_SECONDS = 60 * 60 * 24 * 10;
 /** 1 hour */
 const ACTIVITY_UPDATE_INTERVAL_SECONDS = 60 * 60;
 /** 1 minute */

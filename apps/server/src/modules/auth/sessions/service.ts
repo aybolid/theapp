@@ -7,8 +7,8 @@ import {
   generateSecureRandomString,
   hashSecret,
 } from "@theapp/server/utils/crypto";
-import { eq } from "drizzle-orm";
-import { SESSION_TOKEN_DELIMITER } from "../guard";
+import { eq, lt } from "drizzle-orm";
+import { INACTIVITY_TIMEOUT_SECONDS, SESSION_TOKEN_DELIMITER } from "../guard";
 
 export abstract class SessionService {
   static async createSession(
@@ -73,5 +73,12 @@ export abstract class SessionService {
     userId: string,
   ): Promise<void> {
     await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
+  }
+
+  static async deleteInactiveSessions(db: DatabaseConnection): Promise<void> {
+    const cutoff = new Date(Date.now() - INACTIVITY_TIMEOUT_SECONDS * 1000);
+    await db
+      .delete(schema.sessions)
+      .where(lt(schema.sessions.lastUsedAt, cutoff));
   }
 }
