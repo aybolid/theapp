@@ -91,7 +91,7 @@ function RouteComponent() {
   const isBusy = signupMutation.isPending || form.state.isSubmitting;
 
   return (
-    <main className="grid h-screen place-items-center">
+    <main className="grid h-screen place-items-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="border-b">
           <CardTitle>Create an account</CardTitle>

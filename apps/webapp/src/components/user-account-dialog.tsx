@@ -44,6 +44,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@theapp/ui/components/item";
+import { ScrollArea } from "@theapp/ui/components/scroll-area";
 import { Skeleton } from "@theapp/ui/components/skeleton";
 import { Spinner } from "@theapp/ui/components/spinner";
 import {
@@ -112,40 +113,39 @@ export const UserAccountDialog: FC<{
     <Dialog>
       <DialogTrigger render={render} />
       <DialogContent>
+        <DialogHeader>
+          <DialogTitle>User account</DialogTitle>
+          <DialogDescription className="sr-only">
+            View your profile and access security settings.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col items-center justify-center gap-2 py-4">
+          <Avatar className="size-16">
+            <AvatarFallback>
+              <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col items-center justify-center">
+            <h2 className="font-medium">{meQuery.data.profile.name}</h2>
+            <p className="text-muted-foreground text-xs">
+              {meQuery.data.email}
+            </p>
+          </div>
+        </div>
         <Tabs defaultValue="profile" className="contents">
-          <DialogHeader>
-            <DialogTitle className="sr-only">User account</DialogTitle>
-            <DialogDescription className="sr-only">
-              View profile and access security settings
-            </DialogDescription>
-            <TabsList>
-              <TabsTrigger value="profile">
-                <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
-                <span>Profile</span>
-              </TabsTrigger>
-              <TabsTrigger value="security">
-                <HugeiconsIcon icon={SecurityIcon} strokeWidth={2} />
-                <span>Security</span>
-              </TabsTrigger>
-            </TabsList>
-          </DialogHeader>
-          <TabsContent value="profile">
-            <div className="flex flex-col items-center justify-center gap-2 py-4">
-              <Avatar className="size-16">
-                <AvatarFallback>
-                  <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col items-center justify-center">
-                <h2 className="font-medium">{meQuery.data.profile.name}</h2>
-                <p className="text-muted-foreground text-xs">
-                  {meQuery.data.email}
-                </p>
-              </div>
-            </div>
-            <div className="pt-4">
-              <h3 className="text-muted-foreground">Profile details</h3>
-              <ItemGroup className="gap-2 pt-4">
+          <TabsList className="w-full">
+            <TabsTrigger value="profile">
+              <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
+              <span>Profile</span>
+            </TabsTrigger>
+            <TabsTrigger value="security">
+              <HugeiconsIcon icon={SecurityIcon} strokeWidth={2} />
+              <span>Security</span>
+            </TabsTrigger>
+          </TabsList>
+          <ScrollArea className="h-60">
+            <TabsContent value="profile">
+              <ItemGroup className="gap-2">
                 <Item variant="outline">
                   <NameForm profile={meQuery.data.profile} />
                 </Item>
@@ -161,40 +161,47 @@ export const UserAccountDialog: FC<{
                   </Item>
                 ))}
               </ItemGroup>
-            </div>
-          </TabsContent>
-          <TabsContent value="security">
-            <h3 className="text-muted-foreground">Active sessions</h3>
-            <QueryErrorResetBoundary>
-              {({ reset }) => (
-                <ErrorBoundary
-                  onReset={reset}
-                  fallbackRender={({ resetErrorBoundary }) => (
-                    <Alert variant="destructive" className="my-4">
-                      <HugeiconsIcon icon={AlertIcon} strokeWidth={2} />
-                      <AlertTitle>Something went wrong!</AlertTitle>
-                      <AlertDescription>
-                        Failed to fetch active sessions.
-                      </AlertDescription>
-                      <AlertAction>
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          onClick={resetErrorBoundary}
-                        >
-                          Retry
-                        </Button>
-                      </AlertAction>
-                    </Alert>
-                  )}
-                >
-                  <Suspense fallback={<Skeleton className="my-4 p-8" />}>
-                    <SessionsList />
-                  </Suspense>
-                </ErrorBoundary>
-              )}
-            </QueryErrorResetBoundary>
-          </TabsContent>
+            </TabsContent>
+            <TabsContent value="security">
+              <QueryErrorResetBoundary>
+                {({ reset }) => (
+                  <ErrorBoundary
+                    onReset={reset}
+                    fallbackRender={({ resetErrorBoundary }) => (
+                      <Alert variant="destructive">
+                        <HugeiconsIcon icon={AlertIcon} strokeWidth={2} />
+                        <AlertTitle>Something went wrong!</AlertTitle>
+                        <AlertDescription>
+                          Failed to fetch active sessions.
+                        </AlertDescription>
+                        <AlertAction>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            onClick={resetErrorBoundary}
+                          >
+                            Retry
+                          </Button>
+                        </AlertAction>
+                      </Alert>
+                    )}
+                  >
+                    <Suspense
+                      fallback={
+                        <div className="grid gap-2">
+                          <Skeleton className="p-8" />
+                          <Skeleton className="p-8" />
+                          <Skeleton className="p-8" />
+                        </div>
+                      }
+                    >
+                      <SessionsList />
+                    </Suspense>
+                  </ErrorBoundary>
+                )}
+              </QueryErrorResetBoundary>
+            </TabsContent>
+          </ScrollArea>
         </Tabs>
         <DialogFooter>
           <Button
@@ -225,7 +232,7 @@ const SessionsList = () => {
 
   return (
     <>
-      <ItemGroup className="gap-2 py-4">
+      <ItemGroup className="gap-2 pb-4">
         {sessionsQuery.data.map((session) => {
           const formatted = formatUserAgent(session.uaData);
           return (
