@@ -8,6 +8,7 @@ import {
   signupBodySchema,
   signupCreatedSchema,
   singupConflictErrorSchema,
+  userNotFoundErrorSchema,
   userResponseSchema,
 } from "@theapp/server/schemas";
 import {
@@ -118,12 +119,19 @@ export const auth = new Elysia({
   .use(authGuard)
   .get(
     "/me",
-    (ctx) => {
-      const { passwordHash: _, ...safeUser } = ctx.user;
-      return ctx.status(200, safeUser);
+    async (ctx) => {
+      const user = await db.query.users.findFirst({
+        where: { userId: { eq: ctx.userId } },
+        columns: { passwordHash: false },
+        with: { profile: true },
+      });
+      if (!user) {
+        throw ctx.status(404, "User not found");
+      }
+      return ctx.status(200, user);
     },
     {
-      response: { 200: userResponseSchema },
+      response: { 200: userResponseSchema, 404: userNotFoundErrorSchema },
       detail: {
         description: "Get the current user.",
       },
@@ -135,7 +143,7 @@ export const auth = new Elysia({
       ctx.cookie.sessionToken?.remove();
       await db
         .delete(schema.sessions)
-        .where(eq(schema.sessions.sessionId, ctx.session.sessionId));
+        .where(eq(schema.sessions.sessionId, ctx.sessionId));
       return ctx.status(200, "User signed out");
     },
     {
@@ -151,7 +159,7 @@ export const auth = new Elysia({
       ctx.cookie.sessionToken?.remove();
       await db
         .delete(schema.sessions)
-        .where(eq(schema.sessions.userId, ctx.user.userId));
+        .where(eq(schema.sessions.userId, ctx.userId));
       return ctx.status(200, "User signed out");
     },
     {

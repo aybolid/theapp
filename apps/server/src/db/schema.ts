@@ -36,6 +36,7 @@ export const sessions = pg.pgTable("sessions", {
     .notNull()
     .default({ ua: "", browser: {}, cpu: {}, device: {}, engine: {}, os: {} }),
   createdAt: timestamps.createdAt,
+  lastUsedAt: pg.timestamp().notNull().defaultNow(),
 });
 
 export const profiles = pg.pgTable("profiles", {

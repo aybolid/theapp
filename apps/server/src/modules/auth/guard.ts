@@ -6,8 +6,10 @@ import Elysia from "elysia";
 
 /** Delimiter used to separate parts of the session token (session id and secret). */
 export const SESSION_TOKEN_DELIMITER = ".";
-/** 1 day */
-const SESSION_EXPIRES_IN_SECONDS = 60 * 60 * 24;
+/** 10 days */
+const INACTIVITY_TIMEOUT_SECONDS = 60 * 60 * 24 * 10;
+/** 1 hour */
+const ACTIVITY_UPDATE_INTERVAL_SECONDS = 60 * 60;
 
 export const authGuard = new Elysia({ name: "auth-guard" })
   .derive(async (ctx) => {
@@ -30,7 +32,7 @@ export const authGuard = new Elysia({ name: "auth-guard" })
     // biome-ignore lint/style/noNonNullAssertion: length checked
     const sessionSecret = tokenParts[1]!;
 
-    const now = Date.now();
+    const now = new Date();
 
     const session = await db.query.sessions.findFirst({
       where: { sessionId: { eq: sessionId } },
@@ -42,8 +44,8 @@ export const authGuard = new Elysia({ name: "auth-guard" })
     }
 
     if (
-      now - session.createdAt.getTime() >=
-      SESSION_EXPIRES_IN_SECONDS * 1000
+      now.getTime() - session.lastUsedAt.getTime() >=
+      INACTIVITY_TIMEOUT_SECONDS * 1000
     ) {
       sessionToken.remove();
       await db
@@ -58,7 +60,17 @@ export const authGuard = new Elysia({ name: "auth-guard" })
       throw ctx.status(401, "Invalid session token");
     }
 
-    const { user, ...sessionData } = session;
-    return { user, session: sessionData };
+    if (
+      now.getTime() - session.lastUsedAt.getTime() >=
+      ACTIVITY_UPDATE_INTERVAL_SECONDS * 1000
+    ) {
+      session.lastUsedAt = now;
+      await db
+        .update(schema.sessions)
+        .set({ lastUsedAt: now })
+        .where(eq(schema.sessions.sessionId, sessionId));
+    }
+
+    return { userId: session.userId, sessionId: session.sessionId };
   })
   .as("scoped");

@@ -8,6 +8,7 @@ export const sessionsResponseSchema = z.array(
     userId: z.uuidv7(),
     uaData: userAgentSchema,
     createdAt: zDate,
+    lastUsedAt: zDate,
     isCurrent: z.boolean(),
   }),
 );

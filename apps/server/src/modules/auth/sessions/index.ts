@@ -11,17 +11,17 @@ export const sessions = new Elysia({
 })
   .use(authGuard)
   .get(
-    "/",
+    "",
     async (ctx) => {
       const sessions = await db.query.sessions.findMany({
-        where: { userId: ctx.user.userId },
+        where: { userId: ctx.userId },
         columns: { secretHash: false },
       });
       return ctx.status(
         200,
         sessions.map((s) => ({
           ...s,
-          isCurrent: s.sessionId === ctx.session.sessionId,
+          isCurrent: s.sessionId === ctx.sessionId,
         })),
       );
     },

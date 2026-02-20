@@ -42,6 +42,10 @@ export const signinOkSchema = z.literal("User signed in");
 
 export type SigninOk = z.infer<typeof signinOkSchema>;
 
+export const userNotFoundErrorSchema = z.literal("User not found");
+
+export type UserNotFoundError = z.infer<typeof userNotFoundErrorSchema>;
+
 export const userResponseSchema = z.object({
   userId: z.uuidv7(),
   email: z.email(),
