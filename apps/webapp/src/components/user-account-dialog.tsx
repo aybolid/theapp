@@ -14,6 +14,7 @@ import {
   AlertTitle,
 } from "@theapp/ui/components/alert";
 import { Avatar, AvatarFallback } from "@theapp/ui/components/avatar";
+import { Badge } from "@theapp/ui/components/badge";
 import { Button } from "@theapp/ui/components/button";
 import {
   Dialog,
@@ -55,7 +56,6 @@ import {
 } from "@theapp/ui/components/tabs";
 import {
   AlertIcon,
-  AuthorizedIcon,
   Login01Icon,
   Logout01Icon,
   Mail01Icon,
@@ -75,7 +75,7 @@ import { extractZodIssuesFromValidationError } from "../lib/api";
 import { setZodIssuesAsFieldErrors } from "../lib/forms";
 import {
   meQueryOptions,
-  useMeSuspenseQuery,
+  type useMeSuspenseQuery,
   useSignoutAllMutation,
   useSignoutMutation,
 } from "../lib/query/auth";
@@ -84,10 +84,9 @@ import { useSessionsSuspenseQuery } from "../lib/query/sessions";
 
 export const UserAccountDialog: FC<{
   render: NonNullable<ComponentProps<typeof DialogTrigger>["render"]>;
-}> = ({ render }) => {
+  meQuery: ReturnType<typeof useMeSuspenseQuery>;
+}> = ({ render, meQuery }) => {
   const router = useRouter();
-  const meQuery = useMeSuspenseQuery();
-
   const signoutMutation = useSignoutMutation({
     onSettled: () => router.invalidate(),
   });
@@ -122,7 +121,11 @@ export const UserAccountDialog: FC<{
         <div className="flex flex-col items-center justify-center gap-2 py-4">
           <Avatar className="size-16">
             <AvatarFallback>
-              <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
+              <HugeiconsIcon
+                icon={User02Icon}
+                strokeWidth={2}
+                className="size-8"
+              />
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-center justify-center">
@@ -240,14 +243,16 @@ const SessionsList = () => {
               key={session.sessionId}
               variant={session.isCurrent ? "outline" : "muted"}
             >
-              <ItemMedia variant="icon">
-                <HugeiconsIcon icon={AuthorizedIcon} strokeWidth={2} />
-              </ItemMedia>
               <ItemContent>
-                <ItemTitle>{formatted.primary}</ItemTitle>
+                <ItemTitle>
+                  {session.isCurrent ? (
+                    <Badge>This device</Badge>
+                  ) : (
+                    formatted.primary
+                  )}
+                </ItemTitle>
                 <ItemDescription className="text-xs">
-                  {formatted.full} -{" "}
-                  {dayjs(session.createdAt).format("MMMM DD, YYYY")}
+                  {formatted.full}
                 </ItemDescription>
                 <ItemDescription className="text-xs">
                   Last used:{" "}

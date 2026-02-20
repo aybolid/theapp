@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Button } from "@theapp/ui/components/button";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@theapp/ui/components/sidebar";
+import { AppSidebar } from "@theapp/webapp/components/app-sidebar";
 import { ThemeMenu } from "@theapp/webapp/components/theme-menu";
-import { UserAccountDialog } from "@theapp/webapp/components/user-account-dialog";
 
 export const Route = createFileRoute("/_auth/")({
   component: RouteComponent,
@@ -9,9 +13,21 @@ export const Route = createFileRoute("/_auth/")({
 
 function RouteComponent() {
   return (
-    <>
-      <UserAccountDialog render={<Button>Hello</Button>} />
-      <ThemeMenu />
-    </>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "19rem",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 px-4">
+          <SidebarTrigger className="-ml-1" />
+          <ThemeMenu className="ml-auto" />
+        </header>
+        <main className="p-4 pt-0"></main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

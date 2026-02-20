@@ -7,6 +7,7 @@ import {
 } from "@theapp/ui/components/dropdown-menu";
 import { Moon01Icon, Sun01Icon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
+import type { ComponentPropsWithoutRef, FC } from "react";
 import { useTheme } from "../contexts/theme";
 
 const OPTIONS = [
@@ -15,14 +16,16 @@ const OPTIONS = [
   { label: "System", value: "system" },
 ] as const;
 
-export function ThemeMenu() {
+export const ThemeMenu: FC<ComponentPropsWithoutRef<typeof Button>> = (
+  props,
+) => {
   const { theme, setTheme } = useTheme();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" {...props}>
             <HugeiconsIcon
               icon={Sun01Icon}
               strokeWidth={2}
@@ -51,4 +54,4 @@ export function ThemeMenu() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};

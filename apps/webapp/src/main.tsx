@@ -2,6 +2,7 @@ import "@theapp/ui/globals.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { TooltipProvider } from "@theapp/ui/components/tooltip";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ThemeContextProvider } from "./contexts/theme";
@@ -33,10 +34,12 @@ if (!root) {
 }
 createRoot(root).render(
   <StrictMode>
-    <ThemeContextProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </ThemeContextProvider>
+    <TooltipProvider>
+      <ThemeContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </ThemeContextProvider>
+    </TooltipProvider>
   </StrictMode>,
 );
