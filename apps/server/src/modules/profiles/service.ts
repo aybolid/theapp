@@ -20,11 +20,15 @@ export abstract class ProfileService {
   static async updateProfile(
     db: DatabaseConnection,
     where: { userId: string },
-    set: { name?: string; picture?: string },
+    set: { name?: string; picture?: string; bio?: string },
   ): Promise<ProfileResponse | undefined> {
     return db
       .update(schema.profiles)
-      .set({ name: set.name?.trim(), picture: set.picture })
+      .set({
+        name: set.name?.trim(),
+        picture: set.picture,
+        bio: set.bio?.trim(),
+      })
       .where(eq(schema.profiles.userId, where.userId))
       .returning()
       .then((rows) => rows[0]);

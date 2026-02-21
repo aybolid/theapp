@@ -50,6 +50,7 @@ export const profiles = pg.pgTable("profiles", {
       onUpdate: "cascade",
     }),
   name: pg.varchar().notNull().default("Unknown User"),
+  bio: pg.text().notNull().default(""),
   picture: pg.varchar().notNull().default(""),
   ...timestamps,
 });

@@ -31,7 +31,7 @@ export const profiles = new Elysia({
       const updatedProfile = await ProfileService.updateProfile(
         db,
         { userId: ctx.userId },
-        { name: ctx.body.name },
+        { name: ctx.body.name, bio: ctx.body.bio },
       );
       if (!updatedProfile) {
         throw ctx.status(404, "Profile not found");

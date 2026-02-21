@@ -88,9 +88,10 @@ import { useUpdateProfileMutation } from "../lib/query/profiles";
 import { useSessionsSuspenseQuery } from "../lib/query/sessions";
 
 export const UserAccountDialog: FC<{
-  render: NonNullable<ComponentProps<typeof DialogTrigger>["render"]>;
   meQuery: ReturnType<typeof useMeSuspenseQuery>;
-}> = ({ render, meQuery }) => {
+  render: NonNullable<ComponentProps<typeof DialogTrigger>["render"]>;
+  nativeButton?: ComponentProps<typeof DialogTrigger>["nativeButton"];
+}> = ({ render, meQuery, nativeButton }) => {
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
@@ -117,7 +118,7 @@ export const UserAccountDialog: FC<{
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={render} />
+      <DialogTrigger render={render} nativeButton={nativeButton} />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>User account</DialogTitle>

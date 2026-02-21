@@ -8,6 +8,7 @@ export const profilesPatchBodySchema = z.object({
     .min(1, "Name is required")
     .max(255, "Must be less than 255 characters")
     .optional(),
+  bio: z.string().max(500, "Must be less than 500 characters").optional(),
 });
 
 export type ProfilesPatchBody = z.infer<typeof profilesPatchBodySchema>;
@@ -22,6 +23,7 @@ export const profileResponseSchema = z.object({
   profileId: z.uuidv7(),
   userId: z.uuidv7(),
   name: z.string(),
+  bio: z.string(),
   picture: z.url().or(z.literal("")),
   createdAt: zDate,
   updatedAt: zDate,
