@@ -13,7 +13,11 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@theapp/ui/components/alert";
-import { Avatar, AvatarFallback } from "@theapp/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@theapp/ui/components/avatar";
 import { Badge } from "@theapp/ui/components/badge";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -79,7 +83,7 @@ import {
   useSignoutAllMutation,
   useSignoutMutation,
 } from "../lib/query/auth";
-import { useUpdateProfile } from "../lib/query/profiles";
+import { useUpdateProfileMutation } from "../lib/query/profiles";
 import { useSessionsSuspenseQuery } from "../lib/query/sessions";
 
 export const UserAccountDialog: FC<{
@@ -120,6 +124,7 @@ export const UserAccountDialog: FC<{
         </DialogHeader>
         <div className="flex flex-col items-center justify-center gap-2 py-4">
           <Avatar className="size-16">
+            <AvatarImage src={meQuery.data.profile.picture} alt="User Avatar" />
             <AvatarFallback>
               <HugeiconsIcon
                 icon={User02Icon}
@@ -286,7 +291,7 @@ const nameSchema = z.object({
 const NameForm: FC<{ profile: ProfileResponse }> = ({ profile }) => {
   const queryClient = useQueryClient();
 
-  const updateMutation = useUpdateProfile(profile.profileId, {
+  const updateMutation = useUpdateProfileMutation({
     onSuccess: (profile) => {
       form.setFieldValue("name", profile.name);
       queryClient.setQueryData<UserResponse>(
@@ -353,7 +358,6 @@ const NameForm: FC<{ profile: ProfileResponse }> = ({ profile }) => {
                 <FieldLabel htmlFor={field.name}>Name</FieldLabel>
                 <InputGroup>
                   <InputGroupInput
-                    className="text-foreground"
                     id={field.name}
                     name={field.name}
                     value={field.state.value}

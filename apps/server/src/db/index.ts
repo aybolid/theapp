@@ -2,14 +2,9 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { relations } from "./relations";
 import { schema } from "./schema";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not defined");
-}
-
 export const db = drizzle({
   connection: {
-    connectionString,
+    connectionString: process.env.DATABASE_URL,
   },
   casing: "snake_case",
   schema,

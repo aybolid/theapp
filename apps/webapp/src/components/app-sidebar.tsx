@@ -1,4 +1,8 @@
-import { Avatar, AvatarFallback } from "@theapp/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@theapp/ui/components/avatar";
 import {
   Sidebar,
   SidebarContent,
@@ -46,6 +50,7 @@ const UserButton: FC = () => {
       render={
         <SidebarMenuButton size="lg">
           <Avatar>
+            <AvatarImage src={meQuery.data.profile.picture} alt="User Avatar" />
             <AvatarFallback>
               <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
             </AvatarFallback>

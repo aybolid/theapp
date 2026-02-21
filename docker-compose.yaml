@@ -10,3 +10,32 @@ services:
       POSTGRES_DB: theapp_db
     ports:
       - 5432:5432
+
+  garage:
+    image: dxflrs/garage:v2.2.0
+    container_name: theapp_garage
+    restart: unless-stopped
+    ports:
+      - 3900:3900
+      - 3901:3901
+      - 3902:3902
+      - 3903:3903
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+      - ./volumes/garage/meta:/tmp/meta
+      - ./volumes/garage/data:/tmp/data
+    environment:
+      - RUST_LOG=info
+
+  # this is no longer developed. waiting on official garage web ui release
+  garage_ui:
+    image: khairul169/garage-webui:latest
+    container_name: theapp_garage-ui
+    restart: unless-stopped
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+    ports:
+      - 3909:3909
+    environment:
+      API_BASE_URL: http://garage:3903
+      S3_ENDPOINT_URL: http://garage:3900

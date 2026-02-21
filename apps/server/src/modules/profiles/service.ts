@@ -3,7 +3,7 @@
 import type { DatabaseConnection } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
 import type { ProfileResponse } from "@theapp/server/schemas";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export abstract class ProfileService {
   static async createProfile(
@@ -19,18 +19,13 @@ export abstract class ProfileService {
 
   static async updateProfile(
     db: DatabaseConnection,
-    where: { userId: string; profileId: string },
-    set: { name?: string },
+    where: { userId: string },
+    set: { name?: string; picture?: string },
   ): Promise<ProfileResponse | undefined> {
     return db
       .update(schema.profiles)
-      .set({ name: set.name?.trim() })
-      .where(
-        and(
-          eq(schema.profiles.profileId, where.profileId),
-          eq(schema.profiles.userId, where.userId),
-        ),
-      )
+      .set({ name: set.name?.trim(), picture: set.picture })
+      .where(eq(schema.profiles.userId, where.userId))
       .returning()
       .then((rows) => rows[0]);
   }

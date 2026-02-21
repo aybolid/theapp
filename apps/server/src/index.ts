@@ -3,6 +3,9 @@ import { auth } from "@theapp/server/modules/auth";
 import { profiles } from "@theapp/server/modules/profiles";
 import { Elysia } from "elysia";
 import z from "zod";
+import { checkEnv } from "./env";
+
+checkEnv();
 
 const PORT = 8080;
 
@@ -17,5 +20,7 @@ const app = new Elysia()
   )
   .use(api)
   .listen(PORT);
+
 console.log(`Server is running at ${app.server?.hostname}:${app.server?.port}`);
+
 export type App = typeof app;

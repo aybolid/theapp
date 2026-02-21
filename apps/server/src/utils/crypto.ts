@@ -6,12 +6,7 @@ const SECRET_HASH_ALGORITHM: AlgorithmIdentifier = "SHA-256";
 
 const PASSWORD_ALGORITHM = "argon2id";
 
-const JWT_SECRET_VAR = process.env.JWT_SECRET;
-if (!JWT_SECRET_VAR) {
-  throw new Error("JWT_SECRET environment variable is not set");
-}
-
-const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_VAR);
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export function signAuthJwt(
   payload: {

@@ -14,20 +14,22 @@
     "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile dist/server src/index.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.995.0",
     "@elysiajs/cron": "^1.4.1",
     "@elysiajs/openapi": "^1.4.14",
-    "drizzle-orm": "^1.0.0-beta.15-859cf75",
-    "elysia": "catalog:",
+    "drizzle-orm": "^1.0.0-beta.9-e89174b",
+    "elysia": "^1.4.25",
     "jose": "^6.1.3",
     "pg": "^8.18.0",
+    "sharp": "^0.34.5",
     "ua-parser-js": "^2.0.9",
-    "zod": "catalog:"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@theapp/typescript-config": "workspace:*",
     "@types/pg": "^8.16.0",
-    "bun-types": "catalog:",
-    "drizzle-kit": "^1.0.0-beta.15-859cf75"
+    "bun-types": "^1.3.9",
+    "drizzle-kit": "^1.0.0-beta.9-e89174b"
   },
   "module": "src/index.js"
 }

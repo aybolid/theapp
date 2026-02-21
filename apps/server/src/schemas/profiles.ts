@@ -1,11 +1,6 @@
+import type { FileType } from "elysia/type-system/types";
 import z from "zod";
 import { zDate } from "../utils/zod";
-
-export const profilesPatchParamsSchema = z.object({
-  profileId: z.uuidv7(),
-});
-
-export type ProfilesPatchParams = z.infer<typeof profilesPatchParamsSchema>;
 
 export const profilesPatchBodySchema = z.object({
   name: z
@@ -27,8 +22,35 @@ export const profileResponseSchema = z.object({
   profileId: z.uuidv7(),
   userId: z.uuidv7(),
   name: z.string(),
+  picture: z.url().or(z.literal("")),
   createdAt: zDate,
   updatedAt: zDate,
 });
 
 export type ProfileResponse = z.infer<typeof profileResponseSchema>;
+
+export const profilePictureBodySchema = z.object({
+  file: z.file(),
+});
+
+export const PROFILE_PICTURE_FILE_TYPES: FileType[] = [
+  "image/jpeg",
+  "image/png",
+  "image/svg",
+  "image/webp",
+];
+
+/** 5 MB */
+export const MAX_PROFILE_PICTURE_SIZE = 1024 * 1024 * 5;
+
+export type ProfilePictureBody = z.infer<typeof profilePictureBodySchema>;
+
+export const profilePictureTooLargeErrorSchema = z.literal("File too large");
+
+export type ProfilePictureTooLargeError = z.infer<
+  typeof profilePictureTooLargeErrorSchema
+>;
+
+export const profilePictureOkSchema = z.literal("Profile picture updated");
+
+export type ProfilePictureOk = z.infer<typeof profilePictureOkSchema>;
