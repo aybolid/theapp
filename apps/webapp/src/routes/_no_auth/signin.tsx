@@ -25,6 +25,13 @@ import { setZodIssuesAsFieldErrors } from "@theapp/webapp/lib/forms";
 import { useSigninMutation } from "@theapp/webapp/lib/query/auth";
 
 export const Route = createFileRoute("/_no_auth/signin")({
+  head: () => ({
+    meta: [
+      {
+        title: "Sign In | theapp",
+      },
+    ],
+  }),
   component: RouteComponent,
 });
 

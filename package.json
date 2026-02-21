@@ -20,10 +20,15 @@
   "catalog": {
     "elysia": "latest",
     "bun-types": "latest",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "zod": "^4.3.6"
+
+    "dayjs": "^1.11.19",
+    "zod": "^4.3.6",
+
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-error-boundary": "^6.1.1",
+
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3"
   }
 }

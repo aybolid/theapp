@@ -26,6 +26,13 @@ import { useSignupMutation } from "@theapp/webapp/lib/query/auth";
 import z from "zod";
 
 export const Route = createFileRoute("/_no_auth/signup")({
+  head: () => ({
+    meta: [
+      {
+        title: "Create Account | theapp",
+      },
+    ],
+  }),
   component: RouteComponent,
 });
 

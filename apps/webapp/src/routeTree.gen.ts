@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as No_authRouteImport } from './routes/_no_auth'
 import { Route as AuthRouteImport } from './routes/_auth'
-import { Route as AuthIndexRouteImport } from './routes/_auth/index'
 import { Route as No_authSignupRouteImport } from './routes/_no_auth/signup'
 import { Route as No_authSigninRouteImport } from './routes/_no_auth/signin'
+import { Route as AuthSidebarRouteImport } from './routes/_auth/_sidebar'
+import { Route as AuthSidebarIndexRouteImport } from './routes/_auth/_sidebar/index'
+import { Route as AuthSidebarProfileRouteRouteImport } from './routes/_auth/_sidebar/profile/route'
 
 const No_authRoute = No_authRouteImport.update({
   id: '/_no_auth',
@@ -22,11 +24,6 @@ const No_authRoute = No_authRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthIndexRoute = AuthIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthRoute,
 } as any)
 const No_authSignupRoute = No_authSignupRouteImport.update({
   id: '/signup',
@@ -38,37 +35,57 @@ const No_authSigninRoute = No_authSigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => No_authRoute,
 } as any)
+const AuthSidebarRoute = AuthSidebarRouteImport.update({
+  id: '/_sidebar',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSidebarIndexRoute = AuthSidebarIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthSidebarRoute,
+} as any)
+const AuthSidebarProfileRouteRoute = AuthSidebarProfileRouteRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthSidebarRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthIndexRoute
+  '/': typeof AuthSidebarIndexRoute
   '/signin': typeof No_authSigninRoute
   '/signup': typeof No_authSignupRoute
+  '/profile': typeof AuthSidebarProfileRouteRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof AuthIndexRoute
+  '/': typeof AuthSidebarIndexRoute
   '/signin': typeof No_authSigninRoute
   '/signup': typeof No_authSignupRoute
+  '/profile': typeof AuthSidebarProfileRouteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
   '/_no_auth': typeof No_authRouteWithChildren
+  '/_auth/_sidebar': typeof AuthSidebarRouteWithChildren
   '/_no_auth/signin': typeof No_authSigninRoute
   '/_no_auth/signup': typeof No_authSignupRoute
-  '/_auth/': typeof AuthIndexRoute
+  '/_auth/_sidebar/profile': typeof AuthSidebarProfileRouteRoute
+  '/_auth/_sidebar/': typeof AuthSidebarIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signin' | '/signup'
+  fullPaths: '/' | '/signin' | '/signup' | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signin' | '/signup'
+  to: '/' | '/signin' | '/signup' | '/profile'
   id:
     | '__root__'
     | '/_auth'
     | '/_no_auth'
+    | '/_auth/_sidebar'
     | '/_no_auth/signin'
     | '/_no_auth/signup'
-    | '/_auth/'
+    | '/_auth/_sidebar/profile'
+    | '/_auth/_sidebar/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -92,13 +109,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth/': {
-      id: '/_auth/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AuthIndexRouteImport
-      parentRoute: typeof AuthRoute
-    }
     '/_no_auth/signup': {
       id: '/_no_auth/signup'
       path: '/signup'
@@ -113,15 +123,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof No_authSigninRouteImport
       parentRoute: typeof No_authRoute
     }
+    '/_auth/_sidebar': {
+      id: '/_auth/_sidebar'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthSidebarRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/_sidebar/': {
+      id: '/_auth/_sidebar/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthSidebarIndexRouteImport
+      parentRoute: typeof AuthSidebarRoute
+    }
+    '/_auth/_sidebar/profile': {
+      id: '/_auth/_sidebar/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthSidebarProfileRouteRouteImport
+      parentRoute: typeof AuthSidebarRoute
+    }
   }
 }
 
+interface AuthSidebarRouteChildren {
+  AuthSidebarProfileRouteRoute: typeof AuthSidebarProfileRouteRoute
+  AuthSidebarIndexRoute: typeof AuthSidebarIndexRoute
+}
+
+const AuthSidebarRouteChildren: AuthSidebarRouteChildren = {
+  AuthSidebarProfileRouteRoute: AuthSidebarProfileRouteRoute,
+  AuthSidebarIndexRoute: AuthSidebarIndexRoute,
+}
+
+const AuthSidebarRouteWithChildren = AuthSidebarRoute._addFileChildren(
+  AuthSidebarRouteChildren,
+)
+
 interface AuthRouteChildren {
-  AuthIndexRoute: typeof AuthIndexRoute
+  AuthSidebarRoute: typeof AuthSidebarRouteWithChildren
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
-  AuthIndexRoute: AuthIndexRoute,
+  AuthSidebarRoute: AuthSidebarRouteWithChildren,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

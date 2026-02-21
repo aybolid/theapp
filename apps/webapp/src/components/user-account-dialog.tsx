@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { QueryErrorResetBoundary, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import {
   type ProfileResponse,
   profilesPatchBodySchema,
@@ -60,6 +60,7 @@ import {
 } from "@theapp/ui/components/tabs";
 import {
   AlertIcon,
+  ExternalLink,
   Login01Icon,
   Logout01Icon,
   Mail01Icon,
@@ -72,7 +73,7 @@ import {
   type IconSvgElement,
 } from "@theapp/ui/icons/huge-react";
 import dayjs from "dayjs";
-import { type ComponentProps, type FC, Suspense } from "react";
+import { type ComponentProps, type FC, Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import z from "zod";
 import { extractZodIssuesFromValidationError } from "../lib/api";
@@ -90,6 +91,8 @@ export const UserAccountDialog: FC<{
   render: NonNullable<ComponentProps<typeof DialogTrigger>["render"]>;
   meQuery: ReturnType<typeof useMeSuspenseQuery>;
 }> = ({ render, meQuery }) => {
+  const [open, setOpen] = useState(false);
+
   const router = useRouter();
   const signoutMutation = useSignoutMutation({
     onSettled: () => router.invalidate(),
@@ -113,7 +116,7 @@ export const UserAccountDialog: FC<{
   ];
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={render} />
       <DialogContent>
         <DialogHeader>
@@ -211,7 +214,19 @@ export const UserAccountDialog: FC<{
             </TabsContent>
           </ScrollArea>
         </Tabs>
-        <DialogFooter>
+        <DialogFooter className="justify-between!">
+          <Button
+            onClick={() => setOpen(false)}
+            variant="link"
+            size="sm"
+            nativeButton={false}
+            render={
+              <Link to="/profile">
+                <span>Full Profile</span>
+                <HugeiconsIcon icon={ExternalLink} strokeWidth={2} />
+              </Link>
+            }
+          />
           <Button
             variant="destructive"
             disabled={signoutMutation.isPending}

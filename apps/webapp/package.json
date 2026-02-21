@@ -1,5 +1,5 @@
 {
-  "name": "webapp",
+  "name": "@theapp/webapp",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -21,24 +21,24 @@
     "@tanstack/react-router-devtools": "^1.161.3",
     "@theapp/server": "workspace:*",
     "@theapp/ui": "workspace:*",
-    "dayjs": "^1.11.19",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-error-boundary": "^6.1.1",
-    "zod": "^4.3.6"
+    "dayjs": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-error-boundary": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@tanstack/router-plugin": "^1.161.3",
     "@theapp/typescript-config": "workspace:*",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^5.1.4",
     "babel-plugin-react-compiler": "^1.0.0",
-    "bun-types": "^1.3.9",
-    "elysia": "^1.4.25",
+    "bun-types": "catalog:",
+    "elysia": "catalog:",
     "vite": "^8.0.0-beta.15"
   },
   "overrides": {
-    "vite": "^8.0.0-beta.13"
+    "vite": "^8.0.0-beta.15"
   }
 }

@@ -21,7 +21,6 @@ export const meQueryOptions = queryOptions<
   Treaty.Error<typeof server.api.auth.me.get>
 >({
   queryKey: ["me"],
-  enabled: document.cookie.includes("sessionToken"),
   queryFn: async () => {
     const resp = await server.api.auth.me.get();
     if (resp.error) {

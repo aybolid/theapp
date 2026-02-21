@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import {
   SidebarInset,
   SidebarProvider,
@@ -7,7 +7,7 @@ import {
 import { AppSidebar } from "@theapp/webapp/components/app-sidebar";
 import { ThemeMenu } from "@theapp/webapp/components/theme-menu";
 
-export const Route = createFileRoute("/_auth/")({
+export const Route = createFileRoute("/_auth/_sidebar")({
   component: RouteComponent,
 });
 
@@ -26,7 +26,9 @@ function RouteComponent() {
           <SidebarTrigger className="-ml-1" />
           <ThemeMenu className="ml-auto" />
         </header>
-        <main className="p-4 pt-0"></main>
+        <main className="p-4 pt-0">
+          <Outlet />
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

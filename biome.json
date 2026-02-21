@@ -22,6 +22,9 @@
           "level": "warn",
           "fix": "safe"
         }
+      },
+      "correctness": {
+        "noChildrenProp": "off"
       }
     }
   },
