@@ -4,6 +4,8 @@ services:
     container_name: theapp_db
     restart: always
     shm_size: 128mb
+    volumes:
+      - ./volumes/db/data:/var/lib/postgresql
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

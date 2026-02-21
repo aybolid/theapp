@@ -12,3 +12,5 @@ dist
 
 volumes/garage
 garage.toml
+
+volumes/db
