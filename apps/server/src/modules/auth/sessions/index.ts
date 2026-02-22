@@ -12,14 +12,13 @@ export const sessions = new Elysia({
   },
 })
   .use(
-    // @ts-expect-error - FIXME: remove type assertion
     cron({
       name: "delete-inactive-sessions",
       pattern: Patterns.EVERY_DAY_AT_MIDNIGHT,
       run: async () => {
         await SessionService.deleteInactiveSessions(db);
       },
-    }) as Elysia,
+    }),
   )
   .use(authGuard)
   .get(

@@ -2,13 +2,20 @@ import type { FileType } from "elysia/type-system/types";
 import z from "zod";
 import { zDate } from "./zdate";
 
+export const MAX_BIO_LEN_AFTER_TRIM = 500;
+
 export const profilesPatchBodySchema = z.object({
   name: z
     .string()
+    .trim()
     .min(1, "Name is required")
     .max(255, "Must be less than 255 characters")
     .optional(),
-  bio: z.string().max(500, "Must be less than 500 characters").optional(),
+  bio: z
+    .string()
+    .trim()
+    .max(MAX_BIO_LEN_AFTER_TRIM, "Must be less than 500 characters")
+    .optional(),
 });
 
 export type ProfilesPatchBody = z.infer<typeof profilesPatchBodySchema>;

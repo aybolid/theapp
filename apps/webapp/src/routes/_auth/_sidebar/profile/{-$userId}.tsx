@@ -41,14 +41,30 @@ import {
   LazyDevJsonDisplay,
 } from "@theapp/webapp/lib/lazy";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
-import { parseAsStringLiteral, useQueryStates } from "nuqs";
-import { Suspense } from "react";
+import {
+  createStandardSchemaV1,
+  parseAsStringLiteral,
+  useQueryStates,
+} from "nuqs";
+import { lazy, Suspense } from "react";
 
 const searchParams = {
   tab: parseAsStringLiteral(["activity", "settings", "debug"]).withDefault(
     "activity",
   ),
 };
+
+const LazyEditProfileDialog = lazy(() =>
+  import("./-components/edit-profile-dialog").then((m) => ({
+    default: m.EditProfileDialog,
+  })),
+);
+
+const LazyUploadAvatarDialog = lazy(() =>
+  import("./-components/upload-avatar-dialog").then((m) => ({
+    default: m.UploadAvatarDialog,
+  })),
+);
 
 export const Route = createFileRoute("/_auth/_sidebar/profile/{-$userId}")({
   head: () => ({
@@ -58,6 +74,7 @@ export const Route = createFileRoute("/_auth/_sidebar/profile/{-$userId}")({
       },
     ],
   }),
+  validateSearch: createStandardSchemaV1(searchParams, { partialOutput: true }),
   component: RouteComponent,
   pendingComponent: PendingComponent,
   errorComponent: ErrorComponent,
@@ -94,14 +111,41 @@ function RouteComponent() {
         )}
         {isMe && (
           <CardFooter className="justify-end gap-2 py-2">
-            <Button variant="secondary" size="xs">
-              <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />
-              <span>Edit profile</span>
-            </Button>
-            <Button variant="secondary" size="xs">
-              <HugeiconsIcon icon={Photo} strokeWidth={2} />
-              <span>Upload avatar</span>
-            </Button>
+            <Suspense
+              fallback={
+                <Button variant="secondary" size="xs" disabled>
+                  <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />
+                  <span>Edit profile</span>
+                </Button>
+              }
+            >
+              <LazyEditProfileDialog
+                profile={userQuery.data.profile}
+                render={
+                  <Button variant="secondary" size="xs">
+                    <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />
+                    <span>Edit profile</span>
+                  </Button>
+                }
+              />
+            </Suspense>
+            <Suspense
+              fallback={
+                <Button variant="secondary" size="xs" disabled>
+                  <HugeiconsIcon icon={Photo} strokeWidth={2} />
+                  <span>Upload avatar</span>
+                </Button>
+              }
+            >
+              <LazyUploadAvatarDialog
+                render={
+                  <Button variant="secondary" size="xs">
+                    <HugeiconsIcon icon={Photo} strokeWidth={2} />
+                    <span>Upload avatar</span>
+                  </Button>
+                }
+              />
+            </Suspense>
           </CardFooter>
         )}
       </Card>
@@ -114,7 +158,7 @@ function RouteComponent() {
           })
         }
       >
-        <TabsList className="w-full">
+        <TabsList className="w-full" variant="line">
           <TabsTrigger value="activity">
             <HugeiconsIcon icon={Activity01Icon} strokeWidth={2} />
             <span>Activity</span>
