@@ -41,7 +41,14 @@ import {
   LazyDevJsonDisplay,
 } from "@theapp/webapp/lib/lazy";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
+import { parseAsStringLiteral, useQueryStates } from "nuqs";
 import { Suspense } from "react";
+
+const searchParams = {
+  tab: parseAsStringLiteral(["activity", "settings", "debug"]).withDefault(
+    "activity",
+  ),
+};
 
 export const Route = createFileRoute("/_auth/_sidebar/profile/{-$userId}")({
   head: () => ({
@@ -57,6 +64,8 @@ export const Route = createFileRoute("/_auth/_sidebar/profile/{-$userId}")({
 });
 
 function RouteComponent() {
+  const [{ tab }, setSearchParams] = useQueryStates(searchParams);
+
   const { userId } = Route.useParams();
   const isMe = !userId;
 
@@ -97,7 +106,14 @@ function RouteComponent() {
         )}
       </Card>
 
-      <Tabs defaultValue="activity">
+      <Tabs
+        value={tab}
+        onValueChange={(v) =>
+          setSearchParams({
+            tab: searchParams.tab.parse(v),
+          })
+        }
+      >
         <TabsList className="w-full">
           <TabsTrigger value="activity">
             <HugeiconsIcon icon={Activity01Icon} strokeWidth={2} />

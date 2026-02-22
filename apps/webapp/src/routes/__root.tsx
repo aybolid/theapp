@@ -14,6 +14,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Button } from "@theapp/ui/components/button";
 import { Home01Icon, RefreshIcon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
+import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { Suspense } from "react";
 import { LazyDevErrorStackDisplay } from "../lib/lazy";
 
@@ -29,7 +30,9 @@ function RootComponent() {
   return (
     <>
       <HeadContent />
-      <Outlet />
+      <NuqsAdapter>
+        <Outlet />
+      </NuqsAdapter>
       <TanStackDevtools
         plugins={[
           {

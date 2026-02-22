@@ -19,13 +19,14 @@
     "@tanstack/react-query-devtools": "^5.91.3",
     "@tanstack/react-router": "^1.161.3",
     "@tanstack/react-router-devtools": "^1.161.3",
+    "@theapp/schemas": "workspace:*",
     "@theapp/ui": "workspace:*",
     "dayjs": "catalog:",
+    "nuqs": "^2.8.8",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-error-boundary": "catalog:",
-    "zod": "catalog:",
-    "@theapp/schemas": "workspace:*"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@theapp/server": "workspace:*",
