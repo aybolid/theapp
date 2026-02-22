@@ -1,5 +1,5 @@
+import { type UserAgentData, userAgentSchema } from "@theapp/schemas";
 import { UAParser } from "ua-parser-js";
-import { type UserAgentData, userAgentSchema } from "../schemas";
 
 export function parseUserAgent(req: Request): UserAgentData | null {
   try {

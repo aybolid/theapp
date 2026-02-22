@@ -5,7 +5,7 @@ import type {
   ProfilePictureOk,
   ProfileResponse,
   ProfilesPatchBody,
-} from "@theapp/server/schemas";
+} from "@theapp/schemas";
 import { server } from "../api";
 
 export function useUpdateProfileMutation(

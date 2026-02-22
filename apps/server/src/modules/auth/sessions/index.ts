@@ -1,6 +1,6 @@
 import cron, { Patterns } from "@elysiajs/cron";
+import { sessionsResponseSchema } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
-import { sessionsResponseSchema } from "@theapp/server/schemas";
 import Elysia from "elysia";
 import { authGuard } from "../guard";
 import { SessionService } from "./service";

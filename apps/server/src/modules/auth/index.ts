@@ -1,4 +1,3 @@
-import { db } from "@theapp/server/db";
 import {
   signinBadRequestSchema,
   signinBodySchema,
@@ -9,7 +8,8 @@ import {
   singupConflictErrorSchema,
   userNotFoundErrorSchema,
   userResponseSchema,
-} from "@theapp/server/schemas";
+} from "@theapp/schemas";
+import { db } from "@theapp/server/db";
 import {
   hashPassword,
   signAuthJwt,

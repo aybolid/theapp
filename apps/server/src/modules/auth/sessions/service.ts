@@ -1,8 +1,8 @@
 /** biome-ignore-all lint/complexity/noStaticOnlyClass: abstract class == no class alloc */
 
+import type { UserAgentData } from "@theapp/schemas";
 import type { DatabaseConnection } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
-import type { UserAgentData } from "@theapp/server/schemas";
 import {
   generateSecureRandomString,
   hashSecret,

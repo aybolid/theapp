@@ -1,6 +1,6 @@
+import type { UserAgentData } from "@theapp/schemas";
 import { sql } from "drizzle-orm";
 import * as pg from "drizzle-orm/pg-core";
-import type { UserAgentData } from "../schemas";
 
 const uuidv7pk = () => pg.uuid().primaryKey().default(sql`uuidv7()`);
 

@@ -44,5 +44,24 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+
+    build: {
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              {
+                name: "",
+                test: (module) => {
+                  if (module.includes("theapp/apps/server")) {
+                    throw new Error("YOU ARE ABOUT TO LEAK SERVER CODE!");
+                  }
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
   };
 });

@@ -1,14 +1,7 @@
 {
   "name": "@theapp/server",
   "version": "0.0.0",
-  "exports": {
-    ".": {
-      "import": "./src/index.ts"
-    },
-    "./schemas": {
-      "import": "./src/schemas/index.ts"
-    }
-  },
+  "types": "src/index.ts",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile dist/server src/index.ts"
@@ -23,7 +16,8 @@
     "pg": "^8.18.0",
     "sharp": "^0.34.5",
     "ua-parser-js": "^2.0.9",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@theapp/schemas": "workspace:*"
   },
   "devDependencies": {
     "@theapp/typescript-config": "workspace:*",

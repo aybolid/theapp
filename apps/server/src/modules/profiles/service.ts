@@ -1,8 +1,8 @@
 /** biome-ignore-all lint/complexity/noStaticOnlyClass: abstract class == no class alloc */
 
+import type { ProfileResponse } from "@theapp/schemas";
 import type { DatabaseConnection } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
-import type { ProfileResponse } from "@theapp/server/schemas";
 import { eq } from "drizzle-orm";
 
 export abstract class ProfileService {

@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { signinBodySchema } from "@theapp/server/schemas";
+import { signinBodySchema } from "@theapp/schemas";
 import { Button } from "@theapp/ui/components/button";
 import {
   Card,

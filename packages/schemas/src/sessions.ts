@@ -1,6 +1,6 @@
 import z from "zod";
-import { zDate } from ".";
 import { userAgentSchema } from "./ua";
+import { zDate } from "./zdate";
 
 export const sessionsResponseSchema = z.array(
   z.object({

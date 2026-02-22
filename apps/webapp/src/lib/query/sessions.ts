@@ -4,7 +4,7 @@ import {
   type UseSuspenseQueryOptions,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import type { SessionsResponse } from "@theapp/server/schemas";
+import type { SessionsResponse } from "@theapp/schemas";
 import { server } from "../api";
 
 export const sessionsQueryOptions = queryOptions<

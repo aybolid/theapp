@@ -1,6 +1,6 @@
 import type { FileType } from "elysia/type-system/types";
 import z from "zod";
-import { zDate } from ".";
+import { zDate } from "./zdate";
 
 export const profilesPatchBodySchema = z.object({
   name: z

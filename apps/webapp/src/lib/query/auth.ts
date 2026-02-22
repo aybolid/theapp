@@ -13,7 +13,7 @@ import type {
   SignupBody,
   SignupCreated,
   UserResponse,
-} from "@theapp/server/schemas";
+} from "@theapp/schemas";
 import { server } from "../api";
 
 export const meQueryOptions = queryOptions<

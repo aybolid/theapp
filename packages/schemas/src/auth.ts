@@ -1,6 +1,6 @@
 import z from "zod";
-import { zDate } from ".";
 import { profileResponseSchema } from "./profiles";
+import { zDate } from "./zdate";
 
 export const signupBodySchema = z.object({
   email: z.email(),

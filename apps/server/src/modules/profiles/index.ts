@@ -1,6 +1,4 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { db } from "@theapp/server/db";
-import { s3 } from "@theapp/server/s3";
 import {
   MAX_PROFILE_PICTURE_SIZE,
   PROFILE_PICTURE_FILE_TYPES,
@@ -10,7 +8,9 @@ import {
   profileResponseSchema,
   profilesPatchBodySchema,
   profilesPatchNotFoundErrorSchema,
-} from "@theapp/server/schemas";
+} from "@theapp/schemas";
+import { db } from "@theapp/server/db";
+import { s3 } from "@theapp/server/s3";
 import { generateSecureRandomString } from "@theapp/server/utils/crypto";
 import Elysia, { fileType } from "elysia";
 import sharp from "sharp";
