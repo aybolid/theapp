@@ -1,5 +1,5 @@
 import z from "zod";
-import { zDate } from "../utils/zod";
+import { zDate } from ".";
 import { userAgentSchema } from "./ua";
 
 export const sessionsResponseSchema = z.array(

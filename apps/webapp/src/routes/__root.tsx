@@ -14,6 +14,8 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Button } from "@theapp/ui/components/button";
 import { Home01Icon, RefreshIcon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
+import { Suspense } from "react";
+import { LazyDevErrorStackDisplay } from "../lib/lazy";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   {
@@ -80,26 +82,9 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
           <HugeiconsIcon icon={RefreshIcon} strokeWidth={2} />
           <span>Try again</span>
         </Button>
-        {import.meta.env.DEV && (
-          <pre className="mt-6 text-wrap rounded-md bg-muted p-4">
-            {error.stack
-              ? [...error.stack.split("\n"), "\tat YourStupidHead :)"].map(
-                  (line, index) => (
-                    <p
-                      className={
-                        line.includes("node_modules")
-                          ? "text-muted-foreground"
-                          : "text-destructive"
-                      }
-                      key={index}
-                    >
-                      {line}
-                    </p>
-                  ),
-                )
-              : String(error)}
-          </pre>
-        )}
+        <Suspense>
+          <LazyDevErrorStackDisplay error={error} className="mt-6" />
+        </Suspense>
       </div>
     </div>
   );

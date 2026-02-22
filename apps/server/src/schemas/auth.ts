@@ -1,5 +1,5 @@
 import z from "zod";
-import { zDate } from "../utils/zod";
+import { zDate } from ".";
 import { profileResponseSchema } from "./profiles";
 
 export const signupBodySchema = z.object({

@@ -23,11 +23,10 @@ import {
   SidebarMenuSkeleton,
   useSidebar,
 } from "@theapp/ui/components/sidebar";
-import { AccountSetting02Icon, User02Icon } from "@theapp/ui/icons/huge";
+import { User02Icon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
+import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import { type FC, Suspense } from "react";
-import { useMeSuspenseQuery } from "../lib/query/auth";
-import { UserAccountDialog } from "./user-account-dialog";
 
 export const AppSidebar: FC = () => {
   return (
@@ -79,23 +78,13 @@ const UserButton: FC = () => {
         }
       />
       <DropdownMenuContent side={state === "expanded" ? "top" : "inline-end"}>
-        <DropdownMenuItem
-          render={
-            <Link to="/profile">
-              <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
-              <span>Profile</span>
-            </Link>
-          }
-        />
         <DropdownMenuGroup>
-          <UserAccountDialog
-            nativeButton={false}
-            meQuery={meQuery}
+          <DropdownMenuItem
             render={
-              <DropdownMenuItem closeOnClick={false}>
-                <HugeiconsIcon icon={AccountSetting02Icon} strokeWidth={2} />
-                <span>Account</span>
-              </DropdownMenuItem>
+              <Link to="/profile/{-$userId}">
+                <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
+                <span>Profile</span>
+              </Link>
             }
           />
         </DropdownMenuGroup>

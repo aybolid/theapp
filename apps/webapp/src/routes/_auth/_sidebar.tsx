@@ -4,8 +4,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@theapp/ui/components/sidebar";
-import { AppSidebar } from "@theapp/webapp/components/app-sidebar";
 import { ThemeMenu } from "@theapp/webapp/components/theme-menu";
+import { AppSidebar } from "./-components/app-sidebar";
 
 export const Route = createFileRoute("/_auth/_sidebar")({
   component: RouteComponent,
