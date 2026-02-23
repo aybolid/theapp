@@ -2,7 +2,7 @@ import type { FileType } from "elysia/type-system/types";
 import z from "zod";
 import { zDate } from "./zdate";
 
-export const MAX_BIO_LEN_AFTER_TRIM = 500;
+export const MAX_BIO_LEN_AFTER_TRIM = 300;
 
 export const profilesPatchBodySchema = z.object({
   name: z

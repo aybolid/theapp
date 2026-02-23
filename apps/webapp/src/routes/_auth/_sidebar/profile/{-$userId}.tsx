@@ -1,9 +1,11 @@
+import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import {
   createFileRoute,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import {
   Alert,
+  AlertAction,
   AlertDescription,
   AlertTitle,
 } from "@theapp/ui/components/alert";
@@ -12,12 +14,15 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@theapp/ui/components/avatar";
+import { Badge } from "@theapp/ui/components/badge";
 import { Button } from "@theapp/ui/components/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
+  CardTitle,
 } from "@theapp/ui/components/card";
 import { Skeleton } from "@theapp/ui/components/skeleton";
 import {
@@ -31,6 +36,8 @@ import {
   Alert01Icon,
   Bug01Icon,
   Edit01Icon,
+  IdentityCardIcon,
+  Mail01Icon,
   Photo,
   Settings01Icon,
   UserIcon,
@@ -47,6 +54,8 @@ import {
   useQueryStates,
 } from "nuqs";
 import { lazy, Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { SessionsList } from "./-components/sessions-list";
 
 const searchParams = {
   tab: parseAsStringLiteral(["activity", "settings", "debug"]).withDefault(
@@ -91,7 +100,7 @@ function RouteComponent() {
   return (
     <div className="container mx-auto grid max-w-3xl gap-4">
       <Card>
-        <CardHeader className="border-b">
+        <CardHeader className="flex items-center gap-4">
           <Avatar className="size-12">
             <AvatarImage
               src={userQuery.data.profile.picture}
@@ -101,6 +110,15 @@ function RouteComponent() {
               <HugeiconsIcon icon={UserIcon} strokeWidth={2} />
             </AvatarFallback>
           </Avatar>
+          <div className="space-y-1">
+            <CardTitle>{userQuery.data.profile.name}</CardTitle>
+            <CardDescription className="flex gap-1">
+              <Badge variant="secondary">
+                <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} />
+                <span>{userQuery.data.email}</span>
+              </Badge>
+            </CardDescription>
+          </div>
         </CardHeader>
         {userQuery.data.profile.bio && (
           <CardContent>
@@ -177,6 +195,64 @@ function RouteComponent() {
           )}
         </TabsList>
 
+        {isMe && (
+          <TabsContent value="settings">
+            <Tabs>
+              <TabsList className="w-full">
+                <TabsTrigger value="sessions">
+                  <HugeiconsIcon icon={IdentityCardIcon} strokeWidth={2} />
+                  <span>Sessions</span>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="sessions">
+                <QueryErrorResetBoundary>
+                  {({ reset }) => (
+                    <ErrorBoundary
+                      onReset={reset}
+                      fallbackRender={({ error, resetErrorBoundary }) => (
+                        <>
+                          <Alert variant="destructive">
+                            <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
+                            <AlertTitle>Sessions loading failed</AlertTitle>
+                            <AlertDescription>
+                              Some unexpected error occurred.
+                            </AlertDescription>
+                            <AlertAction>
+                              <Button
+                                variant="secondary"
+                                size="xs"
+                                onClick={resetErrorBoundary}
+                              >
+                                Retry
+                              </Button>
+                            </AlertAction>
+                          </Alert>
+                          <Suspense>
+                            <LazyDevErrorStackDisplay
+                              className="mt-2"
+                              error={error as Error}
+                            />
+                          </Suspense>
+                        </>
+                      )}
+                    >
+                      <Suspense
+                        fallback={
+                          <div className="space-y-4">
+                            <Skeleton className="p-8" />
+                            <Skeleton className="p-8" />
+                          </div>
+                        }
+                      >
+                        <SessionsList />
+                      </Suspense>
+                    </ErrorBoundary>
+                  )}
+                </QueryErrorResetBoundary>
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+        )}
         {import.meta.env.DEV && (
           <TabsContent value="debug">
             <Suspense>

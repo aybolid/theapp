@@ -12,6 +12,9 @@ const PORT = 8080;
 const api = new Elysia({ prefix: "/api" }).use(auth).use(profiles);
 
 const app = new Elysia()
+  .onError((ctx) => {
+    console.error(ctx.code, ctx.error);
+  })
   .use(
     openapi({
       mapJsonSchema: { zod: z.toJSONSchema },
