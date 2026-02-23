@@ -8,8 +8,12 @@ import { createRoot } from "react-dom/client";
 import { ThemeContextProvider } from "./contexts/theme";
 import { routeTree } from "./routeTree.gen";
 
+const QUERY_STALE_TIME_SECONS = 3 * 60;
+
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false } },
+  defaultOptions: {
+    queries: { retry: false, staleTime: QUERY_STALE_TIME_SECONS * 1000 },
+  },
 });
 
 const router = createRouter({

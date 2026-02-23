@@ -4,12 +4,18 @@ import { profiles } from "@theapp/server/modules/profiles";
 import { Elysia } from "elysia";
 import z from "zod";
 import { checkEnv } from "./env";
+import { misc } from "./modules/misc";
+import { wishes } from "./modules/wishes";
 
 checkEnv();
 
 const PORT = 8080;
 
-const api = new Elysia({ prefix: "/api" }).use(auth).use(profiles);
+const api = new Elysia({ prefix: "/api" })
+  .use(auth)
+  .use(profiles)
+  .use(wishes)
+  .use(misc);
 
 const app = new Elysia()
   .onError((ctx) => {

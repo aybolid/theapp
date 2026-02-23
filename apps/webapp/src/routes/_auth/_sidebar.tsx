@@ -26,7 +26,7 @@ function RouteComponent() {
           <SidebarTrigger className="-ml-1" />
           <ThemeMenu className="ml-auto" />
         </header>
-        <main className="p-4 pt-0">
+        <main className="size-full p-4 pt-0">
           <Outlet />
         </main>
       </SidebarInset>

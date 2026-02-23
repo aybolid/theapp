@@ -23,7 +23,7 @@ import {
   SidebarMenuSkeleton,
   useSidebar,
 } from "@theapp/ui/components/sidebar";
-import { User02Icon } from "@theapp/ui/icons/huge";
+import { Gift, User02Icon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import { type FC, Suspense } from "react";
@@ -34,7 +34,18 @@ export const AppSidebar: FC = () => {
       <SidebarHeader></SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarMenu className="gap-2"></SidebarMenu>
+          <SidebarMenu className="gap-2">
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                render={
+                  <Link to="/wishes">
+                    <HugeiconsIcon icon={Gift} strokeWidth={2} />
+                    <span>Wishes</span>
+                  </Link>
+                }
+              />
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>

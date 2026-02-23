@@ -55,8 +55,29 @@ export const profiles = pg.pgTable("profiles", {
   ...timestamps,
 });
 
+export const wishes = pg.pgTable("wishes", {
+  wishId: uuidv7pk(),
+  ownerId: pg
+    .uuid()
+    .notNull()
+    .references(() => users.userId, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+  name: pg.varchar().notNull(),
+  note: pg.text().notNull().default(""),
+  link: pg.varchar().notNull(),
+  reserverId: pg.uuid().references(() => users.userId, {
+    onDelete: "set null",
+    onUpdate: "cascade",
+  }),
+  isCompleted: pg.boolean().notNull().default(false),
+  ...timestamps,
+});
+
 export const schema = {
   users,
   sessions,
   profiles,
+  wishes,
 };

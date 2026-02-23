@@ -15,6 +15,7 @@ import { Route as No_authSignupRouteImport } from './routes/_no_auth/signup'
 import { Route as No_authSigninRouteImport } from './routes/_no_auth/signin'
 import { Route as AuthSidebarRouteImport } from './routes/_auth/_sidebar'
 import { Route as AuthSidebarIndexRouteImport } from './routes/_auth/_sidebar/index'
+import { Route as AuthSidebarWishesRouteRouteImport } from './routes/_auth/_sidebar/wishes/route'
 import { Route as AuthSidebarProfileChar123UserIdChar125RouteImport } from './routes/_auth/_sidebar/profile/{-$userId}'
 
 const No_authRoute = No_authRouteImport.update({
@@ -44,6 +45,11 @@ const AuthSidebarIndexRoute = AuthSidebarIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthSidebarRoute,
 } as any)
+const AuthSidebarWishesRouteRoute = AuthSidebarWishesRouteRouteImport.update({
+  id: '/wishes',
+  path: '/wishes',
+  getParentRoute: () => AuthSidebarRoute,
+} as any)
 const AuthSidebarProfileChar123UserIdChar125Route =
   AuthSidebarProfileChar123UserIdChar125RouteImport.update({
     id: '/profile/{-$userId}',
@@ -55,12 +61,14 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthSidebarIndexRoute
   '/signin': typeof No_authSigninRoute
   '/signup': typeof No_authSignupRoute
+  '/wishes': typeof AuthSidebarWishesRouteRoute
   '/profile/{-$userId}': typeof AuthSidebarProfileChar123UserIdChar125Route
 }
 export interface FileRoutesByTo {
   '/': typeof AuthSidebarIndexRoute
   '/signin': typeof No_authSigninRoute
   '/signup': typeof No_authSignupRoute
+  '/wishes': typeof AuthSidebarWishesRouteRoute
   '/profile/{-$userId}': typeof AuthSidebarProfileChar123UserIdChar125Route
 }
 export interface FileRoutesById {
@@ -70,14 +78,15 @@ export interface FileRoutesById {
   '/_auth/_sidebar': typeof AuthSidebarRouteWithChildren
   '/_no_auth/signin': typeof No_authSigninRoute
   '/_no_auth/signup': typeof No_authSignupRoute
+  '/_auth/_sidebar/wishes': typeof AuthSidebarWishesRouteRoute
   '/_auth/_sidebar/': typeof AuthSidebarIndexRoute
   '/_auth/_sidebar/profile/{-$userId}': typeof AuthSidebarProfileChar123UserIdChar125Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signin' | '/signup' | '/profile/{-$userId}'
+  fullPaths: '/' | '/signin' | '/signup' | '/wishes' | '/profile/{-$userId}'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signin' | '/signup' | '/profile/{-$userId}'
+  to: '/' | '/signin' | '/signup' | '/wishes' | '/profile/{-$userId}'
   id:
     | '__root__'
     | '/_auth'
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
     | '/_auth/_sidebar'
     | '/_no_auth/signin'
     | '/_no_auth/signup'
+    | '/_auth/_sidebar/wishes'
     | '/_auth/_sidebar/'
     | '/_auth/_sidebar/profile/{-$userId}'
   fileRoutesById: FileRoutesById
@@ -138,6 +148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSidebarIndexRouteImport
       parentRoute: typeof AuthSidebarRoute
     }
+    '/_auth/_sidebar/wishes': {
+      id: '/_auth/_sidebar/wishes'
+      path: '/wishes'
+      fullPath: '/wishes'
+      preLoaderRoute: typeof AuthSidebarWishesRouteRouteImport
+      parentRoute: typeof AuthSidebarRoute
+    }
     '/_auth/_sidebar/profile/{-$userId}': {
       id: '/_auth/_sidebar/profile/{-$userId}'
       path: '/profile/{-$userId}'
@@ -149,11 +166,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthSidebarRouteChildren {
+  AuthSidebarWishesRouteRoute: typeof AuthSidebarWishesRouteRoute
   AuthSidebarIndexRoute: typeof AuthSidebarIndexRoute
   AuthSidebarProfileChar123UserIdChar125Route: typeof AuthSidebarProfileChar123UserIdChar125Route
 }
 
 const AuthSidebarRouteChildren: AuthSidebarRouteChildren = {
+  AuthSidebarWishesRouteRoute: AuthSidebarWishesRouteRoute,
   AuthSidebarIndexRoute: AuthSidebarIndexRoute,
   AuthSidebarProfileChar123UserIdChar125Route:
     AuthSidebarProfileChar123UserIdChar125Route,
