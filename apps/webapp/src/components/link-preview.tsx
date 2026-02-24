@@ -41,7 +41,7 @@ const LinkPreviewImpl: FC<
 
   return (
     <Glimpse {...props}>
-      <GlimpseTrigger render={render} delay={0} closeDelay={0} />
+      <GlimpseTrigger render={render} closeDelay={0} />
       <GlimpseContent className="w-80">
         {metadataQuery.data.banner && (
           <GlimpseImage src={metadataQuery.data.banner} />

@@ -75,7 +75,7 @@ const LazyUploadAvatarDialog = lazy(() =>
   })),
 );
 
-export const Route = createFileRoute("/_auth/_sidebar/profile/{-$userId}")({
+export const Route = createFileRoute("/_auth/_sidebar/profile/$userId")({
   head: () => ({
     meta: [
       {
@@ -91,11 +91,11 @@ export const Route = createFileRoute("/_auth/_sidebar/profile/{-$userId}")({
 
 function RouteComponent() {
   const [{ tab }, setSearchParams] = useQueryStates(searchParams);
-
-  const { userId } = Route.useParams();
-  const isMe = !userId;
+  // const { userId } = Route.useParams();
 
   const userQuery = useMeSuspenseQuery();
+
+  const isMe = true;
 
   return (
     <div className="container mx-auto grid max-w-3xl gap-4">

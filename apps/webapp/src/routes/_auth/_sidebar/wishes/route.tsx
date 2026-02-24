@@ -1,11 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { WishResponse } from "@theapp/schemas";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@theapp/ui/components/avatar";
 import { Badge } from "@theapp/ui/components/badge";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -29,12 +24,12 @@ import {
   EllipsisVertical,
   ExternalLink,
   Tick01Icon,
-  User02Icon,
   X,
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { DataTable } from "@theapp/webapp/components/data-table";
 import { LinkPreview } from "@theapp/webapp/components/link-preview";
+import { UserChip } from "@theapp/webapp/components/user-chip";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import { useWishesSuspenseQuery } from "@theapp/webapp/lib/query/wishes";
 import dayjs from "dayjs";
@@ -53,23 +48,11 @@ const COLUMNS = [
     header: "Owner",
     cell: (props) => {
       const owner = props.getValue();
-      return (
-        <div className="flex items-center gap-2">
-          <Avatar>
-            <Avatar>
-              <AvatarImage src={owner.profile.picture} alt="User Avatar" />
-              <AvatarFallback>
-                <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
-              </AvatarFallback>
-            </Avatar>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="font-medium">{owner.profile.name}</span>
-            <span className="text-muted-foreground">{owner.email}</span>
-          </div>
-        </div>
-      );
+      return <UserChip user={owner} />;
     },
+  }),
+  helper.accessor("owner.userId", {
+    id: "owner.userId",
   }),
   helper.accessor("isCompleted", {
     header: "Status",
@@ -135,23 +118,11 @@ const COLUMNS = [
         }
       }
 
-      return (
-        <div className="flex items-center gap-2">
-          <Avatar>
-            <Avatar>
-              <AvatarImage src={reserver.profile.picture} alt="User Avatar" />
-              <AvatarFallback>
-                <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
-              </AvatarFallback>
-            </Avatar>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="font-medium">{reserver.profile.name}</span>
-            <span className="text-muted-foreground">{reserver.email}</span>
-          </div>
-        </div>
-      );
+      return <UserChip user={reserver} />;
     },
+  }),
+  helper.accessor("reserver.userId", {
+    id: "reserver.userId",
   }),
   helper.accessor("createdAt", {
     header: "Created at",
@@ -223,7 +194,7 @@ function RouteComponent() {
   return (
     <div className="grid gap-4">
       <div className="flex gap-2">
-        <Button>
+        <Button className="ml-auto">
           <span>New wish</span>
         </Button>
       </div>
@@ -231,6 +202,10 @@ function RouteComponent() {
       <DataTable
         // @ts-expect-error
         columns={COLUMNS}
+        initialColumnVisibility={{
+          "owner.userId": false,
+          "reserver.userId": false,
+        }}
         data={wishesQuery.data.map((wish) => ({
           ...wish,
           isOwnedByMe: meQuery.data.userId === wish.ownerId,

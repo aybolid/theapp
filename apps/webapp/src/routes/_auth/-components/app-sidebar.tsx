@@ -109,7 +109,10 @@ const UserButton: FC = () => {
         <DropdownMenuGroup>
           <DropdownMenuItem
             render={
-              <Link to="/profile/{-$userId}">
+              <Link
+                to="/profile/$userId"
+                params={{ userId: meQuery.data.userId }}
+              >
                 <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
                 <span>Profile</span>
               </Link>

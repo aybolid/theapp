@@ -1,8 +1,12 @@
 import {
   type ColumnDef,
+  type ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
+  type OnChangeFn,
   useReactTable,
+  type VisibilityState,
 } from "@tanstack/react-table";
 
 import {
@@ -22,11 +26,26 @@ type DataTableProps<TData, TValue> = {
 export function DataTable<TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+  initialColumnVisibility,
+  columnFilters,
+  onColumnFiltersChange,
+}: DataTableProps<TData, TValue> & {
+  initialColumnVisibility?: VisibilityState;
+  columnFilters?: ColumnFiltersState;
+  onColumnFiltersChange?: OnChangeFn<ColumnFiltersState>;
+}) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    onColumnFiltersChange: onColumnFiltersChange,
+    getFilteredRowModel: getFilteredRowModel(),
+    initialState: {
+      columnVisibility: initialColumnVisibility,
+    },
+    state: {
+      columnFilters,
+    },
   });
 
   return (
