@@ -19,7 +19,11 @@ import { parseUserAgent } from "@theapp/server/utils/ua";
 import Elysia from "elysia";
 import { ProfileService } from "../profiles/service";
 import { UserService } from "../users/service";
-import { authGuard, JWT_EXPIRATION_SECONDS } from "./guard";
+import {
+  authGuard,
+  INACTIVITY_TIMEOUT_SECONDS,
+  JWT_EXPIRATION_SECONDS,
+} from "./guard";
 import { AuthService } from "./service";
 import { sessions } from "./sessions";
 import { SessionService } from "./sessions/service";
@@ -103,6 +107,7 @@ export const auth = new Elysia({
         sameSite: "lax",
         value: token,
         path: "/",
+        maxAge: INACTIVITY_TIMEOUT_SECONDS,
       });
       ctx.cookie.authToken?.set({
         httpOnly: true,

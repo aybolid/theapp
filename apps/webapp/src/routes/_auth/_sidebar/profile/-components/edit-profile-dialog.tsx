@@ -54,7 +54,7 @@ export const EditProfileDialog: FC<{
   nativeButton?: DialogTriggerProps["nativeButton"];
 }> = ({ render, nativeButton, profile }) => {
   const [open, setOpen] = useQueryState(
-    "editprofile",
+    "editProfile",
     parseAsBoolean.withDefault(false),
   );
 
@@ -215,7 +215,7 @@ export const EditProfileDialog: FC<{
               <HugeiconsIcon icon={X} strokeWidth={2} />
               <span>Cancel</span>
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={isBusy}>
               {isBusy ? (
                 <Spinner />
               ) : (

@@ -46,7 +46,7 @@ import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import {
   LazyDevErrorStackDisplay,
   LazyDevJsonDisplay,
-} from "@theapp/webapp/lib/lazy";
+} from "@theapp/webapp/components/lazy";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import {
   createStandardSchemaV1,

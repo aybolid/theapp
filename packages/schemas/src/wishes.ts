@@ -18,13 +18,22 @@ export const wishResponseSchema = z.object({
 
 export type WishResponse = z.infer<typeof wishResponseSchema>;
 
+export const MAX_WISH_NOTE_LEN_AFTER_TRIM = 120;
+
 export const createWishBodySchema = z.object({
   name: z
     .string()
+    .trim()
     .min(1, "Wish name is required")
-    .max(255, "Must be less than 255 characters"),
+    .max(100, "Must be less than 100 characters"),
   link: z.url(),
-  note: z.string().max(300, "Must be less than 300 characters"),
+  note: z
+    .string()
+    .trim()
+    .max(
+      MAX_WISH_NOTE_LEN_AFTER_TRIM,
+      `Must be less than ${MAX_WISH_NOTE_LEN_AFTER_TRIM} characters`,
+    ),
 });
 
 export type CreateWishBody = z.infer<typeof createWishBodySchema>;

@@ -23,6 +23,7 @@ import {
   Edit01Icon,
   EllipsisVertical,
   ExternalLink,
+  PlusSignIcon,
   Tick01Icon,
   X,
 } from "@theapp/ui/icons/huge";
@@ -33,6 +34,13 @@ import { UserChip } from "@theapp/webapp/components/user-chip";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import { useWishesSuspenseQuery } from "@theapp/webapp/lib/query/wishes";
 import dayjs from "dayjs";
+import { lazy, Suspense } from "react";
+
+const LazyNewWishDialog = lazy(() =>
+  import("./-components/new-wish-dialog").then((m) => ({
+    default: m.NewWishDialog,
+  })),
+);
 
 export const Route = createFileRoute("/_auth/_sidebar/wishes")({
   component: RouteComponent,
@@ -65,12 +73,18 @@ const COLUMNS = [
   }),
   helper.accessor("name", {
     header: "Name",
-    cell: (props) => <span className="font-medium">{props.getValue()}</span>,
+    cell: (props) => (
+      <span className="max-w-72 text-wrap font-medium transition-all">
+        {props.getValue()}
+      </span>
+    ),
   }),
   helper.accessor("note", {
     header: "Note",
     cell: (props) => (
-      <span className="text-muted-foreground text-sm">{props.getValue()}</span>
+      <p className="max-w-72 text-wrap text-muted-foreground text-sm transition-all">
+        {props.getValue()}
+      </p>
     ),
   }),
   helper.accessor("link", {
@@ -194,9 +208,23 @@ function RouteComponent() {
   return (
     <div className="grid gap-4">
       <div className="flex gap-2">
-        <Button className="ml-auto">
-          <span>New wish</span>
-        </Button>
+        <Suspense
+          fallback={
+            <Button className="ml-auto" disabled>
+              <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+              <span>New wish</span>
+            </Button>
+          }
+        >
+          <LazyNewWishDialog
+            render={
+              <Button className="ml-auto">
+                <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                <span>New wish</span>
+              </Button>
+            }
+          />
+        </Suspense>
       </div>
 
       <DataTable

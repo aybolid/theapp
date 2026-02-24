@@ -32,7 +32,7 @@ export const UserChip: FC<
       <GlimpseTrigger
         render={
           <Link to="/profile/$userId" params={{ userId: user.userId }}>
-            <Item {...props} className={cn("p-1", props.className)}>
+            <Item {...props} className={cn("flex-nowrap p-1", props.className)}>
               <Avatar>
                 <AvatarImage src={user.profile.picture} alt="User Avatar" />
                 <AvatarFallback>

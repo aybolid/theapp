@@ -16,7 +16,7 @@ import { Home01Icon, RefreshIcon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { Suspense } from "react";
-import { LazyDevErrorStackDisplay } from "../lib/lazy";
+import { LazyDevErrorStackDisplay } from "../components/lazy";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   {
