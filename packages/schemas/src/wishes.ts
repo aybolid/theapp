@@ -47,3 +47,27 @@ export type CreateWishUnauthorizedError = z.infer<
 export const getWishesResponseSchema = z.array(wishResponseSchema);
 
 export type GetWishesReponse = z.infer<typeof getWishesResponseSchema>;
+
+export const deleteWishByIdParamsSchema = z.object({
+  wishId: z.uuidv7(),
+});
+
+export type DeleteWishByIdParams = z.infer<typeof deleteWishByIdParamsSchema>;
+
+export const deleteWishNotFoundErrorSchema = z.literal("Wish not found");
+
+export type DeleteWishNotFoundError = z.infer<
+  typeof deleteWishNotFoundErrorSchema
+>;
+
+export const deleteWishForbiddenErrorSchema = z.literal(
+  "Only owned wish can be deleted",
+);
+
+export type DeleteWishForbiddenError = z.infer<
+  typeof deleteWishForbiddenErrorSchema
+>;
+
+export const deleteWishOkResponseSchema = z.literal("Wish deleted");
+
+export type DeleteWishOkResponse = z.infer<typeof deleteWishOkResponseSchema>;

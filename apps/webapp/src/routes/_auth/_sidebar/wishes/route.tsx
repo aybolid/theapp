@@ -1,6 +1,18 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { WishResponse } from "@theapp/schemas";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@theapp/ui/components/alert-dialog";
 import { Badge } from "@theapp/ui/components/badge";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -13,6 +25,7 @@ import {
 } from "@theapp/ui/components/dropdown-menu";
 import {
   Empty,
+  EmptyContent,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -23,6 +36,7 @@ import {
   Edit01Icon,
   EllipsisVertical,
   ExternalLink,
+  Gift,
   PlusSignIcon,
   Tick01Icon,
   X,
@@ -32,7 +46,11 @@ import { DataTable } from "@theapp/webapp/components/data-table";
 import { LinkPreview } from "@theapp/webapp/components/link-preview";
 import { UserChip } from "@theapp/webapp/components/user-chip";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
-import { useWishesSuspenseQuery } from "@theapp/webapp/lib/query/wishes";
+import {
+  useDeleteWishMutation,
+  useWishesSuspenseQuery,
+  wishesQueryOptions,
+} from "@theapp/webapp/lib/query/wishes";
 import dayjs from "dayjs";
 import { lazy, Suspense } from "react";
 
@@ -74,7 +92,7 @@ const COLUMNS = [
   helper.accessor("name", {
     header: "Name",
     cell: (props) => (
-      <span className="max-w-72 text-wrap font-medium transition-all">
+      <span className="w-72 text-wrap font-medium transition-all">
         {props.getValue()}
       </span>
     ),
@@ -82,7 +100,7 @@ const COLUMNS = [
   helper.accessor("note", {
     header: "Note",
     cell: (props) => (
-      <p className="max-w-72 text-wrap text-muted-foreground text-sm transition-all">
+      <p className="w-72 text-wrap text-muted-foreground text-sm transition-all">
         {props.getValue()}
       </p>
     ),
@@ -149,6 +167,19 @@ const COLUMNS = [
   helper.display({
     header: "Actions",
     cell: (props) => {
+      const queryClient = useQueryClient();
+      const deleteMutation = useDeleteWishMutation({
+        onSuccess: (_, { wishId }) => {
+          queryClient.setQueryData<WishResponse[]>(
+            wishesQueryOptions.queryKey,
+            (prev) => prev?.filter((w) => w.wishId !== wishId),
+          );
+          queryClient.invalidateQueries({
+            queryKey: wishesQueryOptions.queryKey,
+          });
+        },
+      });
+
       if (
         !props.row.original.isOwnedByMe &&
         !props.row.original.isReservedByMe
@@ -188,10 +219,52 @@ const COLUMNS = [
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
-                  <HugeiconsIcon icon={Delete01Icon} strokeWidth={2} />
-                  <span>Delete</span>
-                </DropdownMenuItem>
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    nativeButton={false}
+                    render={
+                      <DropdownMenuItem
+                        variant="destructive"
+                        closeOnClick={false}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <HugeiconsIcon icon={Delete01Icon} strokeWidth={2} />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    }
+                  />
+                  <AlertDialogContent size="sm">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete your wish.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={deleteMutation.isPending}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogCancel
+                        render={
+                          <AlertDialogAction
+                            variant="destructive"
+                            disabled={deleteMutation.isPending}
+                            onClick={() =>
+                              deleteMutation.mutate({
+                                wishId: props.row.original.wishId,
+                              })
+                            }
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        }
+                      />
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </DropdownMenuGroup>
             )}
           </DropdownMenuContent>
@@ -204,6 +277,38 @@ const COLUMNS = [
 function RouteComponent() {
   const meQuery = useMeSuspenseQuery();
   const wishesQuery = useWishesSuspenseQuery();
+
+  if (wishesQuery.data.length === 0) {
+    return (
+      <Empty className="size-full">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <HugeiconsIcon icon={Gift} strokeWidth={2} />
+          </EmptyMedia>
+          <EmptyTitle>No wishes yet</EmptyTitle>
+          <EmptyContent>
+            <Suspense
+              fallback={
+                <Button className="ml-auto" disabled>
+                  <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                  <span>New wish</span>
+                </Button>
+              }
+            >
+              <LazyNewWishDialog
+                render={
+                  <Button className="ml-auto">
+                    <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                    <span>New wish</span>
+                  </Button>
+                }
+              />
+            </Suspense>
+          </EmptyContent>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
 
   return (
     <div className="grid gap-4">

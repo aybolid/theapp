@@ -1,6 +1,10 @@
 import {
   createWishBodySchema,
   createWishUnauthorizedErrorSchema,
+  deleteWishByIdParamsSchema,
+  deleteWishForbiddenErrorSchema,
+  deleteWishNotFoundErrorSchema,
+  deleteWishOkResponseSchema,
   getWishesResponseSchema,
   wishResponseSchema,
 } from "@theapp/schemas";
@@ -62,6 +66,31 @@ export const wishes = new Elysia({
       },
       detail: {
         description: "Create new wish with current user as owner.",
+      },
+    },
+  )
+  .delete(
+    "/:wishId",
+    async (ctx) => {
+      const wish = await WishService.getWishById(db, ctx.params.wishId);
+      if (!wish) throw ctx.status(404, "Wish not found");
+      if (wish.ownerId !== ctx.userId) {
+        throw ctx.status(403, "Only owned wish can be deleted");
+      }
+
+      await WishService.deleteWishById(db, ctx.params.wishId);
+
+      return ctx.status(200, "Wish deleted");
+    },
+    {
+      params: deleteWishByIdParamsSchema,
+      response: {
+        404: deleteWishNotFoundErrorSchema,
+        403: deleteWishForbiddenErrorSchema,
+        200: deleteWishOkResponseSchema,
+      },
+      detail: {
+        description: "Delete wish by id. Must be owned by current user.",
       },
     },
   );
