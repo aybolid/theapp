@@ -94,18 +94,24 @@ const COLUMNS = [
     header: "Link",
     cell: (props) => {
       const url = props.getValue();
+
+      let label = "Follow link";
+      try {
+        label = new URL(url).hostname;
+      } catch {}
+
       return (
         <LinkPreview
           url={url}
           render={
             <Button
               nativeButton={false}
-              variant="secondary"
+              variant="link"
               size="xs"
               render={
                 <a href={url} target="_blank">
                   <HugeiconsIcon icon={ExternalLink} strokeWidth={2} />
-                  <span>Follow link</span>
+                  <span>{label}</span>
                 </a>
               }
             />

@@ -23,7 +23,7 @@ import {
   SidebarMenuSkeleton,
   useSidebar,
 } from "@theapp/ui/components/sidebar";
-import { Gift, User02Icon } from "@theapp/ui/icons/huge";
+import { DashboardSquareIcon, Gift, User02Icon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import { type FC, Suspense } from "react";
@@ -31,7 +31,24 @@ import { type FC, Suspense } from "react";
 export const AppSidebar: FC = () => {
   return (
     <Sidebar variant="floating" collapsible="icon">
-      <SidebarHeader></SidebarHeader>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={
+                <Link className="font-bold text-lg" to="/">
+                  <HugeiconsIcon
+                    className="text-primary"
+                    icon={DashboardSquareIcon}
+                    strokeWidth={2}
+                  />
+                  <span>THEAPP.</span>
+                </Link>
+              }
+            />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu className="gap-2">

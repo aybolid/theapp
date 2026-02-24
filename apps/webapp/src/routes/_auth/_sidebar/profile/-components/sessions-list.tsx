@@ -30,7 +30,7 @@ export const SessionsList: FC = () => {
   return (
     <ItemGroup>
       {sessionsQuery.data.map((session) => (
-        <Item variant="muted">
+        <Item variant="muted" key={session.sessionId}>
           <ItemContent>
             <ItemTitle>{formatUserAgent(session.uaData)}</ItemTitle>
             <ItemDescription className="flex flex-wrap gap-1">
