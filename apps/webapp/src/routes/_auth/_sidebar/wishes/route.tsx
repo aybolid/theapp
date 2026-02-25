@@ -42,12 +42,14 @@ import {
   X,
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
+import { toast } from "@theapp/ui/lib/sonner";
 import { DataTable } from "@theapp/webapp/components/data-table";
 import { LinkPreview } from "@theapp/webapp/components/link-preview";
 import { UserChip } from "@theapp/webapp/components/user-chip";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import {
   useDeleteWishMutation,
+  useUpdateWishReservationMutation,
   useWishesSuspenseQuery,
   wishesQueryOptions,
 } from "@theapp/webapp/lib/query/wishes";
@@ -109,7 +111,6 @@ const COLUMNS = [
     header: "Link",
     cell: (props) => {
       const url = props.getValue();
-
       let label = "Follow link";
       try {
         label = new URL(url).hostname;
@@ -140,9 +141,38 @@ const COLUMNS = [
     cell: (props) => {
       const reserver = props.getValue();
 
+      const queryClient = useQueryClient();
+
+      const updateReservationMutation = useUpdateWishReservationMutation({
+        onSuccess: (wish) => {
+          queryClient.setQueryData<WishResponse[]>(
+            wishesQueryOptions.queryKey,
+            (prev) => prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
+          );
+          queryClient.invalidateQueries({
+            queryKey: wishesQueryOptions.queryKey,
+          });
+        },
+        onError: () => toast.error("Failed to reserve wish"),
+      });
+
       if (!reserver) {
         if (!props.row.original.isOwnedByMe) {
-          return <Button size="xs">Reserve</Button>;
+          return (
+            <Button
+              size="xs"
+              disabled={updateReservationMutation.isPending}
+              onClick={() => {
+                updateReservationMutation.mutate({
+                  wishId: props.row.original.wishId,
+                  action: "start",
+                });
+              }}
+            >
+              {updateReservationMutation.isPending && <Spinner />}
+              <span>Reserve</span>
+            </Button>
+          );
         } else {
           return (
             <span className="text-muted-foreground text-sm">No reserver</span>
@@ -164,10 +194,19 @@ const COLUMNS = [
       </span>
     ),
   }),
+  helper.accessor("updatedAt", {
+    header: "Updated at",
+    cell: (props) => (
+      <span className="text-muted-foreground text-sm">
+        {dayjs(props.getValue()).format("MMM DD, YYYY, HH:mm")}
+      </span>
+    ),
+  }),
   helper.display({
     header: "Actions",
     cell: (props) => {
       const queryClient = useQueryClient();
+
       const deleteMutation = useDeleteWishMutation({
         onSuccess: (_, { wishId }) => {
           queryClient.setQueryData<WishResponse[]>(
@@ -178,6 +217,22 @@ const COLUMNS = [
             queryKey: wishesQueryOptions.queryKey,
           });
         },
+        onError: () => {
+          toast.error("Failed to delete wish");
+        },
+      });
+
+      const updateReservationMutation = useUpdateWishReservationMutation({
+        onSuccess: (wish) => {
+          queryClient.setQueryData<WishResponse[]>(
+            wishesQueryOptions.queryKey,
+            (prev) => prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
+          );
+          queryClient.invalidateQueries({
+            queryKey: wishesQueryOptions.queryKey,
+          });
+        },
+        onError: () => toast.error("Failed to remove wish reservation"),
       });
 
       if (
@@ -201,6 +256,60 @@ const COLUMNS = [
             }
           />
           <DropdownMenuContent className="w-64">
+            {props.row.original.isReservedByMe && (
+              <DropdownMenuGroup>
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    nativeButton={false}
+                    render={
+                      <DropdownMenuItem
+                        variant="destructive"
+                        closeOnClick={false}
+                        disabled={updateReservationMutation.isPending}
+                      >
+                        <HugeiconsIcon icon={X} strokeWidth={2} />
+                        <span>Stop reservation</span>
+                      </DropdownMenuItem>
+                    }
+                  />
+                  <AlertDialogContent size="sm">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action will remove your reservation. You will be
+                        able to reserve the wish later if it is still has no
+                        other reserver.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel
+                        disabled={updateReservationMutation.isPending}
+                      >
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogCancel
+                        render={
+                          <AlertDialogAction
+                            variant="destructive"
+                            disabled={updateReservationMutation.isPending}
+                            onClick={() =>
+                              updateReservationMutation.mutate({
+                                wishId: props.row.original.wishId,
+                                action: "stop",
+                              })
+                            }
+                          >
+                            Continue
+                          </AlertDialogAction>
+                        }
+                      />
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </DropdownMenuGroup>
+            )}
             {props.row.original.isOwnedByMe && (
               <DropdownMenuGroup>
                 <DropdownMenuItem>

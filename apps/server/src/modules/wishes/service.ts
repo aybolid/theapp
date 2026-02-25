@@ -3,7 +3,7 @@
 import type { WishResponse } from "@theapp/schemas";
 import type { DatabaseConnection } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, not } from "drizzle-orm";
 
 export abstract class WishService {
   static async createWish(
@@ -50,5 +50,36 @@ export abstract class WishService {
     wishId: string,
   ): Promise<void> {
     await db.delete(schema.wishes).where(eq(schema.wishes.wishId, wishId));
+  }
+
+  static async updateWishReserver(
+    db: DatabaseConnection,
+    {
+      wishId,
+      reserverId,
+      currentUserId,
+    }: {
+      wishId: string;
+      reserverId: string | null;
+      currentUserId: string;
+    },
+  ): Promise<Omit<WishResponse, "reserver" | "owner"> | undefined> {
+    return db
+      .update(schema.wishes)
+      .set({ reserverId })
+      .where(
+        reserverId
+          ? and(
+              eq(schema.wishes.wishId, wishId),
+              not(eq(schema.wishes.ownerId, reserverId)),
+              isNull(schema.wishes.reserverId),
+            )
+          : and(
+              eq(schema.wishes.wishId, wishId),
+              eq(schema.wishes.reserverId, currentUserId),
+            ),
+      )
+      .returning()
+      .then((rows) => rows[0]);
   }
 }

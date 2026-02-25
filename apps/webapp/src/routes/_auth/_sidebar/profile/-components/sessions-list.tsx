@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import type { UserAgentData } from "@theapp/schemas";
 import { Badge } from "@theapp/ui/components/badge";
@@ -22,9 +23,13 @@ export const SessionsList: FC = () => {
   const sessionsQuery = useSessionsSuspenseQuery();
 
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const signoutAllMutation = useSignoutAllMutation({
-    onSettled: () => router.invalidate(),
+    onSettled: () => {
+      queryClient.invalidateQueries();
+      router.invalidate();
+    },
   });
 
   return (

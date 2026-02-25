@@ -12,11 +12,13 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Button } from "@theapp/ui/components/button";
+import { Toaster } from "@theapp/ui/components/sonner";
 import { Home01Icon, RefreshIcon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { Suspense } from "react";
 import { LazyDevErrorStackDisplay } from "../components/lazy";
+import { useTheme } from "../contexts/theme";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   {
@@ -27,8 +29,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 );
 
 function RootComponent() {
+  const { theme } = useTheme();
+
   return (
     <>
+      <Toaster theme={theme} position="top-center" />
       <HeadContent />
       <NuqsAdapter>
         <Outlet />

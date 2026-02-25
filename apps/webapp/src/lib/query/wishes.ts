@@ -11,6 +11,8 @@ import type {
   DeleteWishByIdParams,
   DeleteWishOkResponse,
   GetWishesReponse,
+  ReserveWishByIdParams,
+  ReserveWishByIdQuery,
   WishResponse,
 } from "@theapp/schemas";
 import { server } from "../api";
@@ -83,6 +85,32 @@ export function useDeleteWishMutation(
     mutationKey: ["delete", "wish"],
     mutationFn: async (data: DeleteWishByIdParams) => {
       const resp = await server.api.wishes({ wishId: data.wishId }).delete();
+      if (resp.error) {
+        throw resp.error;
+      } else {
+        return resp.data;
+      }
+    },
+    ...options,
+  });
+}
+
+export function useUpdateWishReservationMutation(
+  options?: Omit<
+    UseMutationOptions<
+      WishResponse,
+      Treaty.Error<ReturnType<typeof server.api.wishes.reserve>["post"]>,
+      ReserveWishByIdParams & ReserveWishByIdQuery
+    >,
+    "mutationKey" | "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationKey: ["update", "wish", "reservation"],
+    mutationFn: async (data: ReserveWishByIdParams & ReserveWishByIdQuery) => {
+      const resp = await server.api.wishes
+        .reserve({ wishId: data.wishId })
+        .post(undefined, { query: { action: data.action } });
       if (resp.error) {
         throw resp.error;
       } else {

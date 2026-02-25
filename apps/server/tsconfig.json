@@ -5,7 +5,7 @@
     "types": ["bun-types"],
     "baseUrl": ".",
     "paths": {
-      "@theapp/server/*": ["src/*"]
+      "@theapp/server/*": ["./src/*"]
     }
   },
   "include": ["."]

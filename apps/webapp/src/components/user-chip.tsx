@@ -39,9 +39,11 @@ export const UserChip: FC<
                   <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
                 </AvatarFallback>
               </Avatar>
-              <ItemContent>
+              <ItemContent className="gap-0">
                 <ItemTitle>{user.profile.name}</ItemTitle>
-                <ItemDescription>{user.email}</ItemDescription>
+                <ItemDescription className="text-xs">
+                  {user.email}
+                </ItemDescription>
               </ItemContent>
             </Item>
           </Link>

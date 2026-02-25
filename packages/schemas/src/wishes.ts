@@ -71,3 +71,43 @@ export type DeleteWishForbiddenError = z.infer<
 export const deleteWishOkResponseSchema = z.literal("Wish deleted");
 
 export type DeleteWishOkResponse = z.infer<typeof deleteWishOkResponseSchema>;
+
+export const reserveWishByIdParamsSchema = z.object({
+  wishId: z.uuidv7(),
+});
+
+export type ReserveWishByIdParams = z.infer<typeof reserveWishByIdParamsSchema>;
+
+export const reserveWishByIdQuerySchema = z.object({
+  action: z.enum(["start", "stop"]),
+});
+
+export type ReserveWishByIdQuery = z.infer<typeof reserveWishByIdQuerySchema>;
+
+export const reserveWishByIdNotFoundErrorSchema = z.literal("Wish not found");
+
+export type ReserveWishByIdNotFoundError = z.infer<
+  typeof reserveWishByIdNotFoundErrorSchema
+>;
+
+export const reserveWishByIdUnauthorizedErrorSchema = z.literal("Unauthorized");
+
+export type ReserveWishByIdUnauthorizedError = z.infer<
+  typeof reserveWishByIdUnauthorizedErrorSchema
+>;
+
+export const reserveWishByIdForbiddenErrorSchema = z.enum([
+  "Already reserved",
+  "Owned wish cannot be reserved",
+  "Only current reserver can stop reservation",
+]);
+
+export type ReserveWishByIdForbiddenError = z.infer<
+  typeof reserveWishByIdForbiddenErrorSchema
+>;
+
+export const reserveWishByIdBadRequestErrorSchema = z.literal("Not reserved");
+
+export type ReserveWishByIdBadRequestError = z.infer<
+  typeof reserveWishByIdBadRequestErrorSchema
+>;
