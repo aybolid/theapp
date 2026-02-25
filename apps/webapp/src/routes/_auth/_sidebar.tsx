@@ -5,6 +5,7 @@ import {
   SidebarTrigger,
 } from "@theapp/ui/components/sidebar";
 import { ThemeMenu } from "@theapp/webapp/components/theme-menu";
+import { useState } from "react";
 import { AppSidebar } from "./-components/app-sidebar";
 
 export const Route = createFileRoute("/_auth/_sidebar")({
@@ -12,8 +13,17 @@ export const Route = createFileRoute("/_auth/_sidebar")({
 });
 
 function RouteComponent() {
+  const [open, setOpen] = useState(
+    localStorage.getItem("sidebarState") === "open",
+  );
+
   return (
     <SidebarProvider
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        localStorage.setItem("sidebarState", v ? "open" : "closed");
+      }}
       style={
         {
           "--sidebar-width": "19rem",

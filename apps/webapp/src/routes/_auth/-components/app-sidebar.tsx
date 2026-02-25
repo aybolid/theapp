@@ -79,7 +79,7 @@ export const AppSidebar: FC = () => {
 };
 
 const UserButton: FC = () => {
-  const { state } = useSidebar();
+  const { state, isMobile } = useSidebar();
   const meQuery = useMeSuspenseQuery();
 
   return (
@@ -105,7 +105,9 @@ const UserButton: FC = () => {
           </SidebarMenuButton>
         }
       />
-      <DropdownMenuContent side={state === "expanded" ? "top" : "inline-end"}>
+      <DropdownMenuContent
+        side={state === "expanded" || isMobile ? "top" : "inline-end"}
+      >
         <DropdownMenuGroup>
           <DropdownMenuItem
             render={

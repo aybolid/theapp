@@ -1,28 +1,14 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { createColumnHelper } from "@tanstack/react-table";
-import type { WishResponse } from "@theapp/schemas";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@theapp/ui/components/alert-dialog";
+  createColumnHelper,
+  getCoreRowModel,
+  getFilteredRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import type { WishResponse } from "@theapp/schemas";
 import { Badge } from "@theapp/ui/components/badge";
 import { Button } from "@theapp/ui/components/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@theapp/ui/components/dropdown-menu";
 import {
   Empty,
   EmptyContent,
@@ -32,29 +18,40 @@ import {
 } from "@theapp/ui/components/empty";
 import { Spinner } from "@theapp/ui/components/spinner";
 import {
-  Delete01Icon,
-  Edit01Icon,
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@theapp/ui/components/toggle-group";
+import { useIsMobile } from "@theapp/ui/hooks/use-mobile";
+import {
+  Cards01Icon,
   EllipsisVertical,
   ExternalLink,
   Gift,
+  ListViewIcon,
   PlusSignIcon,
-  Tick01Icon,
-  X,
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { toast } from "@theapp/ui/lib/sonner";
 import { DataTable } from "@theapp/webapp/components/data-table";
 import { LinkPreview } from "@theapp/webapp/components/link-preview";
+import { SearchInput } from "@theapp/webapp/components/search-input";
 import { UserChip } from "@theapp/webapp/components/user-chip";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import {
-  useDeleteWishMutation,
   useUpdateWishReservationMutation,
   useWishesSuspenseQuery,
   wishesQueryOptions,
 } from "@theapp/webapp/lib/query/wishes";
 import dayjs from "dayjs";
-import { lazy, Suspense } from "react";
+import {
+  createStandardSchemaV1,
+  parseAsString,
+  parseAsStringLiteral,
+  useQueryStates,
+} from "nuqs";
+import { Activity, lazy, Suspense, useMemo } from "react";
+import { WishActionsMenu } from "./-components/wish-actions-menu";
+import { WishItem } from "./-components/wish-item";
 
 const LazyNewWishDialog = lazy(() =>
   import("./-components/new-wish-dialog").then((m) => ({
@@ -62,18 +59,209 @@ const LazyNewWishDialog = lazy(() =>
   })),
 );
 
+const searchParams = {
+  query: parseAsString.withDefault(""),
+  view: parseAsStringLiteral(["table", "cards"]).withDefault("table"),
+};
+
 export const Route = createFileRoute("/_auth/_sidebar/wishes")({
+  validateSearch: createStandardSchemaV1(searchParams, { partialOutput: true }),
   component: RouteComponent,
   pendingComponent: PendingComponent,
 });
 
-const helper = createColumnHelper<
-  WishResponse & { isOwnedByMe: boolean; isReservedByMe: boolean }
->();
+type WishTableEntry = WishResponse & {
+  isOwnedByMe: boolean;
+  isReservedByMe: boolean;
+};
+
+function RouteComponent() {
+  const isMobile = useIsMobile();
+  const [{ query, view }, setSearchParams] = useQueryStates(searchParams);
+
+  const meQuery = useMeSuspenseQuery();
+  const wishesQuery = useWishesSuspenseQuery();
+
+  const data: WishTableEntry[] = useMemo(
+    () =>
+      wishesQuery.data.map((wish) => ({
+        ...wish,
+        isOwnedByMe: meQuery.data.userId === wish.ownerId,
+        isReservedByMe: meQuery.data.userId === wish.reserverId,
+      })),
+    [wishesQuery.data],
+  );
+
+  const table = useReactTable({
+    data,
+    columns: COLUMNS,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    initialState: {
+      columnVisibility: {
+        "owner.userId": false,
+        "owner.email": false,
+        "owner.profile.name": false,
+        "reserver.userId": false,
+        "reserver.email": false,
+        "reserver.profile.name": false,
+      },
+    },
+    state: {
+      globalFilter: query || undefined,
+    },
+  });
+
+  const tableWishes = table.getRowModel().rows.map((r) => r.original);
+
+  if (wishesQuery.data.length === 0) {
+    return (
+      <Empty className="size-full">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <HugeiconsIcon icon={Gift} strokeWidth={2} />
+          </EmptyMedia>
+          <EmptyTitle>No wishes yet</EmptyTitle>
+          <EmptyContent>
+            <Suspense
+              fallback={
+                <Button className="ml-auto" disabled>
+                  <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                  <span>New wish</span>
+                </Button>
+              }
+            >
+              <LazyNewWishDialog
+                render={
+                  <Button className="ml-auto">
+                    <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                    <span>New wish</span>
+                  </Button>
+                }
+              />
+            </Suspense>
+          </EmptyContent>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
+  return (
+    <div>
+      <Activity mode={isMobile ? "hidden" : "visible"}>
+        <div className="sticky top-0 z-50 flex gap-2 bg-background py-4 outline outline-background">
+          <SearchInput
+            className="max-w-80 bg-background"
+            defaultValue={query}
+            onDebouncedChange={(v) => setSearchParams({ query: v })}
+          />
+          <ToggleGroup
+            className="bg-background"
+            variant="outline"
+            multiple={false}
+            value={[view]}
+            onValueChange={(v) =>
+              setSearchParams({ view: searchParams.view.parse(v[0] ?? "") })
+            }
+          >
+            <ToggleGroupItem value="table">
+              <HugeiconsIcon icon={ListViewIcon} strokeWidth={2} />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="cards">
+              <HugeiconsIcon icon={Cards01Icon} strokeWidth={2} />
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <Suspense
+            fallback={
+              <Button className="ml-auto" disabled>
+                <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                <span>New wish</span>
+              </Button>
+            }
+          >
+            <LazyNewWishDialog
+              render={
+                <Button className="ml-auto">
+                  <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                  <span>New wish</span>
+                </Button>
+              }
+            />
+          </Suspense>
+        </div>
+        <Activity mode={view === "table" ? "visible" : "hidden"}>
+          <DataTable table={table} />
+        </Activity>
+        <Activity mode={view === "cards" ? "visible" : "hidden"}>
+          {tableWishes.length ? (
+            <div className="grid gap-4 pt-0.5 xl:grid-cols-2 2xl:grid-cols-3">
+              {tableWishes.map((wish) => (
+                <WishItem
+                  key={wish.wishId}
+                  wish={wish}
+                  isOwnedByMe={wish.isOwnedByMe}
+                  isReservedByMe={wish.isReservedByMe}
+                />
+              ))}
+            </div>
+          ) : (
+            <Empty className="size-full">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <HugeiconsIcon icon={Gift} strokeWidth={2} />
+                </EmptyMedia>
+                <EmptyTitle>No wishes found</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
+          )}
+        </Activity>
+      </Activity>
+      <Activity mode={isMobile ? "visible" : "hidden"}>
+        <div className="grid gap-4">
+          {tableWishes.length ? (
+            tableWishes.map((wish) => (
+              <WishItem
+                key={wish.wishId}
+                wish={wish}
+                isOwnedByMe={wish.isOwnedByMe}
+                isReservedByMe={wish.isReservedByMe}
+              />
+            ))
+          ) : (
+            <Empty className="size-full">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <HugeiconsIcon icon={Gift} strokeWidth={2} />
+                </EmptyMedia>
+                <EmptyTitle>No wishes found</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
+          )}
+        </div>
+      </Activity>
+    </div>
+  );
+}
+
+function PendingComponent() {
+  return (
+    <Empty className="size-full">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Spinner />
+        </EmptyMedia>
+        <EmptyTitle>Loading wishes</EmptyTitle>
+      </EmptyHeader>
+    </Empty>
+  );
+}
+
+const helper = createColumnHelper<WishTableEntry>();
 
 const COLUMNS = [
   helper.accessor("owner", {
     header: "Owner",
+    enableGlobalFilter: false,
     cell: (props) => {
       const owner = props.getValue();
       return <UserChip user={owner} />;
@@ -81,9 +269,17 @@ const COLUMNS = [
   }),
   helper.accessor("owner.userId", {
     id: "owner.userId",
+    enableGlobalFilter: false,
+  }),
+  helper.accessor("owner.email", {
+    id: "owner.email",
+  }),
+  helper.accessor("owner.profile.name", {
+    id: "owner.profile.name",
   }),
   helper.accessor("isCompleted", {
     header: "Status",
+    enableGlobalFilter: false,
     cell: (props) =>
       props.getValue() ? (
         <Badge>Completed</Badge>
@@ -138,6 +334,7 @@ const COLUMNS = [
   }),
   helper.accessor("reserver", {
     header: "Reserver",
+    enableGlobalFilter: false,
     cell: (props) => {
       const reserver = props.getValue();
 
@@ -184,10 +381,18 @@ const COLUMNS = [
     },
   }),
   helper.accessor("reserver.userId", {
+    enableGlobalFilter: false,
     id: "reserver.userId",
+  }),
+  helper.accessor("reserver.email", {
+    id: "reserver.email",
+  }),
+  helper.accessor("reserver.profile.name", {
+    id: "reserver.profile.name",
   }),
   helper.accessor("createdAt", {
     header: "Created at",
+    enableGlobalFilter: false,
     cell: (props) => (
       <span className="text-muted-foreground text-sm">
         {dayjs(props.getValue()).format("MMM DD, YYYY, HH:mm")}
@@ -196,6 +401,7 @@ const COLUMNS = [
   }),
   helper.accessor("updatedAt", {
     header: "Updated at",
+    enableGlobalFilter: false,
     cell: (props) => (
       <span className="text-muted-foreground text-sm">
         {dayjs(props.getValue()).format("MMM DD, YYYY, HH:mm")}
@@ -204,269 +410,21 @@ const COLUMNS = [
   }),
   helper.display({
     header: "Actions",
+    enableGlobalFilter: false,
     cell: (props) => {
-      const queryClient = useQueryClient();
-
-      const deleteMutation = useDeleteWishMutation({
-        onSuccess: (_, { wishId }) => {
-          queryClient.setQueryData<WishResponse[]>(
-            wishesQueryOptions.queryKey,
-            (prev) => prev?.filter((w) => w.wishId !== wishId),
-          );
-          queryClient.invalidateQueries({
-            queryKey: wishesQueryOptions.queryKey,
-          });
-        },
-        onError: () => {
-          toast.error("Failed to delete wish");
-        },
-      });
-
-      const updateReservationMutation = useUpdateWishReservationMutation({
-        onSuccess: (wish) => {
-          queryClient.setQueryData<WishResponse[]>(
-            wishesQueryOptions.queryKey,
-            (prev) => prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
-          );
-          queryClient.invalidateQueries({
-            queryKey: wishesQueryOptions.queryKey,
-          });
-        },
-        onError: () => toast.error("Failed to remove wish reservation"),
-      });
-
-      if (
-        !props.row.original.isOwnedByMe &&
-        !props.row.original.isReservedByMe
-      ) {
-        return (
-          <span className="text-muted-foreground text-sm">
-            No actions available
-          </span>
-        );
-      }
-
+      const wish = props.row.original;
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button size="icon" variant="ghost">
-                <HugeiconsIcon icon={EllipsisVertical} strokeWidth={2} />
-              </Button>
-            }
-          />
-          <DropdownMenuContent className="w-64">
-            {props.row.original.isReservedByMe && (
-              <DropdownMenuGroup>
-                <AlertDialog>
-                  <AlertDialogTrigger
-                    nativeButton={false}
-                    render={
-                      <DropdownMenuItem
-                        variant="destructive"
-                        closeOnClick={false}
-                        disabled={updateReservationMutation.isPending}
-                      >
-                        <HugeiconsIcon icon={X} strokeWidth={2} />
-                        <span>Stop reservation</span>
-                      </DropdownMenuItem>
-                    }
-                  />
-                  <AlertDialogContent size="sm">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you absolutely sure?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action will remove your reservation. You will be
-                        able to reserve the wish later if it is still has no
-                        other reserver.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel
-                        disabled={updateReservationMutation.isPending}
-                      >
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogCancel
-                        render={
-                          <AlertDialogAction
-                            variant="destructive"
-                            disabled={updateReservationMutation.isPending}
-                            onClick={() =>
-                              updateReservationMutation.mutate({
-                                wishId: props.row.original.wishId,
-                                action: "stop",
-                              })
-                            }
-                          >
-                            Continue
-                          </AlertDialogAction>
-                        }
-                      />
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuGroup>
-            )}
-            {props.row.original.isOwnedByMe && (
-              <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />
-                  <span>Edit</span>
-                </DropdownMenuItem>{" "}
-                {props.row.original.isCompleted ? (
-                  <DropdownMenuItem>
-                    <HugeiconsIcon icon={X} strokeWidth={2} />
-                    <span>Mark as pending</span>
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem>
-                    <HugeiconsIcon icon={Tick01Icon} strokeWidth={2} />
-                    <span>Mark as completed</span>
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <AlertDialog>
-                  <AlertDialogTrigger
-                    nativeButton={false}
-                    render={
-                      <DropdownMenuItem
-                        variant="destructive"
-                        closeOnClick={false}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <HugeiconsIcon icon={Delete01Icon} strokeWidth={2} />
-                        <span>Delete</span>
-                      </DropdownMenuItem>
-                    }
-                  />
-                  <AlertDialogContent size="sm">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you absolutely sure?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete your wish.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel disabled={deleteMutation.isPending}>
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogCancel
-                        render={
-                          <AlertDialogAction
-                            variant="destructive"
-                            disabled={deleteMutation.isPending}
-                            onClick={() =>
-                              deleteMutation.mutate({
-                                wishId: props.row.original.wishId,
-                              })
-                            }
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        }
-                      />
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuGroup>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <WishActionsMenu
+          wish={wish}
+          isOwnedByMe={wish.isOwnedByMe}
+          isReservedByMe={wish.isReservedByMe}
+          render={
+            <Button size="icon" variant="secondary">
+              <HugeiconsIcon icon={EllipsisVertical} strokeWidth={2} />
+            </Button>
+          }
+        />
       );
     },
   }),
 ];
-
-function RouteComponent() {
-  const meQuery = useMeSuspenseQuery();
-  const wishesQuery = useWishesSuspenseQuery();
-
-  if (wishesQuery.data.length === 0) {
-    return (
-      <Empty className="size-full">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <HugeiconsIcon icon={Gift} strokeWidth={2} />
-          </EmptyMedia>
-          <EmptyTitle>No wishes yet</EmptyTitle>
-          <EmptyContent>
-            <Suspense
-              fallback={
-                <Button className="ml-auto" disabled>
-                  <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-                  <span>New wish</span>
-                </Button>
-              }
-            >
-              <LazyNewWishDialog
-                render={
-                  <Button className="ml-auto">
-                    <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-                    <span>New wish</span>
-                  </Button>
-                }
-              />
-            </Suspense>
-          </EmptyContent>
-        </EmptyHeader>
-      </Empty>
-    );
-  }
-
-  return (
-    <div className="grid gap-4">
-      <div className="flex gap-2">
-        <Suspense
-          fallback={
-            <Button className="ml-auto" disabled>
-              <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-              <span>New wish</span>
-            </Button>
-          }
-        >
-          <LazyNewWishDialog
-            render={
-              <Button className="ml-auto">
-                <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-                <span>New wish</span>
-              </Button>
-            }
-          />
-        </Suspense>
-      </div>
-
-      <DataTable
-        // @ts-expect-error
-        columns={COLUMNS}
-        initialColumnVisibility={{
-          "owner.userId": false,
-          "reserver.userId": false,
-        }}
-        data={wishesQuery.data.map((wish) => ({
-          ...wish,
-          isOwnedByMe: meQuery.data.userId === wish.ownerId,
-          isReservedByMe: meQuery.data.userId === wish.reserverId,
-        }))}
-      />
-    </div>
-  );
-}
-
-function PendingComponent() {
-  return (
-    <Empty className="size-full">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Spinner />
-        </EmptyMedia>
-        <EmptyTitle>Loading wishes</EmptyTitle>
-      </EmptyHeader>
-    </Empty>
-  );
-}

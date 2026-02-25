@@ -1,13 +1,4 @@
-import {
-  type ColumnDef,
-  type ColumnFiltersState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  type OnChangeFn,
-  useReactTable,
-  type VisibilityState,
-} from "@tanstack/react-table";
+import { flexRender, type Table as TTable } from "@tanstack/react-table";
 
 import {
   Table,
@@ -17,39 +8,19 @@ import {
   TableHeader,
   TableRow,
 } from "@theapp/ui/components/table";
+import { cn } from "@theapp/ui/lib/utils";
 
-type DataTableProps<TData, TValue> = {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-};
-
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-  initialColumnVisibility,
-  columnFilters,
-  onColumnFiltersChange,
-}: DataTableProps<TData, TValue> & {
-  initialColumnVisibility?: VisibilityState;
-  columnFilters?: ColumnFiltersState;
-  onColumnFiltersChange?: OnChangeFn<ColumnFiltersState>;
+export function DataTable<T>({
+  table,
+  className,
+}: {
+  table: TTable<T>;
+  className?: string;
 }) {
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    onColumnFiltersChange: onColumnFiltersChange,
-    getFilteredRowModel: getFilteredRowModel(),
-    initialState: {
-      columnVisibility: initialColumnVisibility,
-    },
-    state: {
-      columnFilters,
-    },
-  });
+  "use no memo";
 
   return (
-    <div className="overflow-hidden rounded-md border">
+    <div className={cn("overflow-hidden", className)}>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -86,7 +57,10 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell
+                colSpan={table.getAllColumns().length}
+                className="h-24 text-center"
+              >
                 No results.
               </TableCell>
             </TableRow>
