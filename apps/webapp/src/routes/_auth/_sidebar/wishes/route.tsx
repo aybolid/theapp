@@ -4,7 +4,10 @@ import {
   createColumnHelper,
   getCoreRowModel,
   getFilteredRowModel,
+  getSortedRowModel,
+  type SortingState,
   useReactTable,
+  type VisibilityState,
 } from "@tanstack/react-table";
 import type { WishResponse } from "@theapp/schemas";
 import { Badge } from "@theapp/ui/components/badge";
@@ -33,6 +36,9 @@ import {
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { toast } from "@theapp/ui/lib/sonner";
 import { DataTable } from "@theapp/webapp/components/data-table";
+import { DataTableColumnHeader } from "@theapp/webapp/components/data-table-column-header";
+import { DataTableSortingOptions } from "@theapp/webapp/components/data-table-sorting-options";
+import { DataTableViewOptions } from "@theapp/webapp/components/data-table-view-options";
 import { LinkPreview } from "@theapp/webapp/components/link-preview";
 import { SearchInput } from "@theapp/webapp/components/search-input";
 import { UserChip } from "@theapp/webapp/components/user-chip";
@@ -45,11 +51,13 @@ import {
 import dayjs from "dayjs";
 import {
   createStandardSchemaV1,
+  parseAsJson,
   parseAsString,
   parseAsStringLiteral,
   useQueryStates,
 } from "nuqs";
 import { Activity, lazy, Suspense, useMemo } from "react";
+import z from "zod";
 import { WishActionsMenu } from "./-components/wish-actions-menu";
 import { WishItem } from "./-components/wish-item";
 
@@ -62,6 +70,13 @@ const LazyNewWishDialog = lazy(() =>
 const searchParams = {
   query: parseAsString.withDefault(""),
   view: parseAsStringLiteral(["table", "cards"]).withDefault("table"),
+  columnVisibility: parseAsJson(z.record(z.string(), z.boolean())).withDefault({
+    createdAt: false,
+    updatedAt: false,
+  }),
+  sorting: parseAsJson(z.record(z.string(), z.boolean())).withDefault({
+    createdAt: true,
+  }),
 };
 
 export const Route = createFileRoute("/_auth/_sidebar/wishes")({
@@ -77,7 +92,8 @@ type WishTableEntry = WishResponse & {
 
 function RouteComponent() {
   const isMobile = useIsMobile();
-  const [{ query, view }, setSearchParams] = useQueryStates(searchParams);
+  const [{ query, view, columnVisibility, sorting }, setSearchParams] =
+    useQueryStates(searchParams);
 
   const meQuery = useMeSuspenseQuery();
   const wishesQuery = useWishesSuspenseQuery();
@@ -92,22 +108,45 @@ function RouteComponent() {
     [wishesQuery.data],
   );
 
+  const sortingState = useMemo(() => {
+    return Object.entries(sorting).map(([id, desc]) => ({ id, desc }));
+  }, [sorting]);
+
   const table = useReactTable({
     data,
     columns: COLUMNS,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    initialState: {
+    getSortedRowModel: getSortedRowModel(),
+    onColumnVisibilityChange: (updater) => {
+      let value: VisibilityState;
+      if (typeof updater === "function") {
+        value = updater(columnVisibility);
+      } else {
+        value = updater;
+      }
+      setSearchParams({ columnVisibility: value });
+    },
+    onSortingChange: (updater) => {
+      let value: SortingState;
+      if (typeof updater === "function") {
+        value = updater([]);
+      } else {
+        value = updater;
+      }
+      setSearchParams({
+        sorting: Object.fromEntries(value.map(({ id, desc }) => [id, desc])),
+      });
+    },
+    state: {
       columnVisibility: {
         "owner.userId": false,
         "owner.email": false,
-        "owner.profile.name": false,
         "reserver.userId": false,
         "reserver.email": false,
-        "reserver.profile.name": false,
+        ...columnVisibility,
       },
-    },
-    state: {
+      sorting: sortingState,
       globalFilter: query || undefined,
     },
   });
@@ -171,6 +210,31 @@ function RouteComponent() {
               <HugeiconsIcon icon={Cards01Icon} strokeWidth={2} />
             </ToggleGroupItem>
           </ToggleGroup>
+          <DataTableSortingOptions
+            table={table}
+            variant="outline"
+            labelsMap={{
+              isCompleted: "Status",
+              note: "Note",
+              createdAt: "Created at",
+              updatedAt: "Updated at",
+              owner_profile_name: "Owner",
+              reserver_profile_name: "Reserver",
+              name: "Name",
+            }}
+          />
+          {view === "table" && (
+            <DataTableViewOptions
+              table={table}
+              variant="outline"
+              labelsMap={{
+                isCompleted: "Status",
+                note: "Note",
+                createdAt: "Created at",
+                updatedAt: "Updated at",
+              }}
+            />
+          )}
           <Suspense
             fallback={
               <Button className="ml-auto" disabled>
@@ -259,26 +323,32 @@ function PendingComponent() {
 const helper = createColumnHelper<WishTableEntry>();
 
 const COLUMNS = [
-  helper.accessor("owner", {
-    header: "Owner",
+  helper.accessor("owner.profile.name", {
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Owner" />
+    ),
+    enableHiding: false,
     enableGlobalFilter: false,
     cell: (props) => {
-      const owner = props.getValue();
+      const owner = props.row.original.owner;
       return <UserChip user={owner} />;
     },
   }),
   helper.accessor("owner.userId", {
     id: "owner.userId",
     enableGlobalFilter: false,
+    enableHiding: false,
+    enableSorting: false,
   }),
   helper.accessor("owner.email", {
     id: "owner.email",
-  }),
-  helper.accessor("owner.profile.name", {
-    id: "owner.profile.name",
+    enableHiding: false,
+    enableSorting: false,
   }),
   helper.accessor("isCompleted", {
-    header: "Status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
     enableGlobalFilter: false,
     cell: (props) =>
       props.getValue() ? (
@@ -288,7 +358,10 @@ const COLUMNS = [
       ),
   }),
   helper.accessor("name", {
-    header: "Name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Name" />
+    ),
+    enableHiding: false,
     cell: (props) => (
       <span className="w-72 text-wrap font-medium transition-all">
         {props.getValue()}
@@ -296,7 +369,9 @@ const COLUMNS = [
     ),
   }),
   helper.accessor("note", {
-    header: "Note",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Note" />
+    ),
     cell: (props) => (
       <p className="w-72 text-wrap text-muted-foreground text-sm transition-all">
         {props.getValue()}
@@ -304,7 +379,11 @@ const COLUMNS = [
     ),
   }),
   helper.accessor("link", {
-    header: "Link",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Link" />
+    ),
+    enableSorting: false,
+    enableHiding: false,
     cell: (props) => {
       const url = props.getValue();
       let label = "Follow link";
@@ -332,11 +411,14 @@ const COLUMNS = [
       );
     },
   }),
-  helper.accessor("reserver", {
-    header: "Reserver",
+  helper.accessor("reserver.profile.name", {
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Reserver" />
+    ),
     enableGlobalFilter: false,
+    enableHiding: false,
     cell: (props) => {
-      const reserver = props.getValue();
+      const reserver = props.row.original.reserver;
 
       const queryClient = useQueryClient();
 
@@ -382,16 +464,19 @@ const COLUMNS = [
   }),
   helper.accessor("reserver.userId", {
     enableGlobalFilter: false,
+    enableHiding: false,
+    enableSorting: false,
     id: "reserver.userId",
   }),
   helper.accessor("reserver.email", {
     id: "reserver.email",
-  }),
-  helper.accessor("reserver.profile.name", {
-    id: "reserver.profile.name",
+    enableHiding: false,
+    enableSorting: false,
   }),
   helper.accessor("createdAt", {
-    header: "Created at",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created at" />
+    ),
     enableGlobalFilter: false,
     cell: (props) => (
       <span className="text-muted-foreground text-sm">
@@ -400,7 +485,9 @@ const COLUMNS = [
     ),
   }),
   helper.accessor("updatedAt", {
-    header: "Updated at",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Updated at" />
+    ),
     enableGlobalFilter: false,
     cell: (props) => (
       <span className="text-muted-foreground text-sm">
@@ -409,7 +496,10 @@ const COLUMNS = [
     ),
   }),
   helper.display({
-    header: "Actions",
+    id: "actions",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Actions" />
+    ),
     enableGlobalFilter: false,
     cell: (props) => {
       const wish = props.row.original;
