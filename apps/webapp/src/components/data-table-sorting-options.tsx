@@ -20,10 +20,12 @@ import type { ComponentPropsWithoutRef } from "react";
 export function DataTableSortingOptions<TData>({
   table,
   labelsMap = {},
+  onlyIcon = false,
   ...props
 }: {
   table: Table<TData>;
   labelsMap?: Record<string, string>;
+  onlyIcon?: boolean;
 } & ComponentPropsWithoutRef<typeof Button>) {
   "use no memo";
 
@@ -31,9 +33,9 @@ export function DataTableSortingOptions<TData>({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button {...props}>
+          <Button size={onlyIcon ? "icon" : "default"} {...props}>
             <HugeiconsIcon icon={ChevronsUpDown} strokeWidth={2} />
-            <span>Sorting</span>
+            {!onlyIcon && <span>Sorting</span>}
           </Button>
         }
       />

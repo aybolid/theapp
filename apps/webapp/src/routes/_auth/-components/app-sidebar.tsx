@@ -97,8 +97,10 @@ const UserButton: FC = () => {
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <span className="font-medium">{meQuery.data.profile.name}</span>
-              <span className="text-muted-foreground">
+              <span className="text-nowrap font-medium">
+                {meQuery.data.profile.name}
+              </span>
+              <span className="text-nowrap text-muted-foreground">
                 {meQuery.data.email}
               </span>
             </div>

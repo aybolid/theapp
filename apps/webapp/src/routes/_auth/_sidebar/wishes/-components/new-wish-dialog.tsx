@@ -63,6 +63,7 @@ export const NewWishDialog: FC<{
         (prev) => [wish, ...(prev ?? [])],
       );
       queryClient.invalidateQueries({ queryKey: wishesQueryOptions.queryKey });
+      form.reset();
       setOpen(false);
     },
     onError: (err) => {

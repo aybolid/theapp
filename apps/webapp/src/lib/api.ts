@@ -5,7 +5,8 @@ import type z from "zod";
 export const server = treaty<App>(
   import.meta.env.DEV
     ? `${window.location.origin}/server-proxy`
-    : import.meta.env.VITE_API_BASE_URL,
+    : // TODO: update for prod
+      `${window.location.origin}/server-proxy`,
   { throwHttpError: true },
 );
 

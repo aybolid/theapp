@@ -1,7 +1,7 @@
-import { TanStackDevtools } from "@tanstack/react-devtools";
-import { formDevtoolsPlugin } from "@tanstack/react-form-devtools";
+// import { TanStackDevtools } from "@tanstack/react-devtools";
+// import { formDevtoolsPlugin } from "@tanstack/react-form-devtools";
 import type { QueryClient } from "@tanstack/react-query";
-import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
+// import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import {
   createRootRouteWithContext,
   type ErrorComponentProps,
@@ -10,7 +10,7 @@ import {
   type NotFoundRouteProps,
   Outlet,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+// import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Button } from "@theapp/ui/components/button";
 import { Toaster } from "@theapp/ui/components/sonner";
 import { Home01Icon, RefreshIcon } from "@theapp/ui/icons/huge";
@@ -38,7 +38,7 @@ function RootComponent() {
       <NuqsAdapter>
         <Outlet />
       </NuqsAdapter>
-      <TanStackDevtools
+      {/*<TanStackDevtools
         plugins={[
           {
             name: "TanStack Query",
@@ -52,7 +52,7 @@ function RootComponent() {
             defaultOpen: false,
           },
         ]}
-      />
+      />*/}
     </>
   );
 }

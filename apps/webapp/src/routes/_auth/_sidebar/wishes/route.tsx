@@ -155,7 +155,7 @@ function RouteComponent() {
 
   if (wishesQuery.data.length === 0) {
     return (
-      <Empty className="size-full">
+      <Empty className="h-full">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <HugeiconsIcon icon={Gift} strokeWidth={2} />
@@ -186,16 +186,15 @@ function RouteComponent() {
   }
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <Activity mode={isMobile ? "hidden" : "visible"}>
-        <div className="sticky top-0 z-50 flex gap-2 bg-background py-4 outline outline-background">
+        <div className="sticky top-0 z-50 flex flex-wrap gap-2 bg-background py-4 outline outline-background">
           <SearchInput
-            className="max-w-80 bg-background"
+            className="w-80"
             defaultValue={query}
             onDebouncedChange={(v) => setSearchParams({ query: v })}
           />
           <ToggleGroup
-            className="bg-background"
             variant="outline"
             multiple={false}
             value={[view]}
@@ -235,9 +234,10 @@ function RouteComponent() {
               }}
             />
           )}
+          <div className="flex-1" />
           <Suspense
             fallback={
-              <Button className="ml-auto" disabled>
+              <Button disabled>
                 <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
                 <span>New wish</span>
               </Button>
@@ -245,7 +245,7 @@ function RouteComponent() {
           >
             <LazyNewWishDialog
               render={
-                <Button className="ml-auto">
+                <Button>
                   <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
                   <span>New wish</span>
                 </Button>
@@ -269,7 +269,7 @@ function RouteComponent() {
               ))}
             </div>
           ) : (
-            <Empty className="size-full">
+            <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <HugeiconsIcon icon={Gift} strokeWidth={2} />
@@ -281,26 +281,64 @@ function RouteComponent() {
         </Activity>
       </Activity>
       <Activity mode={isMobile ? "visible" : "hidden"}>
-        <div className="grid gap-4">
-          {tableWishes.length ? (
-            tableWishes.map((wish) => (
-              <WishItem
-                key={wish.wishId}
-                wish={wish}
-                isOwnedByMe={wish.isOwnedByMe}
-                isReservedByMe={wish.isReservedByMe}
-              />
-            ))
-          ) : (
-            <Empty className="size-full">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <HugeiconsIcon icon={Gift} strokeWidth={2} />
-                </EmptyMedia>
-                <EmptyTitle>No wishes found</EmptyTitle>
-              </EmptyHeader>
-            </Empty>
-          )}
+        {tableWishes.length ? (
+          <div className="flex-1">
+            <div className="grid gap-4">
+              {tableWishes.map((wish) => (
+                <WishItem
+                  key={wish.wishId}
+                  wish={wish}
+                  isOwnedByMe={wish.isOwnedByMe}
+                  isReservedByMe={wish.isReservedByMe}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <HugeiconsIcon icon={Gift} strokeWidth={2} />
+              </EmptyMedia>
+              <EmptyTitle>No wishes found</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        )}
+        <div className="sticky bottom-4 z-20 mt-4 flex h-fit w-full items-center gap-2 rounded-lg border bg-background p-2">
+          <SearchInput
+            defaultValue={query}
+            onDebouncedChange={(v) => setSearchParams({ query: v })}
+          />
+          <DataTableSortingOptions
+            className="bg-background!"
+            onlyIcon
+            table={table}
+            variant="outline"
+            labelsMap={{
+              isCompleted: "Status",
+              note: "Note",
+              createdAt: "Created at",
+              updatedAt: "Updated at",
+              owner_profile_name: "Owner",
+              reserver_profile_name: "Reserver",
+              name: "Name",
+            }}
+          />
+          <Suspense
+            fallback={
+              <Button size="icon" disabled>
+                <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+              </Button>
+            }
+          >
+            <LazyNewWishDialog
+              render={
+                <Button size="icon">
+                  <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                </Button>
+              }
+            />
+          </Suspense>
         </div>
       </Activity>
     </div>
@@ -328,7 +366,6 @@ const COLUMNS = [
       <DataTableColumnHeader column={column} title="Owner" />
     ),
     enableHiding: false,
-    enableGlobalFilter: false,
     cell: (props) => {
       const owner = props.row.original.owner;
       return <UserChip user={owner} />;
@@ -363,9 +400,7 @@ const COLUMNS = [
     ),
     enableHiding: false,
     cell: (props) => (
-      <span className="w-72 text-wrap font-medium transition-all">
-        {props.getValue()}
-      </span>
+      <p className="w-72 text-wrap font-medium">{props.getValue()}</p>
     ),
   }),
   helper.accessor("note", {
@@ -373,7 +408,7 @@ const COLUMNS = [
       <DataTableColumnHeader column={column} title="Note" />
     ),
     cell: (props) => (
-      <p className="w-72 text-wrap text-muted-foreground text-sm transition-all">
+      <p className="w-72 text-wrap text-muted-foreground text-sm">
         {props.getValue()}
       </p>
     ),
@@ -415,7 +450,6 @@ const COLUMNS = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Reserver" />
     ),
-    enableGlobalFilter: false,
     enableHiding: false,
     cell: (props) => {
       const reserver = props.row.original.reserver;

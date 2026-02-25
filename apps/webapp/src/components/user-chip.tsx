@@ -40,8 +40,10 @@ export const UserChip: FC<
                 </AvatarFallback>
               </Avatar>
               <ItemContent className="gap-0">
-                <ItemTitle>{user.profile.name}</ItemTitle>
-                <ItemDescription className="text-xs">
+                <ItemTitle className="text-nowrap">
+                  {user.profile.name}
+                </ItemTitle>
+                <ItemDescription className="text-nowrap text-xs">
                   {user.email}
                 </ItemDescription>
               </ItemContent>

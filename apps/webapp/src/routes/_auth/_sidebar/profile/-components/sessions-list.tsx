@@ -39,12 +39,14 @@ export const SessionsList: FC = () => {
           <ItemContent>
             <ItemTitle>{formatUserAgent(session.uaData)}</ItemTitle>
             <ItemDescription className="flex flex-wrap gap-1">
-              {session.isCurrent && <Badge>This device</Badge>}
-              <Badge variant="outline">
+              {session.isCurrent && (
+                <Badge className="font-normal">This device</Badge>
+              )}
+              <Badge variant="outline" className="font-normal">
                 Created:{" "}
                 {dayjs(session.createdAt).format("MMM DD, YYYY, HH:mm")}
               </Badge>
-              <Badge variant="outline">
+              <Badge variant="outline" className="font-normal">
                 Last used:{" "}
                 {dayjs(session.lastUsedAt).format("MMM DD, YYYY, HH:mm")}
               </Badge>
