@@ -46,9 +46,14 @@ export const userNotFoundErrorSchema = z.literal("User not found");
 
 export type UserNotFoundError = z.infer<typeof userNotFoundErrorSchema>;
 
+export const userRoleSchema = z.enum(["admin", "viewer"]);
+
+export type UserRole = z.infer<typeof userRoleSchema>;
+
 export const userResponseSchema = z.object({
   userId: z.uuidv7(),
   email: z.email(),
+  role: userRoleSchema,
   createdAt: zDate,
   updatedAt: zDate,
   profile: profileResponseSchema,

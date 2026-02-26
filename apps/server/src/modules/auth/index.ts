@@ -17,6 +17,7 @@ import {
 } from "@theapp/server/utils/crypto";
 import { parseUserAgent } from "@theapp/server/utils/ua";
 import Elysia from "elysia";
+import { isProduction } from "elysia/error";
 import { ProfileService } from "../profiles/service";
 import { UserService } from "../users/service";
 import {
@@ -98,6 +99,7 @@ export const auth = new Elysia({
         {
           sessionId,
           userId: candidate.userId,
+          role: candidate.role,
         },
         JWT_EXPIRATION_SECONDS,
       );
@@ -108,12 +110,14 @@ export const auth = new Elysia({
         value: token,
         path: "/",
         maxAge: INACTIVITY_TIMEOUT_SECONDS,
+        secure: isProduction,
       });
       ctx.cookie.authToken?.set({
         httpOnly: true,
         sameSite: "lax",
         value: jwt,
         path: "/",
+        secure: isProduction,
       });
 
       return ctx.status(200, "User signed in");
@@ -127,7 +131,7 @@ export const auth = new Elysia({
       },
     },
   )
-  .use(authGuard)
+  .use(authGuard())
   .get(
     "/me",
     async (ctx) => {

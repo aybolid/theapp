@@ -34,7 +34,7 @@ export const wishes = new Elysia({
     tags: ["wishes"],
   },
 })
-  .use(authGuard)
+  .use(authGuard())
   .get(
     "",
     async (ctx) => {

@@ -15,8 +15,10 @@ import { Route as No_authSignupRouteImport } from './routes/_no_auth/signup'
 import { Route as No_authSigninRouteImport } from './routes/_no_auth/signin'
 import { Route as AuthSidebarRouteImport } from './routes/_auth/_sidebar'
 import { Route as AuthSidebarIndexRouteImport } from './routes/_auth/_sidebar/index'
+import { Route as AuthSidebarAdminRouteImport } from './routes/_auth/_sidebar/_admin'
 import { Route as AuthSidebarWishesRouteRouteImport } from './routes/_auth/_sidebar/wishes/route'
 import { Route as AuthSidebarProfileUserIdRouteImport } from './routes/_auth/_sidebar/profile/$userId'
+import { Route as AuthSidebarAdminUsersRouteImport } from './routes/_auth/_sidebar/_admin/users'
 
 const No_authRoute = No_authRouteImport.update({
   id: '/_no_auth',
@@ -45,6 +47,10 @@ const AuthSidebarIndexRoute = AuthSidebarIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthSidebarRoute,
 } as any)
+const AuthSidebarAdminRoute = AuthSidebarAdminRouteImport.update({
+  id: '/_admin',
+  getParentRoute: () => AuthSidebarRoute,
+} as any)
 const AuthSidebarWishesRouteRoute = AuthSidebarWishesRouteRouteImport.update({
   id: '/wishes',
   path: '/wishes',
@@ -56,12 +62,18 @@ const AuthSidebarProfileUserIdRoute =
     path: '/profile/$userId',
     getParentRoute: () => AuthSidebarRoute,
   } as any)
+const AuthSidebarAdminUsersRoute = AuthSidebarAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthSidebarAdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthSidebarIndexRoute
   '/signin': typeof No_authSigninRoute
   '/signup': typeof No_authSignupRoute
   '/wishes': typeof AuthSidebarWishesRouteRoute
+  '/users': typeof AuthSidebarAdminUsersRoute
   '/profile/$userId': typeof AuthSidebarProfileUserIdRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +81,7 @@ export interface FileRoutesByTo {
   '/signin': typeof No_authSigninRoute
   '/signup': typeof No_authSignupRoute
   '/wishes': typeof AuthSidebarWishesRouteRoute
+  '/users': typeof AuthSidebarAdminUsersRoute
   '/profile/$userId': typeof AuthSidebarProfileUserIdRoute
 }
 export interface FileRoutesById {
@@ -79,14 +92,22 @@ export interface FileRoutesById {
   '/_no_auth/signin': typeof No_authSigninRoute
   '/_no_auth/signup': typeof No_authSignupRoute
   '/_auth/_sidebar/wishes': typeof AuthSidebarWishesRouteRoute
+  '/_auth/_sidebar/_admin': typeof AuthSidebarAdminRouteWithChildren
   '/_auth/_sidebar/': typeof AuthSidebarIndexRoute
+  '/_auth/_sidebar/_admin/users': typeof AuthSidebarAdminUsersRoute
   '/_auth/_sidebar/profile/$userId': typeof AuthSidebarProfileUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signin' | '/signup' | '/wishes' | '/profile/$userId'
+  fullPaths:
+    | '/'
+    | '/signin'
+    | '/signup'
+    | '/wishes'
+    | '/users'
+    | '/profile/$userId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signin' | '/signup' | '/wishes' | '/profile/$userId'
+  to: '/' | '/signin' | '/signup' | '/wishes' | '/users' | '/profile/$userId'
   id:
     | '__root__'
     | '/_auth'
@@ -95,7 +116,9 @@ export interface FileRouteTypes {
     | '/_no_auth/signin'
     | '/_no_auth/signup'
     | '/_auth/_sidebar/wishes'
+    | '/_auth/_sidebar/_admin'
     | '/_auth/_sidebar/'
+    | '/_auth/_sidebar/_admin/users'
     | '/_auth/_sidebar/profile/$userId'
   fileRoutesById: FileRoutesById
 }
@@ -148,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSidebarIndexRouteImport
       parentRoute: typeof AuthSidebarRoute
     }
+    '/_auth/_sidebar/_admin': {
+      id: '/_auth/_sidebar/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthSidebarAdminRouteImport
+      parentRoute: typeof AuthSidebarRoute
+    }
     '/_auth/_sidebar/wishes': {
       id: '/_auth/_sidebar/wishes'
       path: '/wishes'
@@ -162,17 +192,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSidebarProfileUserIdRouteImport
       parentRoute: typeof AuthSidebarRoute
     }
+    '/_auth/_sidebar/_admin/users': {
+      id: '/_auth/_sidebar/_admin/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthSidebarAdminUsersRouteImport
+      parentRoute: typeof AuthSidebarAdminRoute
+    }
   }
 }
 
+interface AuthSidebarAdminRouteChildren {
+  AuthSidebarAdminUsersRoute: typeof AuthSidebarAdminUsersRoute
+}
+
+const AuthSidebarAdminRouteChildren: AuthSidebarAdminRouteChildren = {
+  AuthSidebarAdminUsersRoute: AuthSidebarAdminUsersRoute,
+}
+
+const AuthSidebarAdminRouteWithChildren =
+  AuthSidebarAdminRoute._addFileChildren(AuthSidebarAdminRouteChildren)
+
 interface AuthSidebarRouteChildren {
   AuthSidebarWishesRouteRoute: typeof AuthSidebarWishesRouteRoute
+  AuthSidebarAdminRoute: typeof AuthSidebarAdminRouteWithChildren
   AuthSidebarIndexRoute: typeof AuthSidebarIndexRoute
   AuthSidebarProfileUserIdRoute: typeof AuthSidebarProfileUserIdRoute
 }
 
 const AuthSidebarRouteChildren: AuthSidebarRouteChildren = {
   AuthSidebarWishesRouteRoute: AuthSidebarWishesRouteRoute,
+  AuthSidebarAdminRoute: AuthSidebarAdminRouteWithChildren,
   AuthSidebarIndexRoute: AuthSidebarIndexRoute,
   AuthSidebarProfileUserIdRoute: AuthSidebarProfileUserIdRoute,
 }

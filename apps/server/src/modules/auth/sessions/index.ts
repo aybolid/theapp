@@ -20,7 +20,7 @@ export const sessions = new Elysia({
       },
     }),
   )
-  .use(authGuard)
+  .use(authGuard())
   .get(
     "",
     async (ctx) => {

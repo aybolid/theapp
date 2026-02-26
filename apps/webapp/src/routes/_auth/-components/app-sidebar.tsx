@@ -18,6 +18,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -31,8 +32,10 @@ import {
   Gift,
   Logout01Icon,
   User02Icon,
+  Users,
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
+import { AdminOnly } from "@theapp/webapp/components/role-guard";
 import {
   useMeSuspenseQuery,
   useSignoutMutation,
@@ -75,6 +78,23 @@ export const AppSidebar: FC = () => {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
+        <AdminOnly>
+          <SidebarGroup>
+            <SidebarGroupLabel>Admin only</SidebarGroupLabel>
+            <SidebarMenu className="gap-2">
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  render={
+                    <Link to="/users">
+                      <HugeiconsIcon icon={Users} strokeWidth={2} />
+                      <span>Users</span>
+                    </Link>
+                  }
+                />
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        </AdminOnly>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

@@ -24,7 +24,7 @@ export const profiles = new Elysia({
     tags: ["profiles"],
   },
 })
-  .use(authGuard)
+  .use(authGuard())
   .patch(
     "",
     async (ctx) => {

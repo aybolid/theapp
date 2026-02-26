@@ -13,8 +13,11 @@ const timestamps = {
     .$onUpdate(() => new Date()),
 };
 
+export const userRoleEnum = pg.pgEnum("user_role", ["admin", "viewer"]);
+
 export const users = pg.pgTable("users", {
   userId: uuidv7pk(),
+  role: userRoleEnum().notNull().default("viewer"),
   email: pg.varchar().notNull().unique(),
   passwordHash: pg.varchar({ length: 255 }).notNull(),
   ...timestamps,

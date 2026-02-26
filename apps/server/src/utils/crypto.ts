@@ -1,3 +1,4 @@
+import type { UserRole } from "@theapp/schemas";
 import { type JWTVerifyResult, jwtVerify, SignJWT } from "jose";
 
 /** Human readable alphabet (a-z, 0-9 without l, o, 0, 1 to avoid confusion) */
@@ -12,6 +13,7 @@ export function signAuthJwt(
   payload: {
     userId: string;
     sessionId: string;
+    role: UserRole;
   },
   expirationSeconds: number,
 ): Promise<string> {
@@ -26,6 +28,7 @@ export function verifyAuthJwt(token: string): Promise<
   JWTVerifyResult<{
     userId: string;
     sessionId: string;
+    role: UserRole;
   }>
 > {
   return jwtVerify(token, JWT_SECRET);

@@ -36,7 +36,7 @@ export const misc = new Elysia({
     tags: ["misc"],
   },
 })
-  .use(authGuard)
+  .use(authGuard())
   .get(
     "url-metadata",
     async (ctx) => {
