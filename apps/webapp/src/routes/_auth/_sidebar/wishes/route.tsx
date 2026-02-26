@@ -1,5 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  type ErrorComponentProps,
+} from "@tanstack/react-router";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -10,11 +13,15 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import type { WishResponse } from "@theapp/schemas";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@theapp/ui/components/alert";
 import { Badge } from "@theapp/ui/components/badge";
 import { Button } from "@theapp/ui/components/button";
 import {
   Empty,
-  EmptyContent,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -26,10 +33,10 @@ import {
 } from "@theapp/ui/components/toggle-group";
 import { useIsMobile } from "@theapp/ui/hooks/use-mobile";
 import {
+  Alert01Icon,
   Cards01Icon,
   EllipsisVertical,
   ExternalLink,
-  Gift,
   ListViewIcon,
   PlusSignIcon,
 } from "@theapp/ui/icons/huge";
@@ -39,6 +46,7 @@ import { DataTable } from "@theapp/webapp/components/data-table";
 import { DataTableColumnHeader } from "@theapp/webapp/components/data-table-column-header";
 import { DataTableSortingOptions } from "@theapp/webapp/components/data-table-sorting-options";
 import { DataTableViewOptions } from "@theapp/webapp/components/data-table-view-options";
+import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
 import { LinkPreview } from "@theapp/webapp/components/link-preview";
 import { SearchInput } from "@theapp/webapp/components/search-input";
 import { UserChip } from "@theapp/webapp/components/user-chip";
@@ -58,6 +66,7 @@ import {
 } from "nuqs";
 import { Activity, lazy, Suspense, useMemo } from "react";
 import z from "zod";
+import { EmptyFilteredWishes, EmptyWishes } from "./-components/empty-wishes";
 import { WishActionsMenu } from "./-components/wish-actions-menu";
 import { WishItem } from "./-components/wish-item";
 
@@ -83,6 +92,7 @@ export const Route = createFileRoute("/_auth/_sidebar/wishes")({
   validateSearch: createStandardSchemaV1(searchParams, { partialOutput: true }),
   component: RouteComponent,
   pendingComponent: PendingComponent,
+  errorComponent: ErrorComponent,
 });
 
 type WishTableEntry = WishResponse & {
@@ -154,35 +164,7 @@ function RouteComponent() {
   const tableWishes = table.getRowModel().rows.map((r) => r.original);
 
   if (wishesQuery.data.length === 0) {
-    return (
-      <Empty className="h-full">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <HugeiconsIcon icon={Gift} strokeWidth={2} />
-          </EmptyMedia>
-          <EmptyTitle>No wishes yet</EmptyTitle>
-          <EmptyContent>
-            <Suspense
-              fallback={
-                <Button className="ml-auto" disabled>
-                  <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-                  <span>New wish</span>
-                </Button>
-              }
-            >
-              <LazyNewWishDialog
-                render={
-                  <Button className="ml-auto">
-                    <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-                    <span>New wish</span>
-                  </Button>
-                }
-              />
-            </Suspense>
-          </EmptyContent>
-        </EmptyHeader>
-      </Empty>
-    );
+    return <EmptyWishes className="size-full" />;
   }
 
   return (
@@ -269,14 +251,7 @@ function RouteComponent() {
               ))}
             </div>
           ) : (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <HugeiconsIcon icon={Gift} strokeWidth={2} />
-                </EmptyMedia>
-                <EmptyTitle>No wishes found</EmptyTitle>
-              </EmptyHeader>
-            </Empty>
+            <EmptyFilteredWishes />
           )}
         </Activity>
       </Activity>
@@ -295,14 +270,7 @@ function RouteComponent() {
             </div>
           </div>
         ) : (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <HugeiconsIcon icon={Gift} strokeWidth={2} />
-              </EmptyMedia>
-              <EmptyTitle>No wishes found</EmptyTitle>
-            </EmptyHeader>
-          </Empty>
+          <EmptyFilteredWishes />
         )}
         <div className="sticky bottom-4 z-20 mt-4 flex h-fit w-full items-center gap-2 rounded-lg border bg-background p-2">
           <SearchInput
@@ -355,6 +323,23 @@ function PendingComponent() {
         <EmptyTitle>Loading wishes</EmptyTitle>
       </EmptyHeader>
     </Empty>
+  );
+}
+
+function ErrorComponent({ error }: ErrorComponentProps) {
+  return (
+    <div className="container mx-auto grid max-w-3xl gap-4">
+      <Alert variant="destructive">
+        <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
+        <AlertTitle>Wishes loading failed</AlertTitle>
+        <AlertDescription>
+          Some unexpected error occurred. Please try again later.
+        </AlertDescription>
+      </Alert>
+      <Suspense>
+        <LazyDevErrorStackDisplay error={error} />
+      </Suspense>
+    </div>
   );
 }
 
