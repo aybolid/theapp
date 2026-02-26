@@ -19,8 +19,8 @@ const ACTIVITY_UPDATE_INTERVAL_SECONDS = 60 * 60;
 /** 1 minute */
 export const JWT_EXPIRATION_SECONDS = 60;
 
-export function authGuard(adminOnly = false) {
-  return new Elysia({ name: "auth-guard", seed: { adminOnly } })
+export function authGuard(seed?: { adminOnly: boolean }) {
+  return new Elysia({ name: "auth-guard", seed })
     .derive(
       async (
         ctx,
@@ -29,7 +29,7 @@ export function authGuard(adminOnly = false) {
         if (authJwt && typeof authJwt.value === "string") {
           try {
             const result = await verifyAuthJwt(authJwt.value);
-            if (adminOnly && result.payload.role !== "admin") {
+            if (seed?.adminOnly && result.payload.role !== "admin") {
               throw ctx.status(403, "Admin access required");
             }
             return {
@@ -119,7 +119,7 @@ export function authGuard(adminOnly = false) {
           );
         }
 
-        if (adminOnly && session.user.role !== "admin") {
+        if (seed?.adminOnly && session.user.role !== "admin") {
           throw ctx.status(403, "Admin access required");
         }
 

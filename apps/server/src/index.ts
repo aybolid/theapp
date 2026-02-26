@@ -5,6 +5,7 @@ import { Elysia } from "elysia";
 import z from "zod";
 import { checkEnv } from "./env";
 import { misc } from "./modules/misc";
+import { users } from "./modules/users";
 import { wishes } from "./modules/wishes";
 
 checkEnv();
@@ -15,7 +16,8 @@ const api = new Elysia({ prefix: "/api" })
   .use(auth)
   .use(profiles)
   .use(wishes)
-  .use(misc);
+  .use(misc)
+  .use(users);
 
 const app = new Elysia()
   .onError((ctx) => {

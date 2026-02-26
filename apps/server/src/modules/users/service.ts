@@ -5,6 +5,13 @@ import type { DatabaseConnection } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
 
 export abstract class UserService {
+  static async getUsers(db: DatabaseConnection): Promise<UserResponse[]> {
+    return db.query.users.findMany({
+      columns: { passwordHash: false },
+      with: { profile: true },
+    });
+  }
+
   static async createUser(
     db: DatabaseConnection,
     data: { email: string; passwordHash: string },
