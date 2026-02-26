@@ -1,3 +1,4 @@
+import { render } from "@react-email/components";
 import {
   createWishBodySchema,
   createWishUnauthorizedErrorSchema,
@@ -19,6 +20,9 @@ import {
   wishResponseSchema,
 } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
+import { transporter } from "@theapp/server/emails";
+import WishNotReservedEmail from "@theapp/server/emails/wish-not-reserved";
+import WishReservedEmail from "@theapp/server/emails/wish-reserved";
 import Elysia from "elysia";
 import { authGuard } from "../auth/guard";
 import { UserService } from "../users/service";
@@ -178,6 +182,29 @@ export const wishes = new Elysia({
       if (!updatedWish) {
         throw new Error("Failed to update reserver");
       }
+
+      render(
+        ctx.query.action === "start"
+          ? WishReservedEmail({
+              ownerName: wish.owner.profile.name,
+              reserverName: currentUser.profile.name,
+              wishName: wish.name,
+            })
+          : WishNotReservedEmail({
+              ownerName: wish.owner.profile.name,
+              wishName: wish.name,
+              prevReserverName: currentUser.profile.name,
+            }),
+      ).then((html) =>
+        transporter.sendMail({
+          to: wish.owner.email,
+          subject:
+            ctx.query.action === "start"
+              ? "Your wish has been reserved"
+              : "Your wish no longer reserved",
+          html,
+        }),
+      );
 
       return ctx.status(200, {
         ...updatedWish,
