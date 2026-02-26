@@ -6,7 +6,8 @@
     "baseUrl": ".",
     "paths": {
       "@theapp/server/*": ["./src/*"]
-    }
+    },
+    "jsx": "react-jsx"
   },
   "include": ["."]
 }
