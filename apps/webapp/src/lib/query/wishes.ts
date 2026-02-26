@@ -11,6 +11,8 @@ import type {
   DeleteWishByIdParams,
   DeleteWishOkResponse,
   GetWishesReponse,
+  PatchWishBody,
+  PatchWishByIdParams,
   ReserveWishByIdParams,
   ReserveWishByIdQuery,
   WishResponse,
@@ -111,6 +113,34 @@ export function useUpdateWishReservationMutation(
       const resp = await server.api.wishes
         .reserve({ wishId: data.wishId })
         .post(undefined, { query: { action: data.action } });
+      if (resp.error) {
+        throw resp.error;
+      } else {
+        return resp.data;
+      }
+    },
+    ...options,
+  });
+}
+
+export function useUpdateWishMutation(
+  options?: Omit<
+    UseMutationOptions<
+      WishResponse,
+      Treaty.Error<ReturnType<typeof server.api.wishes>["patch"]>,
+      PatchWishBody & PatchWishByIdParams
+    >,
+    "mutationKey" | "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationKey: ["update", "wish"],
+    mutationFn: async (data: PatchWishBody & PatchWishByIdParams) => {
+      const resp = await server.api.wishes({ wishId: data.wishId }).patch({
+        name: data.name,
+        note: data.note,
+        isCompleted: data.isCompleted,
+      });
       if (resp.error) {
         throw resp.error;
       } else {

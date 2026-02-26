@@ -6,6 +6,10 @@ import {
   deleteWishNotFoundErrorSchema,
   deleteWishOkResponseSchema,
   getWishesResponseSchema,
+  patchWishBodySchema,
+  patchWishByIdParamsSchema,
+  patchWishForbiddenErrorSchema,
+  patchWishNotFoundErrorSchema,
   reserveWishByIdBadRequestErrorSchema,
   reserveWishByIdForbiddenErrorSchema,
   reserveWishByIdNotFoundErrorSchema,
@@ -84,7 +88,10 @@ export const wishes = new Elysia({
         throw ctx.status(403, "Only owned wish can be deleted");
       }
 
-      await WishService.deleteWishById(db, ctx.params.wishId);
+      await WishService.deleteWishById(db, {
+        wishId: ctx.params.wishId,
+        currentUserId: ctx.userId,
+      });
 
       return ctx.status(200, "Wish deleted");
     },
@@ -97,6 +104,43 @@ export const wishes = new Elysia({
       },
       detail: {
         description: "Delete wish by id. Must be owned by current user.",
+      },
+    },
+  )
+  .patch(
+    ":wishId",
+    async (ctx) => {
+      const wish = await WishService.getWishById(db, ctx.params.wishId);
+      if (!wish) throw ctx.status(404, "Wish not found");
+      if (wish.ownerId !== ctx.userId) {
+        throw ctx.status(403, "Only owned wish can be updated");
+      }
+
+      const updatedWish = await WishService.updateWishById(db, {
+        wishId: ctx.params.wishId,
+        currentUserId: ctx.userId,
+        ...ctx.body,
+      });
+      if (!updatedWish) {
+        throw new Error("Failed to update wish");
+      }
+
+      return ctx.status(200, {
+        ...updatedWish,
+        owner: wish.owner,
+        reserver: wish.reserver,
+      });
+    },
+    {
+      params: patchWishByIdParamsSchema,
+      body: patchWishBodySchema,
+      response: {
+        404: patchWishNotFoundErrorSchema,
+        403: patchWishForbiddenErrorSchema,
+        200: wishResponseSchema,
+      },
+      detail: {
+        description: "Update wish by id. Must be owned by current user",
       },
     },
   )

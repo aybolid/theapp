@@ -111,3 +111,43 @@ export const reserveWishByIdBadRequestErrorSchema = z.literal("Not reserved");
 export type ReserveWishByIdBadRequestError = z.infer<
   typeof reserveWishByIdBadRequestErrorSchema
 >;
+
+export const patchWishBodySchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Wish name is required")
+    .max(100, "Must be less than 100 characters")
+    .optional(),
+  note: z
+    .string()
+    .trim()
+    .max(
+      MAX_WISH_NOTE_LEN_AFTER_TRIM,
+      `Must be less than ${MAX_WISH_NOTE_LEN_AFTER_TRIM} characters`,
+    )
+    .optional(),
+  isCompleted: z.boolean().optional(),
+});
+
+export type PatchWishBody = z.infer<typeof patchWishBodySchema>;
+
+export const patchWishByIdParamsSchema = z.object({
+  wishId: z.uuidv7(),
+});
+
+export type PatchWishByIdParams = z.infer<typeof patchWishByIdParamsSchema>;
+
+export const patchWishNotFoundErrorSchema = z.literal("Wish not found");
+
+export type PatchWishNotFoundError = z.infer<
+  typeof patchWishNotFoundErrorSchema
+>;
+
+export const patchWishForbiddenErrorSchema = z.literal(
+  "Only owned wish can be updated",
+);
+
+export type PatchWishForbiddenError = z.infer<
+  typeof patchWishForbiddenErrorSchema
+>;

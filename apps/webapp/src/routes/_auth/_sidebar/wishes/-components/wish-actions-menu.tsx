@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@theapp/ui/components/alert-dialog";
+import { Badge } from "@theapp/ui/components/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,17 +20,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@theapp/ui/components/dropdown-menu";
+import { Spinner } from "@theapp/ui/components/spinner";
 import { Delete01Icon, Edit01Icon, Tick01Icon, X } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { toast } from "@theapp/ui/lib/sonner";
 import {
   useDeleteWishMutation,
+  useUpdateWishMutation,
   useUpdateWishReservationMutation,
   wishesQueryOptions,
 } from "@theapp/webapp/lib/query/wishes";
-import type { ComponentProps, FC } from "react";
+import { type ComponentProps, type FC, lazy, Suspense } from "react";
 
 type DropdownMenuTriggerProps = ComponentProps<typeof DropdownMenuTrigger>;
+
+const LazyEditWishDialog = lazy(() =>
+  import("./edit-wish-dailog").then((m) => ({ default: m.EditWishDialog })),
+);
 
 export const WishActionsMenu: FC<{
   wish: WishResponse;
@@ -68,12 +75,26 @@ export const WishActionsMenu: FC<{
     onError: () => toast.error("Failed to remove wish reservation"),
   });
 
+  const updateMutation = useUpdateWishMutation({
+    onSuccess: (wish) => {
+      queryClient.setQueryData<WishResponse[]>(
+        wishesQueryOptions.queryKey,
+        (prev) => prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
+      );
+      queryClient.invalidateQueries({ queryKey: wishesQueryOptions.queryKey });
+    },
+    onError: () => toast.error("Failed to change wish status"),
+  });
+
   if (!isOwnedByMe && !isReservedByMe) return null;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger nativeButton={nativeButton} render={render} />
-      <DropdownMenuContent className="w-64">
+      <DropdownMenuContent
+        className="w-max"
+        onKeyDown={(e) => e.preventBaseUIHandler()}
+      >
         {isReservedByMe && (
           <DropdownMenuGroup>
             <AlertDialog>
@@ -128,19 +149,62 @@ export const WishActionsMenu: FC<{
         )}
         {isOwnedByMe && (
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />
-              <span>Edit</span>
-            </DropdownMenuItem>
+            <Suspense
+              fallback={
+                <DropdownMenuItem disabled>
+                  <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />
+                  <span>Edit</span>
+                </DropdownMenuItem>
+              }
+            >
+              <LazyEditWishDialog
+                nativeButton={false}
+                wish={wish}
+                render={
+                  <DropdownMenuItem closeOnClick={false}>
+                    <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />
+                    <span>Edit</span>
+                  </DropdownMenuItem>
+                }
+              />
+            </Suspense>
             {wish.isCompleted ? (
-              <DropdownMenuItem>
-                <HugeiconsIcon icon={X} strokeWidth={2} />
-                <span>Mark as pending</span>
+              <DropdownMenuItem
+                disabled={updateMutation.isPending}
+                onClick={() =>
+                  updateMutation.mutate({
+                    wishId: wish.wishId,
+                    isCompleted: false,
+                  })
+                }
+              >
+                {updateMutation.isPending ? (
+                  <Spinner />
+                ) : (
+                  <HugeiconsIcon icon={X} strokeWidth={2} />
+                )}
+                <span>
+                  Mark as <Badge variant="secondary">Pending</Badge>
+                </span>
               </DropdownMenuItem>
             ) : (
-              <DropdownMenuItem>
-                <HugeiconsIcon icon={Tick01Icon} strokeWidth={2} />
-                <span>Mark as completed</span>
+              <DropdownMenuItem
+                disabled={updateMutation.isPending}
+                onClick={() =>
+                  updateMutation.mutate({
+                    wishId: wish.wishId,
+                    isCompleted: true,
+                  })
+                }
+              >
+                {updateMutation.isPending ? (
+                  <Spinner />
+                ) : (
+                  <HugeiconsIcon icon={Tick01Icon} strokeWidth={2} />
+                )}
+                <span>
+                  Mark as <Badge>Completed</Badge>
+                </span>
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />

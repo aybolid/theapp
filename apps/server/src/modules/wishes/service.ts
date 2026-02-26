@@ -47,9 +47,43 @@ export abstract class WishService {
 
   static async deleteWishById(
     db: DatabaseConnection,
-    wishId: string,
+    data: { wishId: string; currentUserId: string },
   ): Promise<void> {
-    await db.delete(schema.wishes).where(eq(schema.wishes.wishId, wishId));
+    await db
+      .delete(schema.wishes)
+      .where(
+        and(
+          eq(schema.wishes.wishId, data.wishId),
+          eq(schema.wishes.ownerId, data.currentUserId),
+        ),
+      );
+  }
+
+  static async updateWishById(
+    db: DatabaseConnection,
+    {
+      wishId,
+      currentUserId,
+      ...set
+    }: {
+      wishId: string;
+      currentUserId: string;
+      name?: string;
+      description?: string;
+      isCompleted?: boolean;
+    },
+  ): Promise<Omit<WishResponse, "reserver" | "owner"> | undefined> {
+    return db
+      .update(schema.wishes)
+      .set(set)
+      .where(
+        and(
+          eq(schema.wishes.wishId, wishId),
+          eq(schema.wishes.ownerId, currentUserId),
+        ),
+      )
+      .returning()
+      .then((rows) => rows[0]);
   }
 
   static async updateWishReserver(

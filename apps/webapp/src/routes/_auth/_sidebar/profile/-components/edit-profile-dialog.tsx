@@ -37,8 +37,7 @@ import { extractZodIssuesFromValidationError } from "@theapp/webapp/lib/api";
 import { setZodIssuesAsFieldErrors } from "@theapp/webapp/lib/forms";
 import { meQueryOptions } from "@theapp/webapp/lib/query/auth";
 import { useUpdateProfileMutation } from "@theapp/webapp/lib/query/profiles";
-import { parseAsBoolean, useQueryState } from "nuqs";
-import type { ComponentProps, FC } from "react";
+import { type ComponentProps, type FC, useState } from "react";
 import z from "zod";
 
 type DialogTriggerProps = ComponentProps<typeof DialogTrigger>;
@@ -53,10 +52,7 @@ export const EditProfileDialog: FC<{
   render: NonNullable<DialogTriggerProps["render"]>;
   nativeButton?: DialogTriggerProps["nativeButton"];
 }> = ({ render, nativeButton, profile }) => {
-  const [open, setOpen] = useQueryState(
-    "editProfile",
-    parseAsBoolean.withDefault(false),
-  );
+  const [open, setOpen] = useState(false);
 
   const queryClient = useQueryClient();
 

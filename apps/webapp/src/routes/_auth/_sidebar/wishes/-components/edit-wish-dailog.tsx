@@ -1,8 +1,8 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  createWishBodySchema,
   MAX_WISH_NOTE_LEN_AFTER_TRIM,
+  patchWishBodySchema,
   type WishResponse,
 } from "@theapp/schemas";
 import { Button } from "@theapp/ui/components/button";
@@ -21,45 +21,50 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@theapp/ui/components/field";
+import { Input } from "@theapp/ui/components/input";
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
   InputGroupText,
   InputGroupTextarea,
 } from "@theapp/ui/components/input-group";
 import { Spinner } from "@theapp/ui/components/spinner";
-import { PlusSignIcon, X } from "@theapp/ui/icons/huge";
+import { Save, X } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { cn } from "@theapp/ui/lib/utils";
 import { extractZodIssuesFromValidationError } from "@theapp/webapp/lib/api";
 import { setZodIssuesAsFieldErrors } from "@theapp/webapp/lib/forms";
-import { useGetUrlMetadataMutation } from "@theapp/webapp/lib/query/misc";
 import {
-  useCreateWishMutation,
+  useUpdateWishMutation,
   wishesQueryOptions,
 } from "@theapp/webapp/lib/query/wishes";
 import { type ComponentProps, type FC, useState } from "react";
+import z from "zod";
 
 type DialogTriggerProps = ComponentProps<typeof DialogTrigger>;
 
-export const NewWishDialog: FC<{
+const schema = z.object({
+  name: patchWishBodySchema.shape.name.nonoptional(),
+  note: patchWishBodySchema.shape.note.nonoptional(),
+  isCompleted: patchWishBodySchema.shape.isCompleted.nonoptional(),
+});
+
+export const EditWishDialog: FC<{
+  wish: WishResponse;
   render: NonNullable<DialogTriggerProps["render"]>;
   nativeButton?: DialogTriggerProps["nativeButton"];
-}> = ({ render, nativeButton }) => {
+}> = ({ render, nativeButton, wish }) => {
   const [open, setOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
-  const createMutation = useCreateWishMutation({
+  const updateMutation = useUpdateWishMutation({
     onSuccess: (wish) => {
       queryClient.setQueryData<WishResponse[]>(
         wishesQueryOptions.queryKey,
-        (prev) => [wish, ...(prev ?? [])],
+        (prev) => prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
       );
       queryClient.invalidateQueries({ queryKey: wishesQueryOptions.queryKey });
-      form.reset();
       setOpen(false);
     },
     onError: (err) => {
@@ -88,38 +93,26 @@ export const NewWishDialog: FC<{
 
   const form = useForm({
     defaultValues: {
-      name: "",
-      note: "",
-      link: "",
+      name: wish.name,
+      note: wish.note,
+      isCompleted: wish.isCompleted,
     },
     validators: {
-      onSubmit: createWishBodySchema,
+      onSubmit: schema,
     },
-    onSubmit: ({ value }) => createMutation.mutate(value),
+    onSubmit: ({ value }) =>
+      updateMutation.mutate({ wishId: wish.wishId, ...value }),
   });
 
-  const getUrlMetadataMutation = useGetUrlMetadataMutation({
-    onSettled: (data) => {
-      if (data) {
-        if (form.getFieldValue("name").trim() === "") {
-          form.setFieldValue("name", data.title);
-        }
-        if (form.getFieldValue("note").trim() === "") {
-          form.setFieldValue("note", data.description);
-        }
-      }
-    },
-  });
-
-  const isBusy = form.state.isSubmitting || createMutation.isPending;
+  const isBusy = form.state.isSubmitting || updateMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={(v) => setOpen(v)}>
       <DialogTrigger nativeButton={nativeButton} render={render} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create wish</DialogTitle>
-          <DialogDescription>Add new wish with details below</DialogDescription>
+          <DialogTitle>Edit wish</DialogTitle>
+          <DialogDescription>Update wish details</DialogDescription>
         </DialogHeader>
         <form
           className="contents"
@@ -130,49 +123,6 @@ export const NewWishDialog: FC<{
         >
           <FieldGroup>
             <form.Field
-              name="link"
-              listeners={{
-                onChangeDebounceMs: 200,
-                onChange: ({ value, fieldApi }) => {
-                  if (fieldApi.state.meta.isValid) {
-                    getUrlMetadataMutation.mutate({ url: value });
-                  }
-                },
-              }}
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Link</FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        autoComplete="off"
-                        placeholder="https://"
-                      />
-                      {getUrlMetadataMutation.isPending && (
-                        <InputGroupAddon align="inline-end">
-                          <Spinner />
-                        </InputGroupAddon>
-                      )}
-                    </InputGroup>
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            />
-          </FieldGroup>
-
-          <FieldGroup>
-            <form.Field
               name="name"
               children={(field) => {
                 const isInvalid =
@@ -180,28 +130,16 @@ export const NewWishDialog: FC<{
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Name</FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        autoComplete="off"
-                        placeholder="New boots"
-                      />
-                      {field.state.value.trim() && (
-                        <InputGroupAddon align="inline-end">
-                          <InputGroupButton
-                            onClick={() => field.setValue("")}
-                            variant="destructive"
-                          >
-                            <HugeiconsIcon icon={X} strokeWidth={2} />
-                          </InputGroupButton>
-                        </InputGroupAddon>
-                      )}
-                    </InputGroup>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      autoComplete="off"
+                      placeholder="New boots"
+                    />
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
                     )}
@@ -243,15 +181,6 @@ export const NewWishDialog: FC<{
                         >
                           {trimmedValue.length}/{MAX_WISH_NOTE_LEN_AFTER_TRIM}
                         </InputGroupText>
-                        {trimmedValue && (
-                          <InputGroupButton
-                            onClick={() => field.setValue("")}
-                            className="ml-auto"
-                            variant="destructive"
-                          >
-                            <HugeiconsIcon icon={X} strokeWidth={2} />
-                          </InputGroupButton>
-                        )}
                       </InputGroupAddon>
                     </InputGroup>
                     {isInvalid && (
@@ -276,21 +205,18 @@ export const NewWishDialog: FC<{
                 setOpen(false);
                 form.reset();
               }}
-              disabled={isBusy || getUrlMetadataMutation.isPending}
+              disabled={isBusy}
             >
               <HugeiconsIcon icon={X} strokeWidth={2} />
               <span>Cancel</span>
             </Button>
-            <Button
-              type="submit"
-              disabled={isBusy || getUrlMetadataMutation.isPending}
-            >
+            <Button type="submit" disabled={isBusy}>
               {isBusy ? (
                 <Spinner />
               ) : (
-                <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                <HugeiconsIcon icon={Save} strokeWidth={2} />
               )}
-              <span>Create</span>
+              <span>Save</span>
             </Button>
           </DialogFooter>
         </form>
