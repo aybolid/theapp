@@ -1,4 +1,5 @@
-import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useRouter } from "@tanstack/react-router";
 import {
   Avatar,
   AvatarFallback,
@@ -9,6 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@theapp/ui/components/dropdown-menu";
 import {
@@ -23,9 +25,18 @@ import {
   SidebarMenuSkeleton,
   useSidebar,
 } from "@theapp/ui/components/sidebar";
-import { DashboardSquareIcon, Gift, User02Icon } from "@theapp/ui/icons/huge";
+import { Spinner } from "@theapp/ui/components/spinner";
+import {
+  DashboardSquareIcon,
+  Gift,
+  Logout01Icon,
+  User02Icon,
+} from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
-import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
+import {
+  useMeSuspenseQuery,
+  useSignoutMutation,
+} from "@theapp/webapp/lib/query/auth";
 import { type FC, Suspense } from "react";
 
 export const AppSidebar: FC = () => {
@@ -79,8 +90,18 @@ export const AppSidebar: FC = () => {
 };
 
 const UserButton: FC = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
   const { state, isMobile } = useSidebar();
   const meQuery = useMeSuspenseQuery();
+
+  const signoutMutation = useSignoutMutation({
+    onSettled: () => {
+      queryClient.invalidateQueries();
+      router.invalidate();
+    },
+  });
 
   return (
     <DropdownMenu>
@@ -123,6 +144,19 @@ const UserButton: FC = () => {
             }
           />
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          disabled={signoutMutation.isPending}
+          onClick={() => signoutMutation.mutate()}
+        >
+          {signoutMutation.isPending ? (
+            <Spinner />
+          ) : (
+            <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />
+          )}
+          <span>Sign out</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
