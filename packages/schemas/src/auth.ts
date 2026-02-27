@@ -3,7 +3,7 @@ import { profileResponseSchema } from "./profiles";
 import { zDate } from "./zdate";
 
 export const signupBodySchema = z.object({
-  email: z.email(),
+  inviteId: z.uuidv7(),
   password: z
     .string()
     .regex(/[a-z]/, "Must contain at least one lowercase letter")
@@ -19,6 +19,13 @@ export type SignupBody = z.infer<typeof signupBodySchema>;
 export const singupConflictErrorSchema = z.literal("Email already in use");
 
 export type SignupConflictError = z.infer<typeof singupConflictErrorSchema>;
+
+export const singupBadRequestErrorSchema = z.enum([
+  "Invalid invite",
+  "Invite expired",
+]);
+
+export type SignupBadRequestError = z.infer<typeof singupBadRequestErrorSchema>;
 
 export const signupCreatedSchema = z.literal("User created");
 

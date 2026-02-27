@@ -9,11 +9,26 @@ export abstract class InviteService {
     db: DatabaseConnection,
     email: string,
   ): Promise<boolean> {
-    return db.query.invites
-      .findFirst({
-        where: { email: { eq: email } },
-      })
-      .then((invite) => !invite);
+    return await db.transaction(async (tx) => {
+      const userExists = await tx.query.users.findFirst({
+        where: { email: { eq: email.toLowerCase() } },
+      });
+      if (userExists) return false;
+      const inviteExists = await tx.query.invites.findFirst({
+        where: { email: { eq: email.toLowerCase() } },
+      });
+      if (inviteExists) return false;
+      return true;
+    });
+  }
+
+  static async getInviteById(
+    db: DatabaseConnection,
+    inviteId: string,
+  ): Promise<InviteResponse | undefined> {
+    return db.query.invites.findFirst({
+      where: { inviteId: { eq: inviteId } },
+    });
   }
 
   static async getInvites(db: DatabaseConnection): Promise<InviteResponse[]> {
@@ -35,7 +50,7 @@ export abstract class InviteService {
   ): Promise<InviteResponse | undefined> {
     return db
       .insert(schema.invites)
-      .values({ email })
+      .values({ email: email.toLowerCase() })
       .returning()
       .then((rows) => rows[0]);
   }

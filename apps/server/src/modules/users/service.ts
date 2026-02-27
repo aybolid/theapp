@@ -35,7 +35,7 @@ export abstract class UserService {
     (Omit<UserResponse, "profile"> & { passwordHash: string }) | undefined
   > {
     return db.query.users.findFirst({
-      where: { email: { eq: email } },
+      where: { email: { eq: email.toLowerCase() } },
     });
   }
 

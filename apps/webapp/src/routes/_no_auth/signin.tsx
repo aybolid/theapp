@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { signinBodySchema } from "@theapp/schemas";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -7,7 +7,6 @@ import {
   CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@theapp/ui/components/card";
@@ -173,14 +172,6 @@ function RouteComponent() {
             </FieldGroup>
           </CardContent>
         </form>
-        <CardFooter>
-          <p className="text-muted-foreground text-sm">
-            Do not have an account?{" "}
-            <Link className="text-foreground hover:underline" to="/signup">
-              Create account
-            </Link>
-          </p>
-        </CardFooter>
       </Card>
     </main>
   );

@@ -23,7 +23,9 @@ export default function InviteEmail({ link }: Props) {
                 You have been invited to join THEAPP. Click the link below to
                 accept the invitation:
               </Text>
-              <Text className="font-bold">{link}</Text>
+              <Text className="font-bold underline">
+                <a href={link}>Accept invitation</a>
+              </Text>
             </Section>
           </Container>
         </Body>

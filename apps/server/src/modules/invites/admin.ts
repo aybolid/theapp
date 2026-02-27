@@ -10,7 +10,6 @@ import { transporter } from "@theapp/server/emails";
 import InviteEmail from "@theapp/server/emails/invite";
 import Elysia from "elysia";
 import { authGuard } from "../auth/guard";
-import { AuthService } from "../auth/service";
 import { InviteService } from "./service";
 
 export const invitesAdmin = new Elysia({
@@ -33,20 +32,12 @@ export const invitesAdmin = new Elysia({
   .post(
     "",
     async (ctx) => {
-      let isEmailAvailable = await InviteService.checkEmailAvailability(
+      const isEmailAvailable = await InviteService.checkEmailAvailability(
         db,
         ctx.body.email,
       );
       if (!isEmailAvailable) {
-        return ctx.status(409, "Invite with this email already exists");
-      }
-
-      isEmailAvailable = await AuthService.checkEmailAvailability(
-        db,
-        ctx.body.email,
-      );
-      if (!isEmailAvailable) {
-        return ctx.status(409, "User with this email already exists");
+        throw ctx.status(409, "Invite or user with this email already exists");
       }
 
       const invite = await db.transaction(async (tx) => {
@@ -55,7 +46,7 @@ export const invitesAdmin = new Elysia({
           throw new Error("Failed to create invite");
         }
 
-        const link = `${process.env.INVITE_REDIRECT_URL}?invite=${invite.inviteId}`;
+        const link = `${process.env.INVITE_REDIRECT_URL}?inviteId=${invite.inviteId}`;
 
         try {
           const html = await render(InviteEmail({ link }));

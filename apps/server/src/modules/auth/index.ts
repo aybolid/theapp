@@ -5,6 +5,7 @@ import {
   signoutOkSchema,
   signupBodySchema,
   signupCreatedSchema,
+  singupBadRequestErrorSchema,
   singupConflictErrorSchema,
   userNotFoundErrorSchema,
   userResponseSchema,
@@ -18,6 +19,7 @@ import {
 import { parseUserAgent } from "@theapp/server/utils/ua";
 import Elysia from "elysia";
 import { isProduction } from "elysia/error";
+import { InviteService } from "../invites/service";
 import { ProfileService } from "../profiles/service";
 import { UserService } from "../users/service";
 import {
@@ -39,9 +41,17 @@ export const auth = new Elysia({
   .post(
     "/signup",
     async (ctx) => {
+      const invite = await InviteService.getInviteById(db, ctx.body.inviteId);
+      if (!invite) {
+        throw ctx.status(400, "Invalid invite");
+      }
+      if (new Date(invite.expiresAt).getTime() < Date.now()) {
+        throw ctx.status(400, "Invite expired");
+      }
+
       const isEmailAvailable = await AuthService.checkEmailAvailability(
         db,
-        ctx.body.email,
+        invite.email,
       );
       if (!isEmailAvailable) {
         throw ctx.status(409, "Email already in use");
@@ -51,12 +61,13 @@ export const auth = new Elysia({
 
       await db.transaction(async (tx) => {
         const createdUser = await UserService.createUser(tx, {
-          email: ctx.body.email,
+          email: invite.email,
           passwordHash,
         });
         if (!createdUser) {
           throw new Error("Failed to create user");
         }
+
         const createdProfile = await ProfileService.createProfile(
           tx,
           createdUser.userId,
@@ -64,13 +75,19 @@ export const auth = new Elysia({
         if (!createdProfile) {
           throw new Error("Failed to create profile");
         }
+
+        await InviteService.deleteInvite(tx, ctx.body.inviteId);
       });
 
       return ctx.status(201, "User created");
     },
     {
       body: signupBodySchema,
-      response: { 409: singupConflictErrorSchema, 201: signupCreatedSchema },
+      response: {
+        409: singupConflictErrorSchema,
+        201: signupCreatedSchema,
+        400: singupBadRequestErrorSchema,
+      },
       detail: { description: "Sign up a new user." },
     },
   )

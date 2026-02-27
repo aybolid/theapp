@@ -13,6 +13,39 @@ import type {
 } from "@theapp/schemas";
 import { server } from "../api";
 
+export function validInviteQueryOptions(inviteId: string) {
+  return queryOptions<
+    InviteResponse,
+    Treaty.Error<ReturnType<typeof server.api.invites.valid>["get"]>
+  >({
+    queryKey: ["valid", "invite", inviteId],
+    queryFn: async () => {
+      const resp = await server.api.invites.valid({ inviteId }).get();
+      if (resp.error) {
+        throw resp.error;
+      } else {
+        return resp.data;
+      }
+    },
+  });
+}
+
+export function useValidInviteSuspenseQuery(
+  inviteId: string,
+  options?: Omit<
+    UseSuspenseQueryOptions<
+      InviteResponse,
+      Treaty.Error<ReturnType<typeof server.api.invites.valid>["get"]>
+    >,
+    "queryFn" | "queryKey"
+  >,
+) {
+  return useSuspenseQuery({
+    ...validInviteQueryOptions(inviteId),
+    ...options,
+  });
+}
+
 export const invitesQueryOptions = queryOptions<
   GetInvitesResponse,
   Treaty.Error<typeof server.api.invites.get>

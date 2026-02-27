@@ -16,10 +16,9 @@ export const createInviteBodySchema = z.object({
 
 export type CreateInviteBody = z.infer<typeof createInviteBodySchema>;
 
-export const createInviteConflictErrorSchema = z.enum([
-  "Invite with this email already exists",
-  "User with this email already exists",
-]);
+export const createInviteConflictErrorSchema = z.literal(
+  "Invite or user with this email already exists",
+);
 
 export type CreateInviteConflictError = z.infer<
   typeof createInviteConflictErrorSchema
@@ -28,3 +27,22 @@ export type CreateInviteConflictError = z.infer<
 export const getInvitesResponseSchema = z.array(inviteResponseSchema);
 
 export type GetInvitesResponse = z.infer<typeof getInvitesResponseSchema>;
+
+export const getValidInviteParamsSchema = z.object({
+  inviteId: z.uuidv7(),
+});
+
+export type GetValidInviteParams = z.infer<typeof getValidInviteParamsSchema>;
+
+export const getValidInviteNotFoundErrorSchema = z.literal("Invite not found");
+
+export type GetValidInviteNotFoundError = z.infer<
+  typeof getValidInviteNotFoundErrorSchema
+>;
+
+export const getValidInviteBadRequestErrorSchema =
+  z.literal("Invite has expired");
+
+export type GetValidInviteBadRequestError = z.infer<
+  typeof getValidInviteBadRequestErrorSchema
+>;
