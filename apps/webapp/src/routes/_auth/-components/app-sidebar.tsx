@@ -30,6 +30,7 @@ import {
   DashboardSquareIcon,
   Gift,
   Logout01Icon,
+  Mail01Icon,
   User02Icon,
   Users,
 } from "@theapp/ui/icons/huge";
@@ -86,6 +87,16 @@ export const AppSidebar: FC = () => {
                     <Link to="/users">
                       <HugeiconsIcon icon={Users} strokeWidth={2} />
                       <span>Users</span>
+                    </Link>
+                  }
+                />
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  render={
+                    <Link to="/invites">
+                      <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} />
+                      <span>Invites</span>
                     </Link>
                   }
                 />

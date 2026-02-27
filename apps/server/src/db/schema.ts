@@ -23,6 +23,13 @@ export const users = pg.pgTable("users", {
   ...timestamps,
 });
 
+export const invites = pg.pgTable("invites", {
+  inviteId: uuidv7pk(),
+  email: pg.varchar().notNull().unique(),
+  createdAt: timestamps.createdAt,
+  expiresAt: pg.timestamp().notNull().default(sql`now() + interval '30 days'`),
+});
+
 export const sessions = pg.pgTable("sessions", {
   sessionId: pg.varchar({ length: 255 }).primaryKey(),
   secretHash: pg.bytea().notNull(),
@@ -83,4 +90,5 @@ export const schema = {
   sessions,
   profiles,
   wishes,
+  invites,
 };

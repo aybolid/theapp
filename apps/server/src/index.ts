@@ -4,6 +4,7 @@ import { profiles } from "@theapp/server/modules/profiles";
 import { Elysia } from "elysia";
 import z from "zod";
 import { checkEnv } from "./env";
+import { invites } from "./modules/invites";
 import { misc } from "./modules/misc";
 import { users } from "./modules/users";
 import { wishes } from "./modules/wishes";
@@ -17,7 +18,8 @@ const api = new Elysia({ prefix: "/api" })
   .use(profiles)
   .use(wishes)
   .use(misc)
-  .use(users);
+  .use(users)
+  .use(invites);
 
 const app = new Elysia()
   .onError((ctx) => {

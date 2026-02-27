@@ -14,6 +14,7 @@ const envSchema = z
     S3_BUCKET: z.string().min(1, "S3_BUCKET is required"),
     S3_PUBLIC_BASE_URL: z.url(),
     FROM_EMAIL: z.email(),
+    INVITE_REDIRECT_URL: z.url(),
   })
   .readonly();
 

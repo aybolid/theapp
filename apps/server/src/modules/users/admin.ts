@@ -2,7 +2,7 @@ import { getUsersResponseSchema } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import Elysia from "elysia";
 import { authGuard } from "../auth/guard";
-import { UserService } from "../users/service";
+import { UserService } from "./service";
 
 export const usersAdmin = new Elysia({
   detail: {
