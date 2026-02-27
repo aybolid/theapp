@@ -18,7 +18,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -80,7 +79,6 @@ export const AppSidebar: FC = () => {
         </SidebarGroup>
         <AdminOnly>
           <SidebarGroup>
-            <SidebarGroupLabel>Admin only</SidebarGroupLabel>
             <SidebarMenu className="gap-2">
               <SidebarMenuItem>
                 <SidebarMenuButton

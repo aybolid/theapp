@@ -18,7 +18,7 @@ import { Route as AuthSidebarIndexRouteImport } from './routes/_auth/_sidebar/in
 import { Route as AuthSidebarAdminRouteImport } from './routes/_auth/_sidebar/_admin'
 import { Route as AuthSidebarWishesRouteRouteImport } from './routes/_auth/_sidebar/wishes/route'
 import { Route as AuthSidebarProfileUserIdRouteImport } from './routes/_auth/_sidebar/profile/$userId'
-import { Route as AuthSidebarAdminUsersRouteImport } from './routes/_auth/_sidebar/_admin/users'
+import { Route as AuthSidebarAdminUsersRouteRouteImport } from './routes/_auth/_sidebar/_admin/users/route'
 
 const No_authRoute = No_authRouteImport.update({
   id: '/_no_auth',
@@ -62,18 +62,19 @@ const AuthSidebarProfileUserIdRoute =
     path: '/profile/$userId',
     getParentRoute: () => AuthSidebarRoute,
   } as any)
-const AuthSidebarAdminUsersRoute = AuthSidebarAdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AuthSidebarAdminRoute,
-} as any)
+const AuthSidebarAdminUsersRouteRoute =
+  AuthSidebarAdminUsersRouteRouteImport.update({
+    id: '/users',
+    path: '/users',
+    getParentRoute: () => AuthSidebarAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthSidebarIndexRoute
   '/signin': typeof No_authSigninRoute
   '/signup': typeof No_authSignupRoute
   '/wishes': typeof AuthSidebarWishesRouteRoute
-  '/users': typeof AuthSidebarAdminUsersRoute
+  '/users': typeof AuthSidebarAdminUsersRouteRoute
   '/profile/$userId': typeof AuthSidebarProfileUserIdRoute
 }
 export interface FileRoutesByTo {
@@ -81,7 +82,7 @@ export interface FileRoutesByTo {
   '/signin': typeof No_authSigninRoute
   '/signup': typeof No_authSignupRoute
   '/wishes': typeof AuthSidebarWishesRouteRoute
-  '/users': typeof AuthSidebarAdminUsersRoute
+  '/users': typeof AuthSidebarAdminUsersRouteRoute
   '/profile/$userId': typeof AuthSidebarProfileUserIdRoute
 }
 export interface FileRoutesById {
@@ -94,7 +95,7 @@ export interface FileRoutesById {
   '/_auth/_sidebar/wishes': typeof AuthSidebarWishesRouteRoute
   '/_auth/_sidebar/_admin': typeof AuthSidebarAdminRouteWithChildren
   '/_auth/_sidebar/': typeof AuthSidebarIndexRoute
-  '/_auth/_sidebar/_admin/users': typeof AuthSidebarAdminUsersRoute
+  '/_auth/_sidebar/_admin/users': typeof AuthSidebarAdminUsersRouteRoute
   '/_auth/_sidebar/profile/$userId': typeof AuthSidebarProfileUserIdRoute
 }
 export interface FileRouteTypes {
@@ -196,18 +197,18 @@ declare module '@tanstack/react-router' {
       id: '/_auth/_sidebar/_admin/users'
       path: '/users'
       fullPath: '/users'
-      preLoaderRoute: typeof AuthSidebarAdminUsersRouteImport
+      preLoaderRoute: typeof AuthSidebarAdminUsersRouteRouteImport
       parentRoute: typeof AuthSidebarAdminRoute
     }
   }
 }
 
 interface AuthSidebarAdminRouteChildren {
-  AuthSidebarAdminUsersRoute: typeof AuthSidebarAdminUsersRoute
+  AuthSidebarAdminUsersRouteRoute: typeof AuthSidebarAdminUsersRouteRoute
 }
 
 const AuthSidebarAdminRouteChildren: AuthSidebarAdminRouteChildren = {
-  AuthSidebarAdminUsersRoute: AuthSidebarAdminUsersRoute,
+  AuthSidebarAdminUsersRouteRoute: AuthSidebarAdminUsersRouteRoute,
 }
 
 const AuthSidebarAdminRouteWithChildren =

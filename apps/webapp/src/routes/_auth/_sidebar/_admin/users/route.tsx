@@ -47,12 +47,16 @@ import {
 import { Suspense, useMemo } from "react";
 import z from "zod";
 
+type UserTableEntry = UserResponse & { isMe: boolean };
+
 const searchParams = {
   query: parseAsString.withDefault(""),
   columnVisibility: parseAsJson(z.record(z.string(), z.boolean())).withDefault(
     {},
   ),
-  sorting: parseAsJson(z.record(z.string(), z.boolean())).withDefault({}),
+  sorting: parseAsJson(z.record(z.string(), z.boolean())).withDefault({
+    createdAt: true,
+  }),
 };
 
 export const Route = createFileRoute("/_auth/_sidebar/_admin/users")({
@@ -73,8 +77,15 @@ function RouteComponent() {
     return Object.entries(sorting).map(([id, desc]) => ({ id, desc }));
   }, [sorting]);
 
+  const data = useMemo<UserTableEntry[]>(() => {
+    return usersQuery.data.map((user) => ({
+      ...user,
+      isMe: user.userId === meQuery.data.userId,
+    }));
+  }, []);
+
   const table = useReactTable({
-    data: usersQuery.data,
+    data,
     columns: COLUMNS,
     getRowId: (user) => user.userId,
     getCoreRowModel: getCoreRowModel(),
@@ -107,9 +118,6 @@ function RouteComponent() {
       sorting: sortingState,
       globalFilter: query || undefined,
     },
-    initialState: {
-      rowSelection: { [meQuery.data.userId]: true },
-    },
   });
 
   return (
@@ -123,9 +131,25 @@ function RouteComponent() {
         <DataTableSortingOptions
           table={table}
           variant="outline"
-          labelsMap={{}}
+          labelsMap={{
+            userId: "ID",
+            role: "Role",
+            profile_name: "Name",
+            email: "Email",
+            createdAt: "Member since",
+          }}
         />
-        <DataTableViewOptions table={table} variant="outline" labelsMap={{}} />
+        <DataTableViewOptions
+          table={table}
+          variant="outline"
+          labelsMap={{
+            userId: "ID",
+            role: "Role",
+            profile_name: "Name",
+            email: "Email",
+            createdAt: "Member since",
+          }}
+        />
         <div className="flex-1" />
       </div>
       <DataTable table={table} />
@@ -133,10 +157,12 @@ function RouteComponent() {
   );
 }
 
-const helper = createColumnHelper<UserResponse>();
+const helper = createColumnHelper<UserTableEntry>();
 
 const COLUMNS = [
   helper.accessor("userId", {
+    enableHiding: false,
+    enableSorting: false,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="ID" />
     ),
@@ -175,6 +201,7 @@ const COLUMNS = [
     cell: (props) => <span className="font-medium">{props.getValue()}</span>,
   }),
   helper.accessor("email", {
+    enableHiding: false,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Email" />
     ),
@@ -188,6 +215,13 @@ const COLUMNS = [
         {dayjs(props.getValue()).format("MMM DD, YYYY, HH:mm")}
       </span>
     ),
+  }),
+  helper.display({
+    id: "actions",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Actions" />
+    ),
+    cell: () => null,
   }),
 ];
 
