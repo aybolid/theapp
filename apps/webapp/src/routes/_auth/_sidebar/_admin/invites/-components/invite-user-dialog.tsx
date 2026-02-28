@@ -101,8 +101,8 @@ export const InviteUserDialog: FC<{
       <DialogTrigger nativeButton={nativeButton} render={render} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invite new user</DialogTitle>
-          <DialogDescription>Send invite to a user</DialogDescription>
+          <DialogTitle>Bring someone in</DialogTitle>
+          <DialogDescription>Send an invite link to a friend</DialogDescription>
         </DialogHeader>
         <form
           className="contents"
@@ -132,8 +132,7 @@ export const InviteUserDialog: FC<{
                       placeholder="example@mail.com"
                     />
                     <FieldDescription>
-                      User will receive an email with a link to create an
-                      account
+                      They'll get an email with a link to join the group
                     </FieldDescription>
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />

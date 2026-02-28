@@ -113,8 +113,8 @@ export const EditProfileDialog: FC<{
       <DialogTrigger nativeButton={nativeButton} render={render} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
-          <DialogDescription>Update your profile details</DialogDescription>
+          <DialogTitle>Edit your profile</DialogTitle>
+          <DialogDescription>Change how you appear to others</DialogDescription>
         </DialogHeader>
         <form
           className="contents"

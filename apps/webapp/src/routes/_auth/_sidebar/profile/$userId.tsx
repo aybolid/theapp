@@ -34,7 +34,6 @@ import {
 import {
   Activity01Icon,
   Alert01Icon,
-  Bug01Icon,
   Edit01Icon,
   IdentityCardIcon,
   Mail01Icon,
@@ -43,10 +42,7 @@ import {
   UserIcon,
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
-import {
-  LazyDevErrorStackDisplay,
-  LazyDevJsonDisplay,
-} from "@theapp/webapp/components/lazy";
+import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import {
   createStandardSchemaV1,
@@ -58,9 +54,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { SessionsList } from "./-components/sessions-list";
 
 const searchParams = {
-  tab: parseAsStringLiteral(["activity", "settings", "debug"]).withDefault(
-    "activity",
-  ),
+  tab: parseAsStringLiteral(["activity", "settings"]).withDefault("activity"),
 };
 
 const LazyEditProfileDialog = lazy(() =>
@@ -179,18 +173,12 @@ function RouteComponent() {
         <TabsList className="w-full" variant="line">
           <TabsTrigger value="activity">
             <HugeiconsIcon icon={Activity01Icon} strokeWidth={2} />
-            <span>Activity</span>
+            <span>What's new</span>
           </TabsTrigger>
           {isMe && (
             <TabsTrigger value="settings">
               <HugeiconsIcon icon={Settings01Icon} strokeWidth={2} />
               <span>Settings</span>
-            </TabsTrigger>
-          )}
-          {import.meta.env.DEV && (
-            <TabsTrigger value="debug">
-              <HugeiconsIcon icon={Bug01Icon} strokeWidth={2} />
-              <span>Debug</span>
             </TabsTrigger>
           )}
         </TabsList>
@@ -213,9 +201,9 @@ function RouteComponent() {
                         <>
                           <Alert variant="destructive">
                             <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-                            <AlertTitle>Sessions loading failed</AlertTitle>
+                            <AlertTitle>Couldn't load your sessions</AlertTitle>
                             <AlertDescription>
-                              Some unexpected error occurred.
+                              Something went wrong on our end.
                             </AlertDescription>
                             <AlertAction>
                               <Button
@@ -223,7 +211,7 @@ function RouteComponent() {
                                 size="xs"
                                 onClick={resetErrorBoundary}
                               >
-                                Retry
+                                Try again
                               </Button>
                             </AlertAction>
                           </Alert>
@@ -253,13 +241,6 @@ function RouteComponent() {
             </Tabs>
           </TabsContent>
         )}
-        {import.meta.env.DEV && (
-          <TabsContent value="debug">
-            <Suspense>
-              <LazyDevJsonDisplay value={userQuery.data} />
-            </Suspense>
-          </TabsContent>
-        )}
       </Tabs>
     </div>
   );
@@ -286,9 +267,9 @@ function ErrorComponent({ error }: ErrorComponentProps) {
     <div className="container mx-auto grid max-w-3xl gap-4">
       <Alert variant="destructive">
         <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-        <AlertTitle>Profile loading failed</AlertTitle>
+        <AlertTitle>Couldn't load the profile</AlertTitle>
         <AlertDescription>
-          Some unexpected error occurred. Please try again later.
+          Something's not right. Try again later?
         </AlertDescription>
       </Alert>
       <Suspense>

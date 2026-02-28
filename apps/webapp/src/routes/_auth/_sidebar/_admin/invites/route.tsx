@@ -136,7 +136,7 @@ function RouteComponent() {
       </div>
       <DataTable
         table={table}
-        caption="Do not bother deleting expired invites. They will be automatically deleted."
+        caption="Don't worry about old invites. They'll disappear on their own."
       />
     </div>
   );
@@ -210,9 +210,9 @@ function ErrorComponent({ error }: ErrorComponentProps) {
     <div className="container mx-auto grid max-w-3xl gap-4">
       <Alert variant="destructive">
         <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-        <AlertTitle>Invites loading failed</AlertTitle>
+        <AlertTitle>Couldn't load invites</AlertTitle>
         <AlertDescription>
-          Some unexpected error occurred. Please try again later.
+          Something's broken. Give it another shot?
         </AlertDescription>
       </Alert>
       <Suspense>

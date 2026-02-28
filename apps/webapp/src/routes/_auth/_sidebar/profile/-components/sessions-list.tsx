@@ -40,14 +40,14 @@ export const SessionsList: FC = () => {
             <ItemTitle>{formatUserAgent(session.uaData)}</ItemTitle>
             <ItemDescription className="flex flex-wrap gap-1">
               {session.isCurrent && (
-                <Badge className="font-normal">This device</Badge>
+                <Badge className="font-normal">You're on this device</Badge>
               )}
               <Badge variant="outline" className="font-normal">
-                Created:{" "}
+                First seen:{" "}
                 {dayjs(session.createdAt).format("MMM DD, YYYY, HH:mm")}
               </Badge>
               <Badge variant="outline" className="font-normal">
-                Last used:{" "}
+                Active:{" "}
                 {dayjs(session.lastUsedAt).format("MMM DD, YYYY, HH:mm")}
               </Badge>
             </ItemDescription>
@@ -72,7 +72,7 @@ export const SessionsList: FC = () => {
         ) : (
           <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />
         )}
-        <span>Sign out all</span>
+        <span>Sign out everywhere</span>
       </Button>
     </ItemGroup>
   );

@@ -244,7 +244,7 @@ function PendingComponent() {
         <EmptyMedia variant="icon">
           <Spinner />
         </EmptyMedia>
-        <EmptyTitle>Loading users</EmptyTitle>
+        <EmptyTitle>Loading users...</EmptyTitle>
       </EmptyHeader>
     </Empty>
   );
@@ -255,9 +255,9 @@ function ErrorComponent({ error }: ErrorComponentProps) {
     <div className="container mx-auto grid max-w-3xl gap-4">
       <Alert variant="destructive">
         <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-        <AlertTitle>Users loading failed</AlertTitle>
+        <AlertTitle>Couldn't load the users</AlertTitle>
         <AlertDescription>
-          Some unexpected error occurred. Please try again later.
+          Something broke. Give it another shot in a bit.
         </AlertDescription>
       </Alert>
       <Suspense>

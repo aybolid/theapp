@@ -87,17 +87,17 @@ export const WishItem: FC<{
         <ItemGroup className="grid gap-2 sm:grid-cols-2">
           <Item variant="muted" className="items-start">
             <ItemContent>
-              <ItemTitle>Owner</ItemTitle>
+              <ItemTitle>Whose wish</ItemTitle>
               <UserChip user={wish.owner} />
             </ItemContent>
           </Item>
           <Item variant="muted" className="items-start">
             <ItemContent>
-              <ItemTitle>Reserver</ItemTitle>
+              <ItemTitle>Getting it</ItemTitle>
               {wish.reserver ? (
                 <UserChip user={wish.reserver} />
               ) : isOwnedByMe ? (
-                <ItemDescription>No reserver</ItemDescription>
+                <ItemDescription>Nobody yet</ItemDescription>
               ) : (
                 <Button
                   disabled={updateReservationMutation.isPending}
@@ -109,19 +109,19 @@ export const WishItem: FC<{
                   }
                 >
                   {updateReservationMutation.isPending && <Spinner />}
-                  <span>Reserve</span>
+                  <span>I'll get it!</span>
                 </Button>
               )}
             </ItemContent>
           </Item>
           <Item variant="muted" className="justify-between">
-            <ItemTitle>Created at</ItemTitle>
+            <ItemTitle>Added on</ItemTitle>
             <ItemDescription>
               {dayjs(wish.createdAt).format("MMM DD, YYYY, HH:mm")}
             </ItemDescription>
           </Item>
           <Item variant="muted" className="justify-between">
-            <ItemTitle>Updated at</ItemTitle>
+            <ItemTitle>Updated on</ItemTitle>
             <ItemDescription>
               {dayjs(wish.updatedAt).format("MMM DD, YYYY, HH:mm")}
             </ItemDescription>

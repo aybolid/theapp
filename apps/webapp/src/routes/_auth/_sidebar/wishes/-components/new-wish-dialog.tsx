@@ -118,8 +118,10 @@ export const NewWishDialog: FC<{
       <DialogTrigger nativeButton={nativeButton} render={render} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create wish</DialogTitle>
-          <DialogDescription>Add new wish with details below</DialogDescription>
+          <DialogTitle>Make a wish</DialogTitle>
+          <DialogDescription>
+            What are you dreaming of? Add the details below.
+          </DialogDescription>
         </DialogHeader>
         <form
           className="contents"

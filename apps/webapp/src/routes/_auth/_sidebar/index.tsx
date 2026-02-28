@@ -23,10 +23,10 @@ export const Route = createFileRoute("/_auth/_sidebar/")({
 function RouteComponent() {
   return (
     <div className="container mx-auto grid max-w-3xl gap-4">
-      <h1 className="font-bold text-2xl">Welcome to THEAPP.</h1>
+      <h1 className="font-bold text-2xl">Welcome!</h1>
       <p className="text-muted-foreground">
-        A suite of tools created to simplify your daily routine. Explore
-        available applications below.
+        Just a few tools to make our lives a bit easier. Pick something below
+        and get started.
       </p>
       <section className="grid gap-4 md:grid-cols-2">
         <Link to="/wishes">
@@ -37,8 +37,8 @@ function RouteComponent() {
             <ItemContent>
               <ItemTitle>Wishes</ItemTitle>
               <ItemDescription className="line-clamp-none">
-                Create and share wishes with ease. Take the guesswork out of
-                gifting for birthdays and special occasions.
+                Share what you're wishing for and see what others want. No more
+                awkward "what do you want for your birthday?" talks.
               </ItemDescription>
             </ItemContent>
           </Item>

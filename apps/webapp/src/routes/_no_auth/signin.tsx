@@ -88,9 +88,9 @@ function RouteComponent() {
     <main className="grid h-screen place-items-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="border-b">
-          <CardTitle>Sign in</CardTitle>
+          <CardTitle>Welcome back!</CardTitle>
           <CardDescription>
-            Enter your details below to access your account.
+            Ready to jump back in? Just drop your details below.
           </CardDescription>
           <CardAction>
             <ThemeMenu />
@@ -112,9 +112,7 @@ function RouteComponent() {
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
-                        Email address
-                      </FieldLabel>
+                      <FieldLabel htmlFor={field.name}>Your email</FieldLabel>
                       <Input
                         id={field.name}
                         name={field.name}
@@ -123,7 +121,7 @@ function RouteComponent() {
                         onChange={(e) => field.handleChange(e.target.value)}
                         aria-invalid={isInvalid}
                         type="email"
-                        placeholder="email@example.com"
+                        placeholder="you@example.com"
                       />
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
@@ -150,6 +148,7 @@ function RouteComponent() {
                         onChange={(e) => field.handleChange(e.target.value)}
                         aria-invalid={isInvalid}
                         type="password"
+                        placeholder="••••••••"
                       />
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
@@ -167,7 +166,7 @@ function RouteComponent() {
             <FieldGroup>
               <Button disabled={isBusy} type="submit">
                 {isBusy && <Spinner />}
-                <span>Sign in</span>
+                <span>Let's go!</span>
               </Button>
             </FieldGroup>
           </CardContent>

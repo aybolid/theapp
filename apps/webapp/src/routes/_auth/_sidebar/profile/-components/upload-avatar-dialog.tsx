@@ -20,9 +20,9 @@ export const UploadAvatarDialog: FC<{
       <DialogTrigger nativeButton={nativeButton} render={render} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Upload avatar</DialogTitle>
+          <DialogTitle>Pick a new look</DialogTitle>
           <DialogDescription>
-            Upload an image to use as your avatar
+            Upload a picture so we can recognize you
           </DialogDescription>
         </DialogHeader>
         <DialogFooter></DialogFooter>

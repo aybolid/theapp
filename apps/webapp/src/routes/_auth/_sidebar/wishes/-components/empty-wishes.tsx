@@ -25,13 +25,13 @@ export const EmptyWishes: FC<ComponentPropsWithoutRef<typeof Empty>> = (
         <EmptyMedia variant="icon">
           <HugeiconsIcon icon={Gift} strokeWidth={2} />
         </EmptyMedia>
-        <EmptyTitle>No wishes yet</EmptyTitle>
+        <EmptyTitle>No wishes here yet...</EmptyTitle>
         <EmptyContent>
           <Suspense
             fallback={
               <Button disabled>
                 <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-                <span>New wish</span>
+                <span>Make a wish</span>
               </Button>
             }
           >
@@ -39,7 +39,7 @@ export const EmptyWishes: FC<ComponentPropsWithoutRef<typeof Empty>> = (
               render={
                 <Button>
                   <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-                  <span>New wish</span>
+                  <span>Make a wish</span>
                 </Button>
               }
             />

@@ -184,7 +184,7 @@ const UserButton: FC = () => {
           ) : (
             <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />
           )}
-          <span>Sign out</span>
+          <span>Logout</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

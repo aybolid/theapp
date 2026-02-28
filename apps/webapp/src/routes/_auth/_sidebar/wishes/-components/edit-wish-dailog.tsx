@@ -111,8 +111,10 @@ export const EditWishDialog: FC<{
       <DialogTrigger nativeButton={nativeButton} render={render} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit wish</DialogTitle>
-          <DialogDescription>Update wish details</DialogDescription>
+          <DialogTitle>Change your wish</DialogTitle>
+          <DialogDescription>
+            Made a mistake? No worries, fix it here.
+          </DialogDescription>
         </DialogHeader>
         <form
           className="contents"

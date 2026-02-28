@@ -197,10 +197,10 @@ function RouteComponent() {
             labelsMap={{
               isCompleted: "Status",
               note: "Note",
-              createdAt: "Created at",
-              updatedAt: "Updated at",
-              owner_profile_name: "Owner",
-              reserver_profile_name: "Reserver",
+              createdAt: "Added on",
+              updatedAt: "Updated on",
+              owner_profile_name: "Whose wish",
+              reserver_profile_name: "Getting it",
               name: "Name",
             }}
           />
@@ -211,8 +211,8 @@ function RouteComponent() {
               labelsMap={{
                 isCompleted: "Status",
                 note: "Note",
-                createdAt: "Created at",
-                updatedAt: "Updated at",
+                createdAt: "Added on",
+                updatedAt: "Updated on",
               }}
             />
           )}
@@ -285,10 +285,10 @@ function RouteComponent() {
             labelsMap={{
               isCompleted: "Status",
               note: "Note",
-              createdAt: "Created at",
-              updatedAt: "Updated at",
-              owner_profile_name: "Owner",
-              reserver_profile_name: "Reserver",
+              createdAt: "Added on",
+              updatedAt: "Updated on",
+              owner_profile_name: "Whose wish",
+              reserver_profile_name: "Getting it",
               name: "Name",
             }}
           />
@@ -320,7 +320,7 @@ function PendingComponent() {
         <EmptyMedia variant="icon">
           <Spinner />
         </EmptyMedia>
-        <EmptyTitle>Loading wishes</EmptyTitle>
+        <EmptyTitle>Finding the wishes...</EmptyTitle>
       </EmptyHeader>
     </Empty>
   );
@@ -331,9 +331,9 @@ function ErrorComponent({ error }: ErrorComponentProps) {
     <div className="container mx-auto grid max-w-3xl gap-4">
       <Alert variant="destructive">
         <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-        <AlertTitle>Wishes loading failed</AlertTitle>
+        <AlertTitle>Couldn't load wishes</AlertTitle>
         <AlertDescription>
-          Some unexpected error occurred. Please try again later.
+          Something went wrong. Maybe try refreshing?
         </AlertDescription>
       </Alert>
       <Suspense>
@@ -348,7 +348,7 @@ const helper = createColumnHelper<WishTableEntry>();
 const COLUMNS = [
   helper.accessor("owner.profile.name", {
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Owner" />
+      <DataTableColumnHeader column={column} title="Whose wish" />
     ),
     enableHiding: false,
     cell: (props) => {
@@ -433,7 +433,7 @@ const COLUMNS = [
   }),
   helper.accessor("reserver.profile.name", {
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Reserver" />
+      <DataTableColumnHeader column={column} title="Getting it" />
     ),
     enableHiding: false,
     cell: (props) => {
@@ -468,12 +468,12 @@ const COLUMNS = [
               }}
             >
               {updateReservationMutation.isPending && <Spinner />}
-              <span>Reserve</span>
+              <span>I'll get it!</span>
             </Button>
           );
         } else {
           return (
-            <span className="text-muted-foreground text-sm">No reserver</span>
+            <span className="text-muted-foreground text-sm">Nobody yet</span>
           );
         }
       }

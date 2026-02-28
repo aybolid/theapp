@@ -65,9 +65,9 @@ function RouteComponent() {
     <main className="grid h-screen place-items-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="border-b">
-          <CardTitle>Create an account</CardTitle>
+          <CardTitle>Join the party!</CardTitle>
           <CardDescription>
-            Enter your details below to get started.
+            Glad you could make it. Set your password and we're good to go.
           </CardDescription>
           <CardAction>
             <ThemeMenu />
@@ -77,9 +77,9 @@ function RouteComponent() {
           fallback={
             <CardContent>
               <Alert variant="destructive">
-                <AlertTitle>Invalid invite</AlertTitle>
+                <AlertTitle>Oops! Dead end.</AlertTitle>
                 <AlertDescription>
-                  Your invite has expired or is invalid.
+                  That invite looks expired or just plain wrong.
                 </AlertDescription>
               </Alert>
             </CardContent>
@@ -101,9 +101,9 @@ function RouteComponent() {
         </ErrorBoundary>
         <CardFooter>
           <p className="text-muted-foreground text-sm">
-            Already have an account?{" "}
+            Been here before?{" "}
             <Link className="text-foreground hover:underline" to="/signin">
-              Sign in
+              Sign in instead
             </Link>
           </p>
         </CardFooter>
@@ -244,7 +244,7 @@ function RouteComponentImpl() {
         <FieldGroup>
           <Button disabled={isBusy} type="submit">
             {isBusy && <Spinner />}
-            <span>Create account</span>
+            <span>Create my account</span>
           </Button>
         </FieldGroup>
       </CardContent>
