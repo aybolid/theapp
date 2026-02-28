@@ -68,6 +68,15 @@ export const userResponseSchema = z.object({
 
 export type UserResponse = z.infer<typeof userResponseSchema>;
 
-export const signoutOkSchema = z.literal("User signed out");
+export const signoutQuerySchema = z.object({
+  sessionId: z.string().optional(),
+});
+
+export type SignoutQuery = z.infer<typeof signoutQuerySchema>;
+
+export const signoutOkSchema = z.enum([
+  "User signed out",
+  "Session invalidated",
+]);
 
 export type SignoutOk = z.infer<typeof signoutOkSchema>;

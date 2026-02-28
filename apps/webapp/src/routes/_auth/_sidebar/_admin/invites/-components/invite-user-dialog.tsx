@@ -132,7 +132,7 @@ export const InviteUserDialog: FC<{
                       placeholder="example@mail.com"
                     />
                     <FieldDescription>
-                      They'll get an email with a link to join the group
+                      They'll get an email with a link to join the app
                     </FieldDescription>
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />

@@ -14,7 +14,11 @@ import {
 import { Spinner } from "@theapp/ui/components/spinner";
 import { Logout01Icon, Unlink01Icon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
-import { useSignoutAllMutation } from "@theapp/webapp/lib/query/auth";
+import { toast } from "@theapp/ui/lib/sonner";
+import {
+  useSignoutAllMutation,
+  useSignoutMutation,
+} from "@theapp/webapp/lib/query/auth";
 import { useSessionsSuspenseQuery } from "@theapp/webapp/lib/query/sessions";
 import dayjs from "dayjs";
 import type { FC } from "react";
@@ -24,6 +28,15 @@ export const SessionsList: FC = () => {
 
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const signoutMutation = useSignoutMutation({
+    onSuccess: () => {
+      sessionsQuery.refetch();
+    },
+    onError: () => {
+      toast.error("Failed to invalidate session");
+    },
+  });
 
   const signoutAllMutation = useSignoutAllMutation({
     onSettled: () => {
@@ -54,7 +67,14 @@ export const SessionsList: FC = () => {
           </ItemContent>
           {!session.isCurrent && (
             <ItemActions>
-              <Button variant="destructive" size="icon-sm">
+              <Button
+                variant="destructive"
+                size="icon-sm"
+                disabled={signoutMutation.isPending}
+                onClick={() =>
+                  signoutMutation.mutate({ sessionId: session.sessionId })
+                }
+              >
                 <HugeiconsIcon icon={Unlink01Icon} strokeWidth={2} />
               </Button>
             </ItemActions>

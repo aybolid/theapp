@@ -3,6 +3,7 @@ import {
   signinBodySchema,
   signinOkSchema,
   signoutOkSchema,
+  signoutQuerySchema,
   signupBodySchema,
   signupCreatedSchema,
   singupBadRequestErrorSchema,
@@ -20,7 +21,7 @@ import {
   verifyPassword,
 } from "@theapp/server/utils/crypto";
 import { parseUserAgent } from "@theapp/server/utils/ua";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import Elysia from "elysia";
 import { isProduction } from "elysia/error";
 import {
@@ -193,17 +194,32 @@ export const auth = new Elysia({
   .post(
     "/signout",
     async (ctx) => {
-      ctx.cookie.sessionToken?.remove();
-      ctx.cookie.authToken?.remove();
+      if (!ctx.query.sessionId || ctx.query.sessionId === ctx.sessionId) {
+        ctx.cookie.sessionToken?.remove();
+        ctx.cookie.authToken?.remove();
+        await db
+          .delete(schema.sessions)
+          .where(eq(schema.sessions.sessionId, ctx.sessionId));
+        return ctx.status(200, "User signed out");
+      }
+
       await db
         .delete(schema.sessions)
-        .where(eq(schema.sessions.sessionId, ctx.sessionId));
-      return ctx.status(200, "User signed out");
+        .where(
+          and(
+            eq(schema.sessions.sessionId, ctx.query.sessionId),
+            eq(schema.sessions.userId, ctx.userId),
+          ),
+        );
+
+      return ctx.status(200, "Session invalidated");
     },
     {
+      query: signoutQuerySchema,
       response: { 200: signoutOkSchema },
       detail: {
-        description: "Sign out the current session.",
+        description:
+          "Sign out the current session or, if `sessionId` is provided, the specified session.",
       },
     },
   )

@@ -36,8 +36,10 @@ import {
   Alert01Icon,
   Edit01Icon,
   IdentityCardIcon,
+  LockIcon,
   Mail01Icon,
   Photo,
+  PreferenceHorizontalIcon,
   Settings01Icon,
   UserIcon,
 } from "@theapp/ui/icons/huge";
@@ -190,6 +192,17 @@ function RouteComponent() {
                 <TabsTrigger value="sessions">
                   <HugeiconsIcon icon={IdentityCardIcon} strokeWidth={2} />
                   <span>Sessions</span>
+                </TabsTrigger>
+                <TabsTrigger value="preferences" disabled>
+                  <HugeiconsIcon
+                    icon={PreferenceHorizontalIcon}
+                    strokeWidth={2}
+                  />
+                  <span>Preferences</span>
+                </TabsTrigger>
+                <TabsTrigger value="security" disabled>
+                  <HugeiconsIcon icon={LockIcon} strokeWidth={2} />
+                  <span>Security</span>
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="sessions">

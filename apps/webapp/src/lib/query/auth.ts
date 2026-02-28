@@ -10,6 +10,7 @@ import type {
   SigninBody,
   SigninOk,
   SignoutOk,
+  SignoutQuery,
   SignupBody,
   SignupCreated,
   UserResponse,
@@ -98,15 +99,18 @@ export function useSignoutMutation(
   options?: Omit<
     UseMutationOptions<
       SignoutOk,
-      Treaty.Error<typeof server.api.auth.signout.post>
+      Treaty.Error<typeof server.api.auth.signout.post>,
+      SignoutQuery | undefined
     >,
     "mutationKey" | "mutationFn"
   >,
 ) {
   return useMutation({
     mutationKey: ["signout"],
-    mutationFn: async () => {
-      const resp = await server.api.auth.signout.post();
+    mutationFn: async (data: SignoutQuery) => {
+      const resp = await server.api.auth.signout.post(undefined, {
+        query: data,
+      });
       if (resp.error) {
         throw resp.error;
       } else {

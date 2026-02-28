@@ -177,7 +177,7 @@ const UserButton: FC = () => {
         <DropdownMenuItem
           variant="destructive"
           disabled={signoutMutation.isPending}
-          onClick={() => signoutMutation.mutate()}
+          onClick={() => signoutMutation.mutate({ sessionId: undefined })}
         >
           {signoutMutation.isPending ? (
             <Spinner />
