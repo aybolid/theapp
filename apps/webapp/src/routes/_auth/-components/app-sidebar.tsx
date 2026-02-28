@@ -5,6 +5,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@theapp/ui/components/avatar";
+import { Badge } from "@theapp/ui/components/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,7 @@ import {
 } from "@theapp/ui/components/sidebar";
 import { Spinner } from "@theapp/ui/components/spinner";
 import {
+  Chat01Icon,
   DashboardSquareIcon,
   Gift,
   Logout01Icon,
@@ -72,6 +74,16 @@ export const AppSidebar: FC = () => {
                   <Link to="/wishes">
                     <HugeiconsIcon icon={Gift} strokeWidth={2} />
                     <span>Wishes</span>
+                  </Link>
+                }
+              />
+              <SidebarMenuButton
+                disabled
+                render={
+                  <Link to="/">
+                    <HugeiconsIcon icon={Chat01Icon} strokeWidth={2} />
+                    <span>Quotes</span>
+                    <Badge variant="secondary">Work in progress</Badge>
                   </Link>
                 }
               />

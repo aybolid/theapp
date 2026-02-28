@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Badge } from "@theapp/ui/components/badge";
 import {
   Item,
   ItemContent,
@@ -6,7 +7,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@theapp/ui/components/item";
-import { Gift } from "@theapp/ui/icons/huge";
+import { Chat01Icon, Gift } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { PageWrapper } from "../-components/page-wrapper";
 
@@ -32,7 +33,7 @@ function RouteComponent() {
         </p>
         <section className="grid gap-4 md:grid-cols-2">
           <Link to="/wishes">
-            <Item variant="muted">
+            <Item variant="muted" className="hover:bg-muted">
               <ItemMedia variant="icon">
                 <HugeiconsIcon icon={Gift} strokeWidth={2} />
               </ItemMedia>
@@ -45,6 +46,21 @@ function RouteComponent() {
               </ItemContent>
             </Item>
           </Link>
+          <Item variant="muted" className="opacity-50">
+            <ItemMedia variant="icon">
+              <HugeiconsIcon icon={Chat01Icon} strokeWidth={2} />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>
+                <span>Quotes</span>
+                <Badge variant="secondary">Work in progress</Badge>
+              </ItemTitle>
+              <ItemDescription className="line-clamp-none">
+                Someone said something wild? Write it down! Nothing beats
+                reading it later, completely out of context.
+              </ItemDescription>
+            </ItemContent>
+          </Item>
         </section>
       </div>
     </PageWrapper>

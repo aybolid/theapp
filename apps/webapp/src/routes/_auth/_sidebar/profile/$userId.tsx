@@ -1,11 +1,9 @@
-import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import {
   createFileRoute,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import {
   Alert,
-  AlertAction,
   AlertDescription,
   AlertTitle,
 } from "@theapp/ui/components/alert";
@@ -24,41 +22,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@theapp/ui/components/card";
-import { Skeleton } from "@theapp/ui/components/skeleton";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@theapp/ui/components/tabs";
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@theapp/ui/components/empty";
+import { Spinner } from "@theapp/ui/components/spinner";
 import {
-  Activity01Icon,
   Alert01Icon,
   Edit01Icon,
-  IdentityCardIcon,
-  LockIcon,
   Mail01Icon,
   Photo,
-  PreferenceHorizontalIcon,
-  Settings01Icon,
   UserIcon,
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
-import {
-  createStandardSchemaV1,
-  parseAsStringLiteral,
-  useQueryStates,
-} from "nuqs";
+import { useUserByIdSuspenseQuery } from "@theapp/webapp/lib/query/users";
 import { lazy, Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 import { PageWrapper } from "../../-components/page-wrapper";
-import { SessionsList } from "./-components/sessions-list";
-
-const searchParams = {
-  tab: parseAsStringLiteral(["activity", "settings"]).withDefault("activity"),
-};
 
 const LazyEditProfileDialog = lazy(() =>
   import("./-components/edit-profile-dialog").then((m) => ({
@@ -76,23 +59,22 @@ export const Route = createFileRoute("/_auth/_sidebar/profile/$userId")({
   head: () => ({
     meta: [
       {
-        title: "My Profile | theapp",
+        title: "User Profile | theapp",
       },
     ],
   }),
-  validateSearch: createStandardSchemaV1(searchParams, { partialOutput: true }),
   component: RouteComponent,
   pendingComponent: PendingComponent,
   errorComponent: ErrorComponent,
 });
 
 function RouteComponent() {
-  const [{ tab }, setSearchParams] = useQueryStates(searchParams);
-  // const { userId } = Route.useParams();
+  const { userId } = Route.useParams();
 
-  const userQuery = useMeSuspenseQuery();
+  const meQuery = useMeSuspenseQuery();
+  const userQuery = useUserByIdSuspenseQuery(userId);
 
-  const isMe = true;
+  const isMe = meQuery.data.userId === userQuery.data.userId;
 
   return (
     <PageWrapper breadcrumbs={[userQuery.data.profile.name]}>
@@ -165,103 +147,6 @@ function RouteComponent() {
             </CardFooter>
           )}
         </Card>
-
-        <Tabs
-          value={tab}
-          onValueChange={(v) =>
-            setSearchParams({
-              tab: searchParams.tab.parse(v),
-            })
-          }
-        >
-          <TabsList className="w-full" variant="line">
-            <TabsTrigger value="activity">
-              <HugeiconsIcon icon={Activity01Icon} strokeWidth={2} />
-              <span>What's new</span>
-            </TabsTrigger>
-            {isMe && (
-              <TabsTrigger value="settings">
-                <HugeiconsIcon icon={Settings01Icon} strokeWidth={2} />
-                <span>Settings</span>
-              </TabsTrigger>
-            )}
-          </TabsList>
-
-          {isMe && (
-            <TabsContent value="settings">
-              <Tabs>
-                <TabsList className="w-full">
-                  <TabsTrigger value="sessions">
-                    <HugeiconsIcon icon={IdentityCardIcon} strokeWidth={2} />
-                    <span>Sessions</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="preferences" disabled>
-                    <HugeiconsIcon
-                      icon={PreferenceHorizontalIcon}
-                      strokeWidth={2}
-                    />
-                    <span>Preferences</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="security" disabled>
-                    <HugeiconsIcon icon={LockIcon} strokeWidth={2} />
-                    <span>Security</span>
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="sessions">
-                  <QueryErrorResetBoundary>
-                    {({ reset }) => (
-                      <ErrorBoundary
-                        onReset={reset}
-                        fallbackRender={({ error, resetErrorBoundary }) => (
-                          <>
-                            <Alert variant="destructive">
-                              <HugeiconsIcon
-                                icon={Alert01Icon}
-                                strokeWidth={2}
-                              />
-                              <AlertTitle>
-                                Couldn't load your sessions
-                              </AlertTitle>
-                              <AlertDescription>
-                                Something went wrong on our end.
-                              </AlertDescription>
-                              <AlertAction>
-                                <Button
-                                  variant="secondary"
-                                  size="xs"
-                                  onClick={resetErrorBoundary}
-                                >
-                                  Try again
-                                </Button>
-                              </AlertAction>
-                            </Alert>
-                            <Suspense>
-                              <LazyDevErrorStackDisplay
-                                className="mt-2"
-                                error={error as Error}
-                              />
-                            </Suspense>
-                          </>
-                        )}
-                      >
-                        <Suspense
-                          fallback={
-                            <div className="space-y-4">
-                              <Skeleton className="p-8" />
-                              <Skeleton className="p-8" />
-                            </div>
-                          }
-                        >
-                          <SessionsList />
-                        </Suspense>
-                      </ErrorBoundary>
-                    )}
-                  </QueryErrorResetBoundary>
-                </TabsContent>
-              </Tabs>
-            </TabsContent>
-          )}
-        </Tabs>
       </div>
     </PageWrapper>
   );
@@ -269,17 +154,14 @@ function RouteComponent() {
 
 function PendingComponent() {
   return (
-    <div className="container mx-auto grid max-w-3xl gap-4">
-      <Card>
-        <CardHeader className="border-b">
-          <Skeleton className="size-12 rounded-full" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-8" />
-        </CardContent>
-      </Card>
-      <Skeleton className="h-8" />
-    </div>
+    <Empty className="size-full">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Spinner />
+        </EmptyMedia>
+        <EmptyTitle>Loading the profile...</EmptyTitle>
+      </EmptyHeader>
+    </Empty>
   );
 }
 
