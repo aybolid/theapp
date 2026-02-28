@@ -66,6 +66,7 @@ import {
 } from "nuqs";
 import { Activity, lazy, Suspense, useMemo } from "react";
 import z from "zod";
+import { PageWrapper } from "../../-components/page-wrapper";
 import { EmptyFilteredWishes, EmptyWishes } from "./-components/empty-wishes";
 import { WishActionsMenu } from "./-components/wish-actions-menu";
 import { WishItem } from "./-components/wish-item";
@@ -168,44 +169,31 @@ function RouteComponent() {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <Activity mode={isMobile ? "hidden" : "visible"}>
-        <div className="sticky top-0 z-50 flex flex-wrap gap-2 bg-background py-4 outline outline-background">
-          <SearchInput
-            className="w-80"
-            defaultValue={query}
-            onDebouncedChange={(v) => setSearchParams({ query: v })}
-          />
-          <ToggleGroup
-            variant="outline"
-            multiple={false}
-            value={[view]}
-            onValueChange={(v) =>
-              setSearchParams({ view: searchParams.view.parse(v[0] ?? "") })
-            }
-          >
-            <ToggleGroupItem value="table">
-              <HugeiconsIcon icon={ListViewIcon} strokeWidth={2} />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="cards">
-              <HugeiconsIcon icon={Cards01Icon} strokeWidth={2} />
-            </ToggleGroupItem>
-          </ToggleGroup>
-          <DataTableSortingOptions
-            table={table}
-            variant="outline"
-            labelsMap={{
-              isCompleted: "Status",
-              note: "Note",
-              createdAt: "Added on",
-              updatedAt: "Updated on",
-              owner_profile_name: "Whose wish",
-              reserver_profile_name: "Getting it",
-              name: "Name",
-            }}
-          />
-          {view === "table" && (
-            <DataTableViewOptions
+    <PageWrapper breadcrumbs={["Wishes"]}>
+      <div className="flex h-full flex-col">
+        <Activity mode={isMobile ? "hidden" : "visible"}>
+          <div className="sticky top-0 z-50 flex flex-wrap gap-2 bg-background py-4 outline outline-background">
+            <SearchInput
+              className="w-80"
+              defaultValue={query}
+              onDebouncedChange={(v) => setSearchParams({ query: v })}
+            />
+            <ToggleGroup
+              variant="outline"
+              multiple={false}
+              value={[view]}
+              onValueChange={(v) =>
+                setSearchParams({ view: searchParams.view.parse(v[0] ?? "") })
+              }
+            >
+              <ToggleGroupItem value="table">
+                <HugeiconsIcon icon={ListViewIcon} strokeWidth={2} />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="cards">
+                <HugeiconsIcon icon={Cards01Icon} strokeWidth={2} />
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <DataTableSortingOptions
               table={table}
               variant="outline"
               labelsMap={{
@@ -213,103 +201,118 @@ function RouteComponent() {
                 note: "Note",
                 createdAt: "Added on",
                 updatedAt: "Updated on",
+                owner_profile_name: "Whose wish",
+                reserver_profile_name: "Getting it",
+                name: "Name",
               }}
             />
-          )}
-          <div className="flex-1" />
-          <Suspense
-            fallback={
-              <Button disabled>
-                <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-                <span>New wish</span>
-              </Button>
-            }
-          >
-            <LazyNewWishDialog
-              render={
-                <Button>
+            {view === "table" && (
+              <DataTableViewOptions
+                table={table}
+                variant="outline"
+                labelsMap={{
+                  isCompleted: "Status",
+                  note: "Note",
+                  createdAt: "Added on",
+                  updatedAt: "Updated on",
+                }}
+              />
+            )}
+            <div className="flex-1" />
+            <Suspense
+              fallback={
+                <Button disabled>
                   <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
                   <span>New wish</span>
                 </Button>
               }
-            />
-          </Suspense>
-        </div>
-        <Activity mode={view === "table" ? "visible" : "hidden"}>
-          <DataTable table={table} />
+            >
+              <LazyNewWishDialog
+                render={
+                  <Button>
+                    <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                    <span>New wish</span>
+                  </Button>
+                }
+              />
+            </Suspense>
+          </div>
+          <Activity mode={view === "table" ? "visible" : "hidden"}>
+            <DataTable table={table} />
+          </Activity>
+          <Activity mode={view === "cards" ? "visible" : "hidden"}>
+            {tableWishes.length ? (
+              <div className="grid gap-4 pt-0.5 xl:grid-cols-2 2xl:grid-cols-3">
+                {tableWishes.map((wish) => (
+                  <WishItem
+                    key={wish.wishId}
+                    wish={wish}
+                    isOwnedByMe={wish.isOwnedByMe}
+                    isReservedByMe={wish.isReservedByMe}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyFilteredWishes />
+            )}
+          </Activity>
         </Activity>
-        <Activity mode={view === "cards" ? "visible" : "hidden"}>
+        <Activity mode={isMobile ? "visible" : "hidden"}>
           {tableWishes.length ? (
-            <div className="grid gap-4 pt-0.5 xl:grid-cols-2 2xl:grid-cols-3">
-              {tableWishes.map((wish) => (
-                <WishItem
-                  key={wish.wishId}
-                  wish={wish}
-                  isOwnedByMe={wish.isOwnedByMe}
-                  isReservedByMe={wish.isReservedByMe}
-                />
-              ))}
+            <div className="flex-1">
+              <div className="grid gap-4">
+                {tableWishes.map((wish) => (
+                  <WishItem
+                    key={wish.wishId}
+                    wish={wish}
+                    isOwnedByMe={wish.isOwnedByMe}
+                    isReservedByMe={wish.isReservedByMe}
+                  />
+                ))}
+              </div>
             </div>
           ) : (
             <EmptyFilteredWishes />
           )}
-        </Activity>
-      </Activity>
-      <Activity mode={isMobile ? "visible" : "hidden"}>
-        {tableWishes.length ? (
-          <div className="flex-1">
-            <div className="grid gap-4">
-              {tableWishes.map((wish) => (
-                <WishItem
-                  key={wish.wishId}
-                  wish={wish}
-                  isOwnedByMe={wish.isOwnedByMe}
-                  isReservedByMe={wish.isReservedByMe}
-                />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <EmptyFilteredWishes />
-        )}
-        <div className="sticky bottom-4 z-20 mt-4 flex h-fit w-full items-center gap-2 rounded-lg border bg-background p-2">
-          <SearchInput
-            defaultValue={query}
-            onDebouncedChange={(v) => setSearchParams({ query: v })}
-          />
-          <DataTableSortingOptions
-            className="bg-background!"
-            onlyIcon
-            table={table}
-            variant="outline"
-            labelsMap={{
-              isCompleted: "Status",
-              note: "Note",
-              createdAt: "Added on",
-              updatedAt: "Updated on",
-              owner_profile_name: "Whose wish",
-              reserver_profile_name: "Getting it",
-              name: "Name",
-            }}
-          />
-          <Suspense
-            fallback={
-              <Button size="icon" disabled>
-                <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-              </Button>
-            }
-          >
-            <LazyNewWishDialog
-              render={
-                <Button size="icon">
+          <div className="sticky bottom-4 z-20 mt-4 flex h-fit w-full items-center gap-2 rounded-lg border bg-background p-2">
+            <SearchInput
+              defaultValue={query}
+              onDebouncedChange={(v) => setSearchParams({ query: v })}
+            />
+            <DataTableSortingOptions
+              className="bg-background!"
+              onlyIcon
+              table={table}
+              variant="outline"
+              labelsMap={{
+                isCompleted: "Status",
+                note: "Note",
+                createdAt: "Added on",
+                updatedAt: "Updated on",
+                owner_profile_name: "Whose wish",
+                reserver_profile_name: "Getting it",
+                name: "Name",
+              }}
+            />
+            <Suspense
+              fallback={
+                <Button size="icon" disabled>
                   <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
                 </Button>
               }
-            />
-          </Suspense>
-        </div>
-      </Activity>
-    </div>
+            >
+              <LazyNewWishDialog
+                render={
+                  <Button size="icon">
+                    <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                  </Button>
+                }
+              />
+            </Suspense>
+          </div>
+        </Activity>
+      </div>
+    </PageWrapper>
   );
 }
 
@@ -328,7 +331,7 @@ function PendingComponent() {
 
 function ErrorComponent({ error }: ErrorComponentProps) {
   return (
-    <div className="container mx-auto grid max-w-3xl gap-4">
+    <div className="container mx-auto grid max-w-3xl gap-4 p-4">
       <Alert variant="destructive">
         <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
         <AlertTitle>Couldn't load wishes</AlertTitle>

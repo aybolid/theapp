@@ -71,6 +71,7 @@ import {
 } from "nuqs";
 import { lazy, Suspense, useMemo } from "react";
 import z from "zod";
+import { PageWrapper } from "../../../-components/page-wrapper";
 
 const LazyInviteUserDialog = lazy(() =>
   import("./-components/invite-user-dialog").then(({ InviteUserDialog }) => ({
@@ -126,48 +127,50 @@ function RouteComponent() {
   });
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="sticky top-0 z-50 flex flex-wrap gap-2 bg-background py-4 outline outline-background">
-        <SearchInput
-          className="w-80"
-          defaultValue={query}
-          onDebouncedChange={(v) => setSearchParams({ query: v })}
-        />
-        <DataTableSortingOptions
-          table={table}
-          variant="outline"
-          labelsMap={{
-            email: "Email",
-            createdAt: "Sent at",
-            expiresAt: "Expires at",
-          }}
-        />
+    <PageWrapper breadcrumbs={["Invites"]}>
+      <div className="flex h-full flex-col">
+        <div className="sticky top-0 z-50 flex flex-wrap gap-2 bg-background py-4 outline outline-background">
+          <SearchInput
+            className="w-80"
+            defaultValue={query}
+            onDebouncedChange={(v) => setSearchParams({ query: v })}
+          />
+          <DataTableSortingOptions
+            table={table}
+            variant="outline"
+            labelsMap={{
+              email: "Email",
+              createdAt: "Sent at",
+              expiresAt: "Expires at",
+            }}
+          />
 
-        <div className="flex-1" />
+          <div className="flex-1" />
 
-        <Suspense
-          fallback={
-            <Button disabled>
-              <HugeiconsIcon icon={UserPlus} strokeWidth={2} />
-              <span>Invite user</span>
-            </Button>
-          }
-        >
-          <LazyInviteUserDialog
-            render={
-              <Button>
+          <Suspense
+            fallback={
+              <Button disabled>
                 <HugeiconsIcon icon={UserPlus} strokeWidth={2} />
                 <span>Invite user</span>
               </Button>
             }
-          />
-        </Suspense>
+          >
+            <LazyInviteUserDialog
+              render={
+                <Button>
+                  <HugeiconsIcon icon={UserPlus} strokeWidth={2} />
+                  <span>Invite user</span>
+                </Button>
+              }
+            />
+          </Suspense>
+        </div>
+        <DataTable
+          table={table}
+          caption="Don't worry about old invites. They'll disappear on their own."
+        />
       </div>
-      <DataTable
-        table={table}
-        caption="Don't worry about old invites. They'll disappear on their own."
-      />
-    </div>
+    </PageWrapper>
   );
 }
 
@@ -314,7 +317,7 @@ function PendingComponent() {
 
 function ErrorComponent({ error }: ErrorComponentProps) {
   return (
-    <div className="container mx-auto grid max-w-3xl gap-4">
+    <div className="container mx-auto grid max-w-3xl gap-4 p-4">
       <Alert variant="destructive">
         <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
         <AlertTitle>Couldn't load invites</AlertTitle>

@@ -53,6 +53,7 @@ import {
 } from "nuqs";
 import { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { PageWrapper } from "../../-components/page-wrapper";
 import { SessionsList } from "./-components/sessions-list";
 
 const searchParams = {
@@ -94,168 +95,175 @@ function RouteComponent() {
   const isMe = true;
 
   return (
-    <div className="container mx-auto grid max-w-3xl gap-4">
-      <Card>
-        <CardHeader className="flex items-center gap-4">
-          <Avatar className="size-12">
-            <AvatarImage
-              src={userQuery.data.profile.picture}
-              alt={userQuery.data.profile.name}
-            />
-            <AvatarFallback>
-              <HugeiconsIcon icon={UserIcon} strokeWidth={2} />
-            </AvatarFallback>
-          </Avatar>
-          <div className="space-y-1">
-            <CardTitle>{userQuery.data.profile.name}</CardTitle>
-            <CardDescription className="flex gap-1">
-              <Badge variant="secondary">
-                <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} />
-                <span>{userQuery.data.email}</span>
-              </Badge>
-            </CardDescription>
-          </div>
-        </CardHeader>
-        {userQuery.data.profile.bio && (
-          <CardContent>
-            <p className="text-muted-foreground">
-              {userQuery.data.profile.bio}
-            </p>
-          </CardContent>
-        )}
-        {isMe && (
-          <CardFooter className="justify-end gap-2 py-2">
-            <Suspense
-              fallback={
-                <Button variant="secondary" size="xs" disabled>
-                  <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />
-                  <span>Edit profile</span>
-                </Button>
-              }
-            >
-              <LazyEditProfileDialog
-                profile={userQuery.data.profile}
-                render={
-                  <Button variant="secondary" size="xs">
+    <PageWrapper breadcrumbs={[userQuery.data.profile.name]}>
+      <div className="container mx-auto grid max-w-3xl gap-4">
+        <Card>
+          <CardHeader className="flex items-center gap-4">
+            <Avatar className="size-12">
+              <AvatarImage
+                src={userQuery.data.profile.picture}
+                alt={userQuery.data.profile.name}
+              />
+              <AvatarFallback>
+                <HugeiconsIcon icon={UserIcon} strokeWidth={2} />
+              </AvatarFallback>
+            </Avatar>
+            <div className="space-y-1">
+              <CardTitle>{userQuery.data.profile.name}</CardTitle>
+              <CardDescription className="flex gap-1">
+                <Badge variant="secondary">
+                  <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} />
+                  <span>{userQuery.data.email}</span>
+                </Badge>
+              </CardDescription>
+            </div>
+          </CardHeader>
+          {userQuery.data.profile.bio && (
+            <CardContent>
+              <p className="text-muted-foreground">
+                {userQuery.data.profile.bio}
+              </p>
+            </CardContent>
+          )}
+          {isMe && (
+            <CardFooter className="justify-end gap-2 py-2">
+              <Suspense
+                fallback={
+                  <Button variant="secondary" size="xs" disabled>
                     <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />
                     <span>Edit profile</span>
                   </Button>
                 }
-              />
-            </Suspense>
-            <Suspense
-              fallback={
-                <Button variant="secondary" size="xs" disabled>
-                  <HugeiconsIcon icon={Photo} strokeWidth={2} />
-                  <span>Upload avatar</span>
-                </Button>
-              }
-            >
-              <LazyUploadAvatarDialog
-                render={
-                  <Button variant="secondary" size="xs">
+              >
+                <LazyEditProfileDialog
+                  profile={userQuery.data.profile}
+                  render={
+                    <Button variant="secondary" size="xs">
+                      <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />
+                      <span>Edit profile</span>
+                    </Button>
+                  }
+                />
+              </Suspense>
+              <Suspense
+                fallback={
+                  <Button variant="secondary" size="xs" disabled>
                     <HugeiconsIcon icon={Photo} strokeWidth={2} />
                     <span>Upload avatar</span>
                   </Button>
                 }
-              />
-            </Suspense>
-          </CardFooter>
-        )}
-      </Card>
-
-      <Tabs
-        value={tab}
-        onValueChange={(v) =>
-          setSearchParams({
-            tab: searchParams.tab.parse(v),
-          })
-        }
-      >
-        <TabsList className="w-full" variant="line">
-          <TabsTrigger value="activity">
-            <HugeiconsIcon icon={Activity01Icon} strokeWidth={2} />
-            <span>What's new</span>
-          </TabsTrigger>
-          {isMe && (
-            <TabsTrigger value="settings">
-              <HugeiconsIcon icon={Settings01Icon} strokeWidth={2} />
-              <span>Settings</span>
-            </TabsTrigger>
+              >
+                <LazyUploadAvatarDialog
+                  render={
+                    <Button variant="secondary" size="xs">
+                      <HugeiconsIcon icon={Photo} strokeWidth={2} />
+                      <span>Upload avatar</span>
+                    </Button>
+                  }
+                />
+              </Suspense>
+            </CardFooter>
           )}
-        </TabsList>
+        </Card>
 
-        {isMe && (
-          <TabsContent value="settings">
-            <Tabs>
-              <TabsList className="w-full">
-                <TabsTrigger value="sessions">
-                  <HugeiconsIcon icon={IdentityCardIcon} strokeWidth={2} />
-                  <span>Sessions</span>
-                </TabsTrigger>
-                <TabsTrigger value="preferences" disabled>
-                  <HugeiconsIcon
-                    icon={PreferenceHorizontalIcon}
-                    strokeWidth={2}
-                  />
-                  <span>Preferences</span>
-                </TabsTrigger>
-                <TabsTrigger value="security" disabled>
-                  <HugeiconsIcon icon={LockIcon} strokeWidth={2} />
-                  <span>Security</span>
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="sessions">
-                <QueryErrorResetBoundary>
-                  {({ reset }) => (
-                    <ErrorBoundary
-                      onReset={reset}
-                      fallbackRender={({ error, resetErrorBoundary }) => (
-                        <>
-                          <Alert variant="destructive">
-                            <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-                            <AlertTitle>Couldn't load your sessions</AlertTitle>
-                            <AlertDescription>
-                              Something went wrong on our end.
-                            </AlertDescription>
-                            <AlertAction>
-                              <Button
-                                variant="secondary"
-                                size="xs"
-                                onClick={resetErrorBoundary}
-                              >
-                                Try again
-                              </Button>
-                            </AlertAction>
-                          </Alert>
-                          <Suspense>
-                            <LazyDevErrorStackDisplay
-                              className="mt-2"
-                              error={error as Error}
-                            />
-                          </Suspense>
-                        </>
-                      )}
-                    >
-                      <Suspense
-                        fallback={
-                          <div className="space-y-4">
-                            <Skeleton className="p-8" />
-                            <Skeleton className="p-8" />
-                          </div>
-                        }
+        <Tabs
+          value={tab}
+          onValueChange={(v) =>
+            setSearchParams({
+              tab: searchParams.tab.parse(v),
+            })
+          }
+        >
+          <TabsList className="w-full" variant="line">
+            <TabsTrigger value="activity">
+              <HugeiconsIcon icon={Activity01Icon} strokeWidth={2} />
+              <span>What's new</span>
+            </TabsTrigger>
+            {isMe && (
+              <TabsTrigger value="settings">
+                <HugeiconsIcon icon={Settings01Icon} strokeWidth={2} />
+                <span>Settings</span>
+              </TabsTrigger>
+            )}
+          </TabsList>
+
+          {isMe && (
+            <TabsContent value="settings">
+              <Tabs>
+                <TabsList className="w-full">
+                  <TabsTrigger value="sessions">
+                    <HugeiconsIcon icon={IdentityCardIcon} strokeWidth={2} />
+                    <span>Sessions</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="preferences" disabled>
+                    <HugeiconsIcon
+                      icon={PreferenceHorizontalIcon}
+                      strokeWidth={2}
+                    />
+                    <span>Preferences</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="security" disabled>
+                    <HugeiconsIcon icon={LockIcon} strokeWidth={2} />
+                    <span>Security</span>
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="sessions">
+                  <QueryErrorResetBoundary>
+                    {({ reset }) => (
+                      <ErrorBoundary
+                        onReset={reset}
+                        fallbackRender={({ error, resetErrorBoundary }) => (
+                          <>
+                            <Alert variant="destructive">
+                              <HugeiconsIcon
+                                icon={Alert01Icon}
+                                strokeWidth={2}
+                              />
+                              <AlertTitle>
+                                Couldn't load your sessions
+                              </AlertTitle>
+                              <AlertDescription>
+                                Something went wrong on our end.
+                              </AlertDescription>
+                              <AlertAction>
+                                <Button
+                                  variant="secondary"
+                                  size="xs"
+                                  onClick={resetErrorBoundary}
+                                >
+                                  Try again
+                                </Button>
+                              </AlertAction>
+                            </Alert>
+                            <Suspense>
+                              <LazyDevErrorStackDisplay
+                                className="mt-2"
+                                error={error as Error}
+                              />
+                            </Suspense>
+                          </>
+                        )}
                       >
-                        <SessionsList />
-                      </Suspense>
-                    </ErrorBoundary>
-                  )}
-                </QueryErrorResetBoundary>
-              </TabsContent>
-            </Tabs>
-          </TabsContent>
-        )}
-      </Tabs>
-    </div>
+                        <Suspense
+                          fallback={
+                            <div className="space-y-4">
+                              <Skeleton className="p-8" />
+                              <Skeleton className="p-8" />
+                            </div>
+                          }
+                        >
+                          <SessionsList />
+                        </Suspense>
+                      </ErrorBoundary>
+                    )}
+                  </QueryErrorResetBoundary>
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+          )}
+        </Tabs>
+      </div>
+    </PageWrapper>
   );
 }
 
@@ -277,7 +285,7 @@ function PendingComponent() {
 
 function ErrorComponent({ error }: ErrorComponentProps) {
   return (
-    <div className="container mx-auto grid max-w-3xl gap-4">
+    <div className="container mx-auto grid max-w-3xl gap-4 p-4">
       <Alert variant="destructive">
         <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
         <AlertTitle>Couldn't load the profile</AlertTitle>

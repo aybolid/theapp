@@ -47,6 +47,7 @@ import {
 } from "nuqs";
 import { Suspense, useMemo } from "react";
 import z from "zod";
+import { PageWrapper } from "../../../-components/page-wrapper";
 
 type UserTableEntry = UserResponse & { isMe: boolean };
 
@@ -122,50 +123,52 @@ function RouteComponent() {
   });
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="sticky top-0 z-50 flex flex-wrap gap-2 bg-background py-4 outline outline-background">
-        <SearchInput
-          className="w-80"
-          defaultValue={query}
-          onDebouncedChange={(v) => setSearchParams({ query: v })}
-        />
-        <DataTableSortingOptions
+    <PageWrapper breadcrumbs={["Users"]}>
+      <div className="flex h-full flex-col">
+        <div className="sticky top-0 z-50 flex flex-wrap gap-2 bg-background py-4 outline outline-background">
+          <SearchInput
+            className="w-80"
+            defaultValue={query}
+            onDebouncedChange={(v) => setSearchParams({ query: v })}
+          />
+          <DataTableSortingOptions
+            table={table}
+            variant="outline"
+            labelsMap={{
+              userId: "ID",
+              role: "Role",
+              profile_name: "Name",
+              email: "Email",
+              createdAt: "Member since",
+            }}
+          />
+          <DataTableViewOptions
+            table={table}
+            variant="outline"
+            labelsMap={{
+              userId: "ID",
+              role: "Role",
+              profile_name: "Name",
+              email: "Email",
+              createdAt: "Member since",
+            }}
+          />
+          <div className="flex-1" />
+        </div>
+        <DataTable
           table={table}
-          variant="outline"
-          labelsMap={{
-            userId: "ID",
-            role: "Role",
-            profile_name: "Name",
-            email: "Email",
-            createdAt: "Member since",
-          }}
+          caption={
+            <span>
+              See{" "}
+              <Link className="text-primary underline" to="/invites">
+                invites page
+              </Link>{" "}
+              to add new users.
+            </span>
+          }
         />
-        <DataTableViewOptions
-          table={table}
-          variant="outline"
-          labelsMap={{
-            userId: "ID",
-            role: "Role",
-            profile_name: "Name",
-            email: "Email",
-            createdAt: "Member since",
-          }}
-        />
-        <div className="flex-1" />
       </div>
-      <DataTable
-        table={table}
-        caption={
-          <span>
-            See{" "}
-            <Link className="text-primary underline" to="/invites">
-              invites page
-            </Link>{" "}
-            to add new users.
-          </span>
-        }
-      />
-    </div>
+    </PageWrapper>
   );
 }
 
@@ -252,7 +255,7 @@ function PendingComponent() {
 
 function ErrorComponent({ error }: ErrorComponentProps) {
   return (
-    <div className="container mx-auto grid max-w-3xl gap-4">
+    <div className="container mx-auto grid max-w-3xl gap-4 p-4">
       <Alert variant="destructive">
         <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
         <AlertTitle>Couldn't load the users</AlertTitle>

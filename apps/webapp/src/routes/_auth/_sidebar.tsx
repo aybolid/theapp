@@ -1,10 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@theapp/ui/components/sidebar";
-import { ThemeMenu } from "@theapp/webapp/components/theme-menu";
+import { SidebarInset, SidebarProvider } from "@theapp/ui/components/sidebar";
 import { useState } from "react";
 import { AppSidebar } from "./-components/app-sidebar";
 
@@ -32,13 +27,7 @@ function RouteComponent() {
     >
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 px-4">
-          <SidebarTrigger className="-ml-1" />
-          <ThemeMenu className="ml-auto" />
-        </header>
-        <main className="size-full p-4 pt-0">
-          <Outlet />
-        </main>
+        <Outlet />
       </SidebarInset>
     </SidebarProvider>
   );
