@@ -2,7 +2,6 @@ import { getUsersResponseSchema } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import Elysia from "elysia";
 import { authGuard } from "../auth/guard";
-import { UserService } from "./service";
 
 export const usersAdmin = new Elysia({
   detail: {
@@ -11,15 +10,18 @@ export const usersAdmin = new Elysia({
 })
   .use(authGuard({ adminOnly: true }))
   .get(
-    "",
+    "/",
     async (ctx) => {
-      const users = await UserService.getUsers(db);
+      const users = await db.query.users.findMany({
+        columns: { passwordHash: false },
+        with: { profile: true },
+      });
       return ctx.status(200, users);
     },
     {
       response: { 200: getUsersResponseSchema },
       detail: {
-        description: "Get all users.",
+        description: "Get all users with their profiles. Admin only.",
       },
     },
   );

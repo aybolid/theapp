@@ -1,22 +1,21 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import {
-  MAX_PROFILE_PICTURE_SIZE,
   PROFILE_PICTURE_FILE_TYPES,
   profilePictureBodySchema,
   profilePictureOkSchema,
-  profilePictureTooLargeErrorSchema,
   profileResponseSchema,
   profilesPatchBodySchema,
   profilesPatchNotFoundErrorSchema,
 } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
+import { schema } from "@theapp/server/db/schema";
 import { s3 } from "@theapp/server/s3";
 import { generateSecureRandomString } from "@theapp/server/utils/crypto";
+import { eq } from "drizzle-orm";
 import Elysia, { fileType } from "elysia";
 import sharp from "sharp";
 import z from "zod";
 import { authGuard } from "../auth/guard";
-import { ProfileService } from "./service";
 
 export const profiles = new Elysia({
   prefix: "/profiles",
@@ -26,17 +25,19 @@ export const profiles = new Elysia({
 })
   .use(authGuard())
   .patch(
-    "",
+    "/",
     async (ctx) => {
-      const updatedProfile = await ProfileService.updateProfile(
-        db,
-        { userId: ctx.userId },
-        { name: ctx.body.name, bio: ctx.body.bio },
-      );
-      if (!updatedProfile) {
-        throw ctx.status(404, "Profile not found");
-      }
-      return ctx.status(200, updatedProfile);
+      const profile = await db
+        .update(schema.profiles)
+        .set({
+          name: ctx.body.name?.trim(),
+          bio: ctx.body.bio?.trim(),
+        })
+        .where(eq(schema.profiles.userId, ctx.userId))
+        .returning()
+        .then((rows) => rows[0]);
+      if (!profile) throw ctx.status(404, "Profile not found");
+      return ctx.status(200, profile);
     },
     {
       body: profilesPatchBodySchema,
@@ -45,17 +46,13 @@ export const profiles = new Elysia({
         200: profileResponseSchema,
       },
       detail: {
-        description: "Update current user's profile.",
+        description: "Update the current user's profile (name and bio).",
       },
     },
   )
   .post(
     "/picture",
     async (ctx) => {
-      if (ctx.body.file.size > MAX_PROFILE_PICTURE_SIZE) {
-        throw ctx.status(413, "File too large");
-      }
-
       const buffer = await ctx.body.file.arrayBuffer();
       const optimizedBuffer = await sharp(buffer)
         .webp()
@@ -76,11 +73,12 @@ export const profiles = new Elysia({
 
       const picture = `${process.env.S3_PUBLIC_BASE_URL}/${key}`;
 
-      await ProfileService.updateProfile(
-        db,
-        { userId: ctx.userId },
-        { picture },
-      );
+      await db
+        .update(schema.profiles)
+        .set({
+          picture,
+        })
+        .where(eq(schema.profiles.userId, ctx.userId));
 
       return ctx.status(200, "Profile picture updated");
     },
@@ -95,11 +93,11 @@ export const profiles = new Elysia({
         ),
       }),
       response: {
-        413: profilePictureTooLargeErrorSchema,
         200: profilePictureOkSchema,
       },
       detail: {
-        description: `Upload a profile picture. Supported file types: ${PROFILE_PICTURE_FILE_TYPES.map((ft) => `\`${ft}\``).join(", ")}. Max size: \`${MAX_PROFILE_PICTURE_SIZE}\` bytes.`,
+        description:
+          "Upload and set the user's profile picture. Image is optimized to 400x400 WebP.",
       },
     },
   );

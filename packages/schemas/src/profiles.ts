@@ -36,10 +36,12 @@ export const profileResponseSchema = z.object({
   updatedAt: zDate,
 });
 
+export const MAX_PROFILE_PICTURE_SIZE = 1024 * 1024 * 5;
+
 export type ProfileResponse = z.infer<typeof profileResponseSchema>;
 
 export const profilePictureBodySchema = z.object({
-  file: z.file(),
+  file: z.file().max(MAX_PROFILE_PICTURE_SIZE, "File too large"),
 });
 
 export const PROFILE_PICTURE_FILE_TYPES: FileType[] = [
@@ -49,16 +51,7 @@ export const PROFILE_PICTURE_FILE_TYPES: FileType[] = [
   "image/webp",
 ];
 
-/** 5 MB */
-export const MAX_PROFILE_PICTURE_SIZE = 1024 * 1024 * 5;
-
 export type ProfilePictureBody = z.infer<typeof profilePictureBodySchema>;
-
-export const profilePictureTooLargeErrorSchema = z.literal("File too large");
-
-export type ProfilePictureTooLargeError = z.infer<
-  typeof profilePictureTooLargeErrorSchema
->;
 
 export const profilePictureOkSchema = z.literal("Profile picture updated");
 

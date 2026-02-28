@@ -11,25 +11,25 @@ import {
   userResponseSchema,
 } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
+import { schema } from "@theapp/server/db/schema";
 import {
+  generateSecureRandomString,
   hashPassword,
+  hashSecret,
   signAuthJwt,
   verifyPassword,
 } from "@theapp/server/utils/crypto";
 import { parseUserAgent } from "@theapp/server/utils/ua";
+import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import { isProduction } from "elysia/error";
-import { InviteService } from "../invites/service";
-import { ProfileService } from "../profiles/service";
-import { UserService } from "../users/service";
 import {
   authGuard,
   INACTIVITY_TIMEOUT_SECONDS,
   JWT_EXPIRATION_SECONDS,
+  SESSION_TOKEN_DELIMITER,
 } from "./guard";
-import { AuthService } from "./service";
 import { sessions } from "./sessions";
-import { SessionService } from "./sessions/service";
 
 export const auth = new Elysia({
   prefix: "/auth",
@@ -41,7 +41,9 @@ export const auth = new Elysia({
   .post(
     "/signup",
     async (ctx) => {
-      const invite = await InviteService.getInviteById(db, ctx.body.inviteId);
+      const invite = await db.query.invites.findFirst({
+        where: { inviteId: { eq: ctx.body.inviteId } },
+      });
       if (!invite) {
         throw ctx.status(400, "Invalid invite");
       }
@@ -49,34 +51,40 @@ export const auth = new Elysia({
         throw ctx.status(400, "Invite expired");
       }
 
-      const isEmailAvailable = await AuthService.checkEmailAvailability(
-        db,
-        invite.email,
-      );
-      if (!isEmailAvailable) {
+      const userWithEmail = await db.query.users.findFirst({
+        where: { email: { eq: invite.email.toLowerCase() } },
+      });
+      if (userWithEmail !== undefined) {
         throw ctx.status(409, "Email already in use");
       }
 
       const passwordHash = await hashPassword(ctx.body.password);
 
       await db.transaction(async (tx) => {
-        const createdUser = await UserService.createUser(tx, {
-          email: invite.email,
-          passwordHash,
-        });
-        if (!createdUser) {
+        const user = await tx
+          .insert(schema.users)
+          .values({
+            email: invite.email.toLowerCase(),
+            passwordHash,
+          })
+          .returning()
+          .then((rows) => rows[0]);
+        if (!user) {
           throw new Error("Failed to create user");
         }
 
-        const createdProfile = await ProfileService.createProfile(
-          tx,
-          createdUser.userId,
-        );
-        if (!createdProfile) {
+        const profile = await tx
+          .insert(schema.profiles)
+          .values({ userId: user.userId })
+          .returning()
+          .then((rows) => rows[0]);
+        if (!profile) {
           throw new Error("Failed to create profile");
         }
 
-        await InviteService.deleteInvite(tx, ctx.body.inviteId);
+        await tx
+          .delete(schema.invites)
+          .where(eq(schema.invites.inviteId, ctx.body.inviteId));
       });
 
       return ctx.status(201, "User created");
@@ -88,29 +96,44 @@ export const auth = new Elysia({
         201: signupCreatedSchema,
         400: singupBadRequestErrorSchema,
       },
-      detail: { description: "Sign up a new user." },
+      detail: {
+        description: "Sign up with a valid invite. Creates a new user account.",
+      },
     },
   )
   .post(
     "/signin",
     async (ctx) => {
-      const candidate = await UserService.getUserByEmail(db, ctx.body.email);
-      if (!candidate) {
-        throw ctx.status(400, "Invalid email or password");
-      }
+      const candidate = await db.query.users.findFirst({
+        where: { email: { eq: ctx.body.email.toLowerCase() } },
+      });
+      if (!candidate) throw ctx.status(400, "Invalid email or password");
 
       const isValidPassword = await verifyPassword({
         hash: candidate.passwordHash,
         password: ctx.body.password,
       });
-      if (!isValidPassword) {
-        throw ctx.status(400, "Invalid email or password");
-      }
+      if (!isValidPassword) throw ctx.status(400, "Invalid email or password");
 
-      const { sessionId, token } = await SessionService.createSession(db, {
-        userId: candidate.userId,
-        uaData: parseUserAgent(ctx.request),
-      });
+      const uaData = parseUserAgent(ctx.request);
+
+      const sessionId = generateSecureRandomString();
+      const secret = generateSecureRandomString();
+      const secretHash = await hashSecret(secret);
+
+      const session = await db
+        .insert(schema.sessions)
+        .values({
+          sessionId,
+          secretHash: Buffer.from(secretHash),
+          userId: candidate.userId,
+          uaData: uaData ?? undefined,
+        })
+        .returning()
+        .then((rows) => rows[0]);
+      if (!session) throw new Error("Failed to create session");
+
+      const token = `${sessionId}${SESSION_TOKEN_DELIMITER}${secret}`;
 
       const jwt = await signAuthJwt(
         {
@@ -144,7 +167,7 @@ export const auth = new Elysia({
       response: { 400: signinBadRequestSchema, 200: signinOkSchema },
       detail: {
         description:
-          "Sign in an existing user. Successful request will result in a auth cookies being set.",
+          "Sign in with email and password. Returns session and auth tokens.",
       },
     },
   )
@@ -152,14 +175,18 @@ export const auth = new Elysia({
   .get(
     "/me",
     async (ctx) => {
-      const user = await UserService.getUserById(db, ctx.userId);
+      const user = await db.query.users.findFirst({
+        where: { userId: { eq: ctx.userId } },
+        columns: { passwordHash: false },
+        with: { profile: true },
+      });
       if (!user) throw ctx.status(404, "User not found");
       return ctx.status(200, user);
     },
     {
       response: { 200: userResponseSchema, 404: userNotFoundErrorSchema },
       detail: {
-        description: "Get the current user.",
+        description: "Get the currently authenticated user's profile.",
       },
     },
   )
@@ -168,13 +195,15 @@ export const auth = new Elysia({
     async (ctx) => {
       ctx.cookie.sessionToken?.remove();
       ctx.cookie.authToken?.remove();
-      await SessionService.deleteSessionById(db, ctx.sessionId);
+      await db
+        .delete(schema.sessions)
+        .where(eq(schema.sessions.sessionId, ctx.sessionId));
       return ctx.status(200, "User signed out");
     },
     {
       response: { 200: signoutOkSchema },
       detail: {
-        description: "Sign out the current user.",
+        description: "Sign out the current session.",
       },
     },
   )
@@ -183,14 +212,15 @@ export const auth = new Elysia({
     async (ctx) => {
       ctx.cookie.sessionToken?.remove();
       ctx.cookie.authToken?.remove();
-      await SessionService.deleteSessionsByUserId(db, ctx.userId);
+      await db
+        .delete(schema.sessions)
+        .where(eq(schema.sessions.userId, ctx.userId));
       return ctx.status(200, "User signed out");
     },
     {
       response: { 200: signoutOkSchema },
       detail: {
-        description:
-          "Sign out the current user and delete all related sessions.",
+        description: "Sign out all sessions for the current user.",
       },
     },
   );

@@ -1,14 +1,15 @@
 import type { UserRole } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
+import { schema } from "@theapp/server/db/schema";
 import {
   constantTimeEqual,
   hashSecret,
   signAuthJwt,
   verifyAuthJwt,
 } from "@theapp/server/utils/crypto";
+import { eq } from "drizzle-orm";
 import Elysia, { ElysiaCustomStatusResponse } from "elysia";
 import { isProduction } from "elysia/error";
-import { SessionService } from "./sessions/service";
 
 /** Delimiter used to separate parts of the session token (session id and secret). */
 export const SESSION_TOKEN_DELIMITER = ".";
@@ -19,19 +20,22 @@ const ACTIVITY_UPDATE_INTERVAL_SECONDS = 60 * 60;
 /** 1 minute */
 export const JWT_EXPIRATION_SECONDS = 60;
 
-export function authGuard(seed?: { adminOnly: boolean }) {
-  return new Elysia({ name: "auth-guard", seed })
+export function authGuard(config?: { adminOnly: boolean }) {
+  return new Elysia({ name: "auth-guard", seed: config })
     .derive(
       async (
         ctx,
       ): Promise<{ userId: string; sessionId: string; role: UserRole }> => {
         const authJwt = ctx.cookie.authToken;
+
         if (authJwt && typeof authJwt.value === "string") {
           try {
             const result = await verifyAuthJwt(authJwt.value);
-            if (seed?.adminOnly && result.payload.role !== "admin") {
+
+            if (config?.adminOnly && result.payload.role !== "admin") {
               throw ctx.status(403, "Admin access required");
             }
+
             return {
               userId: result.payload.userId,
               sessionId: result.payload.sessionId,
@@ -59,6 +63,7 @@ export function authGuard(seed?: { adminOnly: boolean }) {
           sessionToken.remove();
           throw ctx.status(401, "Invalid session token");
         }
+
         // biome-ignore lint/style/noNonNullAssertion: length checked
         const sessionId = tokenParts[0]!;
         // biome-ignore lint/style/noNonNullAssertion: length checked
@@ -80,7 +85,9 @@ export function authGuard(seed?: { adminOnly: boolean }) {
           INACTIVITY_TIMEOUT_SECONDS * 1000
         ) {
           sessionToken.remove();
-          await SessionService.deleteSessionById(db, sessionId);
+          db.delete(schema.sessions).where(
+            eq(schema.sessions.sessionId, sessionId),
+          );
           throw ctx.status(401, "Session expired");
         }
 
@@ -112,14 +119,12 @@ export function authGuard(seed?: { adminOnly: boolean }) {
           ACTIVITY_UPDATE_INTERVAL_SECONDS * 1000
         ) {
           session.lastUsedAt = now;
-          await SessionService.updateSession(
-            db,
-            { sessionId },
-            { lastUsedAt: now },
-          );
+          db.update(schema.sessions)
+            .set({ lastUsedAt: now })
+            .where(eq(schema.sessions.sessionId, sessionId));
         }
 
-        if (seed?.adminOnly && session.user.role !== "admin") {
+        if (config?.adminOnly && session.user.role !== "admin") {
           throw ctx.status(403, "Admin access required");
         }
 

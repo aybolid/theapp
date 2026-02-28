@@ -5,9 +5,10 @@ import {
   inviteResponseSchema,
 } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
+import { schema } from "@theapp/server/db/schema";
+import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import { invitesAdmin } from "./admin";
-import { InviteService } from "./service";
 
 export const invites = new Elysia({
   prefix: "/invites",
@@ -19,13 +20,15 @@ export const invites = new Elysia({
   .get(
     "/valid/:inviteId",
     async (ctx) => {
-      const invite = await InviteService.getInviteById(db, ctx.params.inviteId);
-      if (!invite) {
-        throw ctx.status(404, "Invite not found");
-      }
+      const invite = await db.query.invites.findFirst({
+        where: { inviteId: { eq: ctx.params.inviteId } },
+      });
+      if (!invite) throw ctx.status(404, "Invite not found");
 
       if (new Date(invite.expiresAt).getTime() < Date.now()) {
-        await InviteService.deleteInvite(db, invite.inviteId);
+        await db
+          .delete(schema.invites)
+          .where(eq(schema.invites.inviteId, ctx.params.inviteId));
         throw ctx.status(400, "Invite has expired");
       }
 
@@ -38,6 +41,8 @@ export const invites = new Elysia({
         404: getValidInviteNotFoundErrorSchema,
         400: getValidInviteBadRequestErrorSchema,
       },
-      detail: { description: "Check if an invite is valid and return it." },
+      detail: {
+        description: "Check if an invite is valid and not expired.",
+      },
     },
   );
