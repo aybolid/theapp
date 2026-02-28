@@ -27,7 +27,7 @@ export const SessionsList: FC = () => {
 
   const signoutAllMutation = useSignoutAllMutation({
     onSettled: () => {
-      queryClient.invalidateQueries();
+      queryClient.removeQueries();
       router.invalidate();
     },
   });

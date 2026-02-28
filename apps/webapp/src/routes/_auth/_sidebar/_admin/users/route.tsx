@@ -1,6 +1,7 @@
 import {
   createFileRoute,
   type ErrorComponentProps,
+  Link,
 } from "@tanstack/react-router";
 import {
   createColumnHelper,
@@ -152,7 +153,18 @@ function RouteComponent() {
         />
         <div className="flex-1" />
       </div>
-      <DataTable table={table} />
+      <DataTable
+        table={table}
+        caption={
+          <span>
+            See{" "}
+            <Link className="text-primary underline" to="/invites">
+              invites page
+            </Link>{" "}
+            to add new users.
+          </span>
+        }
+      />
     </div>
   );
 }

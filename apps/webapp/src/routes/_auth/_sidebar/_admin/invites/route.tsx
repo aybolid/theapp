@@ -134,7 +134,10 @@ function RouteComponent() {
           />
         </Suspense>
       </div>
-      <DataTable table={table} />
+      <DataTable
+        table={table}
+        caption="Do not bother deleting expired invites. They will be automatically deleted."
+      />
     </div>
   );
 }

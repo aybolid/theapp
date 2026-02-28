@@ -127,7 +127,7 @@ const UserButton: FC = () => {
 
   const signoutMutation = useSignoutMutation({
     onSettled: () => {
-      queryClient.invalidateQueries();
+      queryClient.removeQueries();
       router.invalidate();
     },
   });

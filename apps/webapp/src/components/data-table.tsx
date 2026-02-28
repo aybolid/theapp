@@ -3,25 +3,30 @@ import { flexRender, type Table as TTable } from "@tanstack/react-table";
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@theapp/ui/components/table";
 import { cn } from "@theapp/ui/lib/utils";
+import type { ReactNode } from "react";
 
 export function DataTable<T>({
   table,
   className,
+  caption,
 }: {
   table: TTable<T>;
   className?: string;
+  caption?: ReactNode;
 }) {
   "use no memo";
 
   return (
     <div className={cn("overflow-hidden", className)}>
       <Table>
+        {caption && <TableCaption>{caption}</TableCaption>}
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
