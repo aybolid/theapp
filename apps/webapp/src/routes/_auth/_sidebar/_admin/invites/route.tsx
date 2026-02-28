@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createFileRoute,
   type ErrorComponentProps,
@@ -16,7 +17,25 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@theapp/ui/components/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@theapp/ui/components/alert-dialog";
 import { Button } from "@theapp/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@theapp/ui/components/dropdown-menu";
 import {
   Empty,
   EmptyHeader,
@@ -24,15 +43,25 @@ import {
   EmptyTitle,
 } from "@theapp/ui/components/empty";
 import { Spinner } from "@theapp/ui/components/spinner";
-import { Alert01Icon, UserPlus } from "@theapp/ui/icons/huge";
+import {
+  Alert01Icon,
+  EllipsisVertical,
+  UserPlus,
+  X,
+} from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
+import { toast } from "@theapp/ui/lib/sonner";
 import { DataTable } from "@theapp/webapp/components/data-table";
 import { DataTableColumnHeader } from "@theapp/webapp/components/data-table-column-header";
 import { DataTableSortingOptions } from "@theapp/webapp/components/data-table-sorting-options";
 import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
 import { SearchInput } from "@theapp/webapp/components/search-input";
 import { UuidDisplay } from "@theapp/webapp/components/uuid-diplay";
-import { useInvitesSuspenseQuery } from "@theapp/webapp/lib/query/invites";
+import {
+  invitesQueryOptions,
+  useInvitesSuspenseQuery,
+  useRevokeInviteMutation,
+} from "@theapp/webapp/lib/query/invites";
 import dayjs from "dayjs";
 import {
   createStandardSchemaV1,
@@ -188,7 +217,85 @@ const COLUMNS = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Actions" />
     ),
-    cell: () => null,
+    cell: (props) => {
+      const invite = props.row.original;
+
+      const queryClient = useQueryClient();
+
+      const revokeMutation = useRevokeInviteMutation({
+        onSuccess: (_, { inviteId }) => {
+          queryClient.setQueryData(invitesQueryOptions.queryKey, (prev) =>
+            prev?.filter((i) => i.inviteId !== inviteId),
+          );
+          queryClient.invalidateQueries({
+            queryKey: invitesQueryOptions.queryKey,
+          });
+        },
+        onError: () => {
+          toast.error("Couldn't revoke invite");
+        },
+      });
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button size="icon" variant="secondary">
+                <HugeiconsIcon icon={EllipsisVertical} strokeWidth={2} />
+              </Button>
+            }
+          />
+          <DropdownMenuContent>
+            <DropdownMenuGroup>
+              <AlertDialog>
+                <AlertDialogTrigger
+                  nativeButton={false}
+                  render={
+                    <DropdownMenuItem
+                      variant="destructive"
+                      closeOnClick={false}
+                      disabled={revokeMutation.isPending}
+                    >
+                      <HugeiconsIcon icon={X} strokeWidth={2} />
+                      <span>Revoke invite</span>
+                    </DropdownMenuItem>
+                  }
+                />
+                <AlertDialogContent size="sm">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action will revoke the invite. The invite will be
+                      removed from the list and user will no longer be able to
+                      accept it.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel
+                      render={
+                        <AlertDialogAction
+                          variant="destructive"
+                          onClick={() =>
+                            revokeMutation.mutate({
+                              inviteId: invite.inviteId,
+                            })
+                          }
+                        >
+                          Continue
+                        </AlertDialogAction>
+                      }
+                    />
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   }),
 ];
 

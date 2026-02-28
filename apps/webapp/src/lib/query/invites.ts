@@ -10,6 +10,8 @@ import type {
   CreateInviteBody,
   GetInvitesResponse,
   InviteResponse,
+  RevokeInviteOkResponse,
+  RevokeInviteParams,
 } from "@theapp/schemas";
 import { server } from "../api";
 
@@ -90,6 +92,32 @@ export function useCreateInviteMutation(
     mutationKey: ["create", "invite"],
     mutationFn: async (data: CreateInviteBody) => {
       const resp = await server.api.invites.post(data);
+      if (resp.error) {
+        throw resp.error;
+      } else {
+        return resp.data;
+      }
+    },
+    ...options,
+  });
+}
+
+export function useRevokeInviteMutation(
+  options?: Omit<
+    UseMutationOptions<
+      RevokeInviteOkResponse,
+      Treaty.Error<ReturnType<typeof server.api.invites>["delete"]>,
+      RevokeInviteParams
+    >,
+    "mutationKey" | "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationKey: ["revoke", "invite"],
+    mutationFn: async (data: RevokeInviteParams) => {
+      const resp = await server.api
+        .invites({ inviteId: data.inviteId })
+        .delete();
       if (resp.error) {
         throw resp.error;
       } else {

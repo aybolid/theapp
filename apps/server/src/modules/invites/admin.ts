@@ -4,11 +4,15 @@ import {
   createInviteConflictErrorSchema,
   getInvitesResponseSchema,
   inviteResponseSchema,
+  revokeInviteNotFoundErrorSchema,
+  revokeInviteOkResponseSchema,
+  revokeInviteParamsSchema,
 } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
 import { transporter } from "@theapp/server/emails";
 import InviteEmail from "@theapp/server/emails/invite";
+import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import { authGuard } from "../auth/guard";
 
@@ -88,5 +92,29 @@ export const invitesAdmin = new Elysia({
         description:
           "Create a new invite. Admin only. Sends invite email to the provided address.",
       },
+    },
+  )
+  .delete(
+    "/:inviteId",
+    async (ctx) => {
+      const deleted = await db
+        .delete(schema.invites)
+        .where(eq(schema.invites.inviteId, ctx.params.inviteId))
+        .returning()
+        .then((rows) => rows[0]);
+
+      if (!deleted) {
+        throw ctx.status(404, "Invite not found");
+      }
+
+      return ctx.status(200, "Invite revoked");
+    },
+    {
+      params: revokeInviteParamsSchema,
+      response: {
+        200: revokeInviteOkResponseSchema,
+        404: revokeInviteNotFoundErrorSchema,
+      },
+      detail: { description: "Revoke an invite by ID. Admin only." },
     },
   );

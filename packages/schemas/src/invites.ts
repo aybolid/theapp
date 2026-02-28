@@ -46,3 +46,21 @@ export const getValidInviteBadRequestErrorSchema =
 export type GetValidInviteBadRequestError = z.infer<
   typeof getValidInviteBadRequestErrorSchema
 >;
+
+export const revokeInviteParamsSchema = z.object({
+  inviteId: z.uuidv7(),
+});
+
+export type RevokeInviteParams = z.infer<typeof revokeInviteParamsSchema>;
+
+export const revokeInviteNotFoundErrorSchema = z.literal("Invite not found");
+
+export type RevokeInviteNotFoundError = z.infer<
+  typeof revokeInviteNotFoundErrorSchema
+>;
+
+export const revokeInviteOkResponseSchema = z.literal("Invite revoked");
+
+export type RevokeInviteOkResponse = z.infer<
+  typeof revokeInviteOkResponseSchema
+>;
