@@ -1,3 +1,4 @@
+import cron, { Patterns } from "@elysiajs/cron";
 import {
   getValidInviteBadRequestErrorSchema,
   getValidInviteNotFoundErrorSchema,
@@ -6,7 +7,7 @@ import {
 } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, lt } from "drizzle-orm";
 import Elysia from "elysia";
 import { invitesAdmin } from "./admin";
 
@@ -16,6 +17,17 @@ export const invites = new Elysia({
     tags: ["invites"],
   },
 })
+  .use(
+    cron({
+      name: "delete-expired-invites",
+      pattern: Patterns.EVERY_DAY_AT_MIDNIGHT,
+      run: async () => {
+        await db
+          .delete(schema.invites)
+          .where(lt(schema.invites.expiresAt, new Date()));
+      },
+    }),
+  )
   .use(invitesAdmin)
   .get(
     "/valid/:inviteId",
