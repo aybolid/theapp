@@ -1,5 +1,6 @@
 services:
   db:
+    env_file: ./.env
     image: postgres:18.2
     container_name: theapp_db
     restart: always
@@ -8,9 +9,9 @@ services:
       - ./volumes/db/data:/var/lib/postgresql
     ports:
       - 5432:5432
-    env_file: ./.env
 
   garage:
+    env_file: ./.env
     image: dxflrs/garage:v2.2.0
     container_name: theapp_garage
     restart: unless-stopped
@@ -23,10 +24,10 @@ services:
       - ./garage.toml:/etc/garage.toml:ro
       - ./volumes/garage/meta:/tmp/meta
       - ./volumes/garage/data:/tmp/data
-    env_file: ./.env
 
   # this is no longer developed. waiting on official garage web ui release
   garage_ui:
+    env_file: ./.env
     image: khairul169/garage-webui:latest
     container_name: theapp_garage-ui
     restart: unless-stopped
@@ -34,7 +35,6 @@ services:
       - ./garage.toml:/etc/garage.toml:ro
     ports:
       - 3909:3909
-    env_file: ./.env
 
   # dev only
   mailpit:
@@ -53,6 +53,7 @@ services:
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
   server:
+    env_file: ./.env
     build:
       dockerfile: ./apps/server/Dockerfile
     container_name: theapp_server
@@ -62,4 +63,14 @@ services:
     depends_on:
       - db
       - garage
+
+  webapp:
     env_file: ./.env
+    build:
+      dockerfile: ./apps/webapp/Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+    container_name: theapp_webapp
+    restart: unless-stopped
+    ports:
+      - 5173:80
