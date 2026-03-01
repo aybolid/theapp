@@ -4,7 +4,6 @@ import {
   MAX_BIO_LEN_AFTER_TRIM,
   type ProfileResponse,
   profilesPatchBodySchema,
-  type UserResponse,
 } from "@theapp/schemas";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -58,16 +57,12 @@ export const EditProfileDialog: FC<{
 
   const updateMutation = useUpdateProfileMutation({
     onSuccess: (profile) => {
-      queryClient.setQueryData<UserResponse>(
-        meQueryOptions.queryKey,
-        (prev) => {
-          if (!prev) return undefined;
-          const clone = structuredClone(prev);
-          clone.profile.name = profile.name;
-          clone.profile.bio = profile.bio;
-          clone.profile.updatedAt = profile.updatedAt;
-        },
-      );
+      queryClient.setQueryData(meQueryOptions.queryKey, (prev) => {
+        if (!prev) return undefined;
+        const clone = structuredClone(prev);
+        clone.profile = profile;
+        return clone;
+      });
       queryClient.invalidateQueries({ queryKey: meQueryOptions.queryKey });
       setOpen(false);
     },

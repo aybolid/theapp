@@ -34,7 +34,10 @@ export const UserChip: FC<
           <Link to="/profile/$userId" params={{ userId: user.userId }}>
             <Item {...props} className={cn("flex-nowrap p-1", props.className)}>
               <Avatar>
-                <AvatarImage src={user.profile.picture} alt="User Avatar" />
+                <AvatarImage
+                  src={user.profile.picture || undefined}
+                  alt="User Avatar"
+                />
                 <AvatarFallback>
                   <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
                 </AvatarFallback>

@@ -72,39 +72,33 @@ function RouteComponent() {
   const { userId } = Route.useParams();
 
   const meQuery = useMeSuspenseQuery();
-  const userQuery = useUserByIdSuspenseQuery(userId);
-
-  const isMe = meQuery.data.userId === userQuery.data.userId;
+  const isMe = meQuery.data.userId === userId;
+  const user = isMe ? meQuery.data : useUserByIdSuspenseQuery(userId).data;
 
   return (
-    <PageWrapper breadcrumbs={[userQuery.data.profile.name]}>
+    <PageWrapper breadcrumbs={[user.profile.name]}>
       <div className="container mx-auto grid max-w-3xl gap-4">
         <Card>
           <CardHeader className="flex items-center gap-4">
             <Avatar className="size-12">
-              <AvatarImage
-                src={userQuery.data.profile.picture}
-                alt={userQuery.data.profile.name}
-              />
+              <AvatarImage src={user.profile.picture} alt={user.profile.name} />
               <AvatarFallback>
                 <HugeiconsIcon icon={UserIcon} strokeWidth={2} />
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <CardTitle>{userQuery.data.profile.name}</CardTitle>
+              <CardTitle>{user.profile.name}</CardTitle>
               <CardDescription className="flex gap-1">
                 <Badge variant="secondary">
                   <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} />
-                  <span>{userQuery.data.email}</span>
+                  <span>{user.email}</span>
                 </Badge>
               </CardDescription>
             </div>
           </CardHeader>
-          {userQuery.data.profile.bio && (
+          {user.profile.bio && (
             <CardContent>
-              <p className="text-muted-foreground">
-                {userQuery.data.profile.bio}
-              </p>
+              <p className="text-muted-foreground">{user.profile.bio}</p>
             </CardContent>
           )}
           {isMe && (
@@ -118,7 +112,7 @@ function RouteComponent() {
                 }
               >
                 <LazyEditProfileDialog
-                  profile={userQuery.data.profile}
+                  profile={user.profile}
                   render={
                     <Button variant="secondary" size="xs">
                       <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} />

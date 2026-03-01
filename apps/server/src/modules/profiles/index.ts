@@ -1,4 +1,4 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import {
   PROFILE_PICTURE_FILE_TYPES,
   profilePictureBodySchema,
@@ -59,15 +59,21 @@ export const profiles = new Elysia({
         .resize(400, 400, { fit: "cover" })
         .toBuffer();
 
+      const profile = await db
+        .select({ picture: schema.profiles.picture })
+        .from(schema.profiles)
+        .where(eq(schema.profiles.userId, ctx.userId))
+        .then((rows) => rows[0]);
+
       const key = `avatars/${ctx.userId}/${generateSecureRandomString()}.webp`;
 
-      // TODO: remove old avatar
       await s3.send(
         new PutObjectCommand({
           Bucket: process.env.S3_BUCKET,
           Key: key,
           Body: optimizedBuffer,
           ContentType: "image/webp",
+          CacheControl: "public, max-age=31536000, immutable",
         }),
       );
 
@@ -79,6 +85,23 @@ export const profiles = new Elysia({
           picture,
         })
         .where(eq(schema.profiles.userId, ctx.userId));
+
+      if (profile?.picture.startsWith(process.env.S3_PUBLIC_BASE_URL)) {
+        const oldKey = profile.picture.replace(
+          `${process.env.S3_PUBLIC_BASE_URL}/`,
+          "",
+        );
+        try {
+          await s3.send(
+            new DeleteObjectCommand({
+              Bucket: process.env.S3_BUCKET,
+              Key: oldKey,
+            }),
+          );
+        } catch (error) {
+          console.error("Failed to delete old avatar from S3:", error);
+        }
+      }
 
       return ctx.status(200, "Profile picture updated");
     },
