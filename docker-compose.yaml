@@ -6,12 +6,9 @@ services:
     shm_size: 128mb
     volumes:
       - ./volumes/db/data:/var/lib/postgresql
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: theapp_db
     ports:
       - 5432:5432
+    env_file: ./.env
 
   garage:
     image: dxflrs/garage:v2.2.0
@@ -26,8 +23,7 @@ services:
       - ./garage.toml:/etc/garage.toml:ro
       - ./volumes/garage/meta:/tmp/meta
       - ./volumes/garage/data:/tmp/data
-    environment:
-      - RUST_LOG=info
+    env_file: ./.env
 
   # this is no longer developed. waiting on official garage web ui release
   garage_ui:
@@ -38,10 +34,9 @@ services:
       - ./garage.toml:/etc/garage.toml:ro
     ports:
       - 3909:3909
-    environment:
-      API_BASE_URL: http://garage:3903
-      S3_ENDPOINT_URL: http://garage:3900
+    env_file: ./.env
 
+  # dev only
   mailpit:
     image: axllent/mailpit
     container_name: theapp_mailpit
@@ -67,3 +62,4 @@ services:
     depends_on:
       - db
       - garage
+    env_file: ./.env
