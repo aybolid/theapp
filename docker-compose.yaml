@@ -56,3 +56,14 @@ services:
       MP_DATABASE: /data/mailpit.db
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  server:
+    build:
+      dockerfile: ./apps/server/Dockerfile
+    container_name: theapp_server
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+      - garage
