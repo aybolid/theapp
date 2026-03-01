@@ -13,7 +13,7 @@ import { s3 } from "@theapp/server/s3";
 import { generateSecureRandomString } from "@theapp/server/utils/crypto";
 import { eq } from "drizzle-orm";
 import Elysia, { fileType } from "elysia";
-import sharp from "sharp";
+import { Jimp } from "jimp";
 import z from "zod";
 import { authGuard } from "../auth/guard";
 
@@ -54,10 +54,12 @@ export const profiles = new Elysia({
     "/picture",
     async (ctx) => {
       const buffer = await ctx.body.file.arrayBuffer();
-      const optimizedBuffer = await sharp(buffer)
-        .webp()
-        .resize(400, 400, { fit: "cover" })
-        .toBuffer();
+
+      // TODO: sharp is better in every way but i cant figure out how to compile
+      // server when using it due its native deps
+      const image = await Jimp.read(buffer);
+      image.resize({ w: 400, h: 400 });
+      const optimizedBuffer = await image.getBuffer("image/jpeg");
 
       const profile = await db
         .select({ picture: schema.profiles.picture })
@@ -65,14 +67,14 @@ export const profiles = new Elysia({
         .where(eq(schema.profiles.userId, ctx.userId))
         .then((rows) => rows[0]);
 
-      const key = `avatars/${ctx.userId}/${generateSecureRandomString()}.webp`;
+      const key = `avatars/${ctx.userId}/${generateSecureRandomString()}.jpeg`;
 
       await s3.send(
         new PutObjectCommand({
           Bucket: process.env.S3_BUCKET,
           Key: key,
           Body: optimizedBuffer,
-          ContentType: "image/webp",
+          ContentType: "image/jpeg",
           CacheControl: "public, max-age=31536000, immutable",
         }),
       );
@@ -119,8 +121,7 @@ export const profiles = new Elysia({
         200: profilePictureOkSchema,
       },
       detail: {
-        description:
-          "Upload and set the user's profile picture. Image is optimized to 400x400 WebP.",
+        description: "Upload and set the user's profile picture.",
       },
     },
   );

@@ -18,7 +18,7 @@
     "packages/*"
   ],
   "catalog": {
-    "elysia": "latest",
+    "elysia": "^1.4.26",
     "bun-types": "latest",
 
     "dayjs": "^1.11.19",

@@ -16,12 +16,12 @@
     "cheerio": "^1.2.0",
     "drizzle-orm": "^1.0.0-beta.9-e89174b",
     "elysia": "catalog:",
+    "jimp": "^1.6.0",
     "jose": "^6.1.3",
     "nodemailer": "^8.0.1",
     "pg": "^8.18.0",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "sharp": "^0.34.5",
     "ua-parser-js": "^2.0.9",
     "zod": "catalog:"
   },
