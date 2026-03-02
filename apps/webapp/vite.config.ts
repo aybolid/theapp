@@ -5,7 +5,7 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   function expectEnv(key: string): string {
@@ -35,14 +35,19 @@ export default defineConfig(({ mode }) => {
         "@theapp/webapp": path.resolve(__dirname, "./src"),
       },
     },
-    server: {
-      proxy: {
-        "/api": {
-          target: expectEnv("API_BASE_URL"),
-          changeOrigin: true,
-        },
-      },
-    },
+
+    ...(command === "serve"
+      ? {
+          server: {
+            proxy: {
+              "/api": {
+                target: expectEnv("API_BASE_URL"),
+                changeOrigin: true,
+              },
+            },
+          },
+        }
+      : {}),
 
     build: {
       rolldownOptions: {
