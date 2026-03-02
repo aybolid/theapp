@@ -88,6 +88,12 @@ const searchParams = {
 
 export const Route = createFileRoute("/_auth/_sidebar/_admin/invites")({
   validateSearch: createStandardSchemaV1(searchParams, { partialOutput: true }),
+  head: () => ({
+    meta: [
+      { title: "Invites" },
+      { name: "description", content: "Manage user invites" },
+    ],
+  }),
   component: RouteComponent,
   pendingComponent: PendingComponent,
   errorComponent: ErrorComponent,

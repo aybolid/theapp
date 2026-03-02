@@ -22,6 +22,12 @@ import { useTheme } from "../contexts/theme";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   {
+    head: () => ({
+      meta: [
+        { title: "THEAPP" },
+        { name: "robots", content: "noindex, nofollow" },
+      ],
+    }),
     component: RootComponent,
     notFoundComponent: NotFoundComponent,
     errorComponent: ErrorComponent,

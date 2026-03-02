@@ -52,9 +52,8 @@ export const Route = createFileRoute("/_no_auth/signup")({
   },
   head: () => ({
     meta: [
-      {
-        title: "Create Account | theapp",
-      },
+      { title: "Create account" },
+      { name: "description", content: "Create a new account" },
     ],
   }),
   component: RouteComponent,

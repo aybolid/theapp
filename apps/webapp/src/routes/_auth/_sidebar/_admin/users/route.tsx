@@ -63,6 +63,12 @@ const searchParams = {
 
 export const Route = createFileRoute("/_auth/_sidebar/_admin/users")({
   validateSearch: createStandardSchemaV1(searchParams, { partialOutput: true }),
+  head: () => ({
+    meta: [
+      { title: "Users" },
+      { name: "description", content: "Manage application users" },
+    ],
+  }),
   component: RouteComponent,
   pendingComponent: PendingComponent,
   errorComponent: ErrorComponent,

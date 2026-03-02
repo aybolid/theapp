@@ -58,9 +58,8 @@ const LazyUploadAvatarDialog = lazy(() =>
 export const Route = createFileRoute("/_auth/_sidebar/profile/$userId")({
   head: () => ({
     meta: [
-      {
-        title: "User Profile | theapp",
-      },
+      { title: "User profile" },
+      { name: "description", content: "View user profile" },
     ],
   }),
   component: RouteComponent,

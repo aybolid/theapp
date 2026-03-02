@@ -13,11 +13,7 @@ import { PageWrapper } from "../-components/page-wrapper";
 
 export const Route = createFileRoute("/_auth/_sidebar/")({
   head: () => ({
-    meta: [
-      {
-        title: "theapp",
-      },
-    ],
+    meta: [{ title: "THEAPP" }],
   }),
   component: RouteComponent,
 });

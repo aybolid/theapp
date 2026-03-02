@@ -26,9 +26,8 @@ import { useSigninMutation } from "@theapp/webapp/lib/query/auth";
 export const Route = createFileRoute("/_no_auth/signin")({
   head: () => ({
     meta: [
-      {
-        title: "Sign In | theapp",
-      },
+      { title: "Sign in" },
+      { name: "description", content: "Sign in to your account" },
     ],
   }),
   component: RouteComponent,

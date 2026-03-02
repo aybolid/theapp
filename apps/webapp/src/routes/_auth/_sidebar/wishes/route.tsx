@@ -91,6 +91,15 @@ const searchParams = {
 
 export const Route = createFileRoute("/_auth/_sidebar/wishes")({
   validateSearch: createStandardSchemaV1(searchParams, { partialOutput: true }),
+  head: () => ({
+    meta: [
+      { title: "Wishes" },
+      {
+        name: "description",
+        content: "Manage your wishes and see what others want",
+      },
+    ],
+  }),
   component: RouteComponent,
   pendingComponent: PendingComponent,
   errorComponent: ErrorComponent,
