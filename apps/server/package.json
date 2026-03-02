@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.995.0",
-    "@elysiajs/cors": "^1.4.1",
     "@elysiajs/cron": "^1.4.1",
     "@elysiajs/openapi": "^1.4.14",
     "@react-email/components": "^1.0.8",

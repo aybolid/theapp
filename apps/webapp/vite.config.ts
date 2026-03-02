@@ -37,10 +37,9 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
-        "/server-proxy": {
-          target: expectEnv("VITE_API_BASE_URL"),
+        "/api": {
+          target: expectEnv("API_BASE_URL"),
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/server-proxy/, ""),
         },
       },
     },

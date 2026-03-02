@@ -11,7 +11,8 @@ node_modules
 dist
 tmp
 
-volumes/garage
-garage.toml
-volumes/db
-volumes/mailpit
+docker/volumes/garage
+docker/garage.toml
+docker/volumes/db
+docker/volumes/mailpit
+docker/volumes/caddy

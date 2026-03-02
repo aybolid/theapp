@@ -147,7 +147,7 @@ export const auth = new Elysia({
 
       ctx.cookie.sessionToken?.set({
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "strict",
         value: token,
         path: "/",
         maxAge: INACTIVITY_TIMEOUT_SECONDS,
@@ -155,7 +155,7 @@ export const auth = new Elysia({
       });
       ctx.cookie.authToken?.set({
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "strict",
         value: jwt,
         path: "/",
         secure: isProduction,

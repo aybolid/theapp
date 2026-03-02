@@ -1,4 +1,3 @@
-import { cors } from "@elysiajs/cors";
 import openapi from "@elysiajs/openapi";
 import { auth } from "@theapp/server/modules/auth";
 import { profiles } from "@theapp/server/modules/profiles";
@@ -12,7 +11,7 @@ import { wishes } from "./modules/wishes";
 
 checkEnv();
 
-const PORT = 8080;
+const PORT = 3000;
 
 const api = new Elysia({ prefix: "/api" })
   .use(auth)
@@ -26,7 +25,6 @@ const app = new Elysia()
   .onError((ctx) => {
     console.error(ctx.code, ctx.error);
   })
-  .use(cors({}))
   .use(
     openapi({
       mapJsonSchema: { zod: z.toJSONSchema },

@@ -1,4 +1,4 @@
-volumes/
+docker/volumes
 **/node_modules
 .git
 

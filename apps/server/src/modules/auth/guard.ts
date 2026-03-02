@@ -108,7 +108,7 @@ export function authGuard(config?: { adminOnly: boolean }) {
 
         ctx.cookie.authToken?.set({
           httpOnly: true,
-          sameSite: "lax",
+          sameSite: "strict",
           value: jwt,
           path: "/",
           secure: isProduction,

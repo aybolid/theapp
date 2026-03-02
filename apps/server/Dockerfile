@@ -32,4 +32,4 @@ ENV NODE_ENV=production
 
 CMD ["./server"]
 
-EXPOSE 8080
+EXPOSE 3000

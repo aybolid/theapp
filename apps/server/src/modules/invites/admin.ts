@@ -64,11 +64,12 @@ export const invitesAdmin = new Elysia({
           throw new Error("Failed to create invite");
         }
 
-        const link = `${process.env.INVITE_REDIRECT_URL}?inviteId=${invite.inviteId}`;
+        const link = `https://${process.env.DOMAIN}/signup?inviteId=${invite.inviteId}`;
 
         try {
           const html = await render(InviteEmail({ link }));
           await transporter.sendMail({
+            from: process.env.NOREPLY_EMAIL,
             to: invite.email,
             subject: "Join THEAPP",
             html,

@@ -1,17 +1,16 @@
 services:
   db:
-    env_file: ./.env
+    env_file: ./docker/.env
     image: postgres:18.2
     container_name: theapp_db
     restart: always
     shm_size: 128mb
     volumes:
-      - ./volumes/db/data:/var/lib/postgresql
+      - ./docker/volumes/db/data:/var/lib/postgresql
     ports:
       - 5432:5432
 
   garage:
-    env_file: ./.env
     image: dxflrs/garage:v2.2.0
     container_name: theapp_garage
     restart: unless-stopped
@@ -21,28 +20,82 @@ services:
       - 3902:3902
       - 3903:3903
     volumes:
-      - ./garage.toml:/etc/garage.toml:ro
-      - ./volumes/garage/meta:/tmp/meta
-      - ./volumes/garage/data:/tmp/data
+      - ./docker/garage.toml:/etc/garage.toml:ro
+      - ./docker/volumes/garage/meta:/tmp/meta
+      - ./docker/volumes/garage/data:/tmp/data
+    environment:
+      RUST_LOG: info
+    depends_on:
+      - db
 
-  # this is no longer developed. waiting on official garage web ui release
+  # Production services
+
+  server:
+    profiles:
+      - prod
+    env_file: ./docker/.env
+    build:
+      dockerfile: ./apps/server/Dockerfile
+    container_name: theapp_server
+    restart: unless-stopped
+    expose:
+      - 3000
+    depends_on:
+      - garage
+
+  webapp:
+    profiles:
+      - prod
+    build:
+      dockerfile: ./apps/webapp/Dockerfile
+    container_name: theapp_webapp
+    restart: unless-stopped
+    expose:
+      - 80
+    depends_on:
+      - server
+
+  caddy:
+    profiles:
+      - prod
+    env_file: ./docker/.env
+    image: caddy:latest
+    container_name: theapp_caddy
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile
+      - ./docker/volumes/caddy/data:/data
+      - ./docker/volumes/caddy/config:/config
+    depends_on:
+      - webapp
+
+  # Development services
+
   garage_ui:
-    env_file: ./.env
+    profiles:
+      - dev
     image: khairul169/garage-webui:latest
     container_name: theapp_garage-ui
     restart: unless-stopped
     volumes:
-      - ./garage.toml:/etc/garage.toml:ro
+      - ./docker/garage.toml:/etc/garage.toml:ro
     ports:
       - 3909:3909
+    environment:
+      API_BASE_URL: http://garage:3903
+      S3_ENDPOINT_URL: http://garage:3900
 
-  # dev only
   mailpit:
+    profiles:
+      - dev
     image: axllent/mailpit
     container_name: theapp_mailpit
     restart: unless-stopped
     volumes:
-      - ./volumes/mailpit/data:/data
+      - ./docker/volumes/mailpit/data:/data
     ports:
       - 8025:8025
       - 1025:1025
@@ -51,26 +104,3 @@ services:
       MP_DATABASE: /data/mailpit.db
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
-
-  server:
-    env_file: ./.env
-    build:
-      dockerfile: ./apps/server/Dockerfile
-    container_name: theapp_server
-    restart: unless-stopped
-    ports:
-      - 8080:8080
-    depends_on:
-      - db
-      - garage
-
-  webapp:
-    env_file: ./.env
-    build:
-      dockerfile: ./apps/webapp/Dockerfile
-      args:
-        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
-    container_name: theapp_webapp
-    restart: unless-stopped
-    ports:
-      - 5173:80

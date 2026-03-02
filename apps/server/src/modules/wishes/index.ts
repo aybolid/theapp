@@ -261,6 +261,7 @@ export const wishes = new Elysia({
             }),
       ).then((html) =>
         transporter.sendMail({
+          from: process.env.NOREPLY_EMAIL,
           to: wish.owner.email,
           subject:
             ctx.query.action === "start"

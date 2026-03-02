@@ -2,12 +2,10 @@ import { type Treaty, treaty } from "@elysiajs/eden";
 import type { App } from "@theapp/server";
 import type z from "zod";
 
-export const server = treaty<App>(
-  import.meta.env.DEV
-    ? `${window.location.origin}/server-proxy`
-    : import.meta.env.VITE_API_BASE_URL,
-  { throwHttpError: true, fetch: { credentials: "include" } },
-);
+export const server = treaty<App>(window.location.origin, {
+  throwHttpError: true,
+  fetch: { credentials: "include" },
+});
 
 export function extractZodIssuesFromValidationError(error: {
   type: "validation";
