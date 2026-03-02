@@ -1,26 +1,24 @@
-FROM oven/bun:1 AS build
-
+FROM oven/bun:1 AS pruner
 WORKDIR /app
 
-COPY package.json package.json
-COPY bun.lock bun.lock
+RUN bun install -g turbo
 
-COPY /apps/webapp/package.json ./apps/webapp/package.json
-COPY /apps/server/package.json ./apps/server/package.json
-COPY /packages/typescript-config/package.json ./packages/typescript-config/package.json
-COPY /packages/schemas/package.json ./packages/schemas/package.json
-COPY /packages/ui/package.json ./packages/ui/package.json
+COPY . .
 
-RUN bun install
+RUN turbo prune --scope=@theapp/webapp --docker
 
-COPY /apps/webapp ./apps/webapp
-COPY /apps/server ./apps/server
-COPY /packages/typescript-config ./packages/typescript-config
-COPY /packages/schemas ./packages/schemas
-COPY /packages/ui ./packages/ui
+FROM oven/bun:1 AS builder
+WORKDIR /app
+
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/bun.lock ./bun.lock
+
+RUN --mount=type=cache,id=bun,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile
+
+COPY --from=pruner /app/out/full/ .
 
 WORKDIR /app/apps/webapp
-
 RUN bun run build
 
 FROM nginx:alpine
@@ -34,7 +32,7 @@ RUN printf "server { \n\
     } \n\
 }" > /etc/nginx/conf.d/default.conf
 
-COPY --from=build /app/apps/webapp/dist /usr/share/nginx/html
+COPY --from=builder /app/apps/webapp/dist /usr/share/nginx/html
 
 EXPOSE 80
 

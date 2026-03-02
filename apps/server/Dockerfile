@@ -1,35 +1,38 @@
-FROM oven/bun:1 AS build
-
+FROM oven/bun:1 AS pruner
 WORKDIR /app
 
-COPY package.json package.json
-COPY bun.lock bun.lock
+RUN bun install -g turbo
 
-COPY /apps/server/package.json ./apps/server/package.json
-COPY /packages/typescript-config/package.json ./packages/typescript-config/package.json
-COPY /packages/schemas/package.json ./packages/schemas/package.json
+COPY . .
 
-RUN bun install
+RUN turbo prune --scope=@theapp/server --docker
 
-COPY /apps/server ./apps/server
-COPY /packages/typescript-config ./packages/typescript-config
-COPY /packages/schemas ./packages/schemas
+FROM oven/bun:1 AS builder
+WORKDIR /app
+
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/bun.lock ./bun.lock
+
+RUN --mount=type=cache,id=bun,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile
+
+COPY --from=pruner /app/out/full/ .
 
 RUN bun build \
 	--compile \
 	--minify-whitespace \
 	--minify-syntax \
+	--target bun \
 	--outfile server \
 	apps/server/src/index.ts
 
 FROM gcr.io/distroless/base
-
 WORKDIR /app
 
-COPY --from=build /app/server server
+COPY --from=builder /app/server server
 
 ENV NODE_ENV=production
 
-CMD ["./server"]
-
 EXPOSE 3000
+
+CMD ["./server"]
