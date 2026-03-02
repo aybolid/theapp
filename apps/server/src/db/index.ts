@@ -1,12 +1,15 @@
 import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { logger } from "../utils/logger";
 import { relations } from "./relations";
 import { schema } from "./schema";
 
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
 export const db = drizzle({
-  connection: {
-    connectionString: process.env.DATABASE_URL,
-  },
+  client: pool,
   casing: "snake_case",
   schema,
   relations,

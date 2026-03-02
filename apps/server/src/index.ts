@@ -3,6 +3,7 @@ import { auth } from "@theapp/server/modules/auth";
 import { profiles } from "@theapp/server/modules/profiles";
 import { Elysia } from "elysia";
 import z from "zod";
+import { pool } from "./db";
 import { checkEnv } from "./env";
 import { invites } from "./modules/invites";
 import { misc } from "./modules/misc";
@@ -23,6 +24,12 @@ const api = new Elysia({ prefix: "/api" })
   .use(invites);
 
 const app = new Elysia()
+  .on("stop", async () => {
+    logger.info("Closing database connection...");
+    await pool.end();
+    logger.info("Database connection closed.");
+    process.exit(0);
+  })
   .onRequest(({ request }) => {
     logger.info(
       { method: request.method, url: request.url },
@@ -58,5 +65,9 @@ const app = new Elysia()
   .listen(PORT);
 
 logger.info(`Server is running at ${app.server?.hostname}:${app.server?.port}`);
+
+process.on("beforeExit", app.stop);
+process.on("SIGINT", app.stop);
+process.on("SIGTERM", app.stop);
 
 export type App = typeof app;
