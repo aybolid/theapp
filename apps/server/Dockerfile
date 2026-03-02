@@ -30,6 +30,7 @@ FROM gcr.io/distroless/base
 WORKDIR /app
 
 COPY --from=builder /app/server server
+COPY --from=builder /app/apps/server/drizzle ./migrations
 
 ENV NODE_ENV=production
 

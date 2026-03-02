@@ -16,6 +16,8 @@ const envSchema = z
     S3_BUCKET: z.string().min(1, "S3_BUCKET is required"),
     S3_PUBLIC_BASE_URL: z.url(),
     NOREPLY_EMAIL: z.email(),
+    ADMIN_EMAIL: z.email(),
+    ADMIN_PASSWORD: z.string().min(1, "ADMIN_PASSWORD is required"),
   })
   .readonly();
 
