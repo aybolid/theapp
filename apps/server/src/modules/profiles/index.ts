@@ -15,6 +15,7 @@ import { eq } from "drizzle-orm";
 import Elysia, { fileType } from "elysia";
 import { Jimp } from "jimp";
 import z from "zod";
+import { logger } from "../../utils/logger";
 import { authGuard } from "../auth/guard";
 
 export const profiles = new Elysia({
@@ -101,7 +102,10 @@ export const profiles = new Elysia({
             }),
           );
         } catch (error) {
-          console.error("Failed to delete old avatar from S3:", error);
+          logger.error(
+            { error, oldKey },
+            "Failed to delete old avatar from S3",
+          );
         }
       }
 

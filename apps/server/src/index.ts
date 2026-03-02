@@ -8,6 +8,7 @@ import { invites } from "./modules/invites";
 import { misc } from "./modules/misc";
 import { users } from "./modules/users";
 import { wishes } from "./modules/wishes";
+import { logger } from "./utils/logger";
 
 checkEnv();
 
@@ -22,8 +23,30 @@ const api = new Elysia({ prefix: "/api" })
   .use(invites);
 
 const app = new Elysia()
+  .onRequest(({ request }) => {
+    logger.info(
+      { method: request.method, url: request.url },
+      "Incoming request",
+    );
+  })
+  .onAfterResponse(({ request, set }) => {
+    logger.info(
+      { method: request.method, url: request.url, status: set.status },
+      "Response sent",
+    );
+  })
   .onError((ctx) => {
-    console.error(ctx.code, ctx.error);
+    if (typeof ctx.code !== "number" && ctx.code !== "VALIDATION") {
+      logger.error(
+        { code: ctx.code, error: ctx.error, url: ctx.request.url },
+        "Request failed",
+      );
+    } else {
+      logger.debug(
+        { code: ctx.code, error: ctx.error, url: ctx.request.url },
+        "Request failed",
+      );
+    }
   })
   .use(
     openapi({
@@ -34,6 +57,6 @@ const app = new Elysia()
   .use(api)
   .listen(PORT);
 
-console.log(`Server is running at ${app.server?.hostname}:${app.server?.port}`);
+logger.info(`Server is running at ${app.server?.hostname}:${app.server?.port}`);
 
 export type App = typeof app;
