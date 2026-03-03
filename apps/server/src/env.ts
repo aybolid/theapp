@@ -3,7 +3,6 @@ import { logger } from "./utils/logger";
 
 const envSchema = z
   .object({
-    DOMAIN: z.string().min(1, "DOMAIN is required"),
     DATABASE_URL: z.url(),
     JWT_SECRET: z
       .string()
@@ -14,7 +13,6 @@ const envSchema = z
     S3_REGION: z.string().min(1, "S3_REGION is required"),
     S3_BUCKET: z.string().min(1, "S3_BUCKET is required"),
     S3_PUBLIC_BASE_URL: z.url(),
-    NOREPLY_EMAIL: z.email(),
     ADMIN_EMAIL: z.email(),
     ADMIN_PASSWORD: z.string().min(1, "ADMIN_PASSWORD is required"),
   })
