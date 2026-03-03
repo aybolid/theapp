@@ -147,30 +147,34 @@ function RouteComponent() {
 
 function PendingComponent() {
   return (
-    <Empty className="size-full">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Spinner />
-        </EmptyMedia>
-        <EmptyTitle>Loading the profile...</EmptyTitle>
-      </EmptyHeader>
-    </Empty>
+    <PageWrapper breadcrumbs={["User profile"]}>
+      <Empty className="size-full">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Spinner />
+          </EmptyMedia>
+          <EmptyTitle>Loading the profile...</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    </PageWrapper>
   );
 }
 
 function ErrorComponent({ error }: ErrorComponentProps) {
   return (
-    <div className="container mx-auto grid max-w-3xl gap-4 p-4">
-      <Alert variant="destructive">
-        <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-        <AlertTitle>Couldn't load the profile</AlertTitle>
-        <AlertDescription>
-          Something's not right. Try again later?
-        </AlertDescription>
-      </Alert>
-      <Suspense>
-        <LazyDevErrorStackDisplay error={error} />
-      </Suspense>
-    </div>
+    <PageWrapper breadcrumbs={["User profile"]}>
+      <div className="container mx-auto grid max-w-3xl gap-4 p-4">
+        <Alert variant="destructive">
+          <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
+          <AlertTitle>Couldn't load the profile</AlertTitle>
+          <AlertDescription>
+            Something's not right. Try again later?
+          </AlertDescription>
+        </Alert>
+        <Suspense>
+          <LazyDevErrorStackDisplay error={error} />
+        </Suspense>
+      </div>
+    </PageWrapper>
   );
 }

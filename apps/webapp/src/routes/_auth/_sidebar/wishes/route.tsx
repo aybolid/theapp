@@ -174,7 +174,11 @@ function RouteComponent() {
   const tableWishes = table.getRowModel().rows.map((r) => r.original);
 
   if (wishesQuery.data.length === 0) {
-    return <EmptyWishes className="size-full" />;
+    return (
+      <PageWrapper breadcrumbs={["Wishes"]}>
+        <EmptyWishes className="size-full" />
+      </PageWrapper>
+    );
   }
 
   return (
@@ -327,31 +331,35 @@ function RouteComponent() {
 
 function PendingComponent() {
   return (
-    <Empty className="size-full">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Spinner />
-        </EmptyMedia>
-        <EmptyTitle>Finding the wishes...</EmptyTitle>
-      </EmptyHeader>
-    </Empty>
+    <PageWrapper breadcrumbs={["Wishes"]}>
+      <Empty className="size-full">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Spinner />
+          </EmptyMedia>
+          <EmptyTitle>Finding the wishes...</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    </PageWrapper>
   );
 }
 
 function ErrorComponent({ error }: ErrorComponentProps) {
   return (
-    <div className="container mx-auto grid max-w-3xl gap-4 p-4">
-      <Alert variant="destructive">
-        <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-        <AlertTitle>Couldn't load wishes</AlertTitle>
-        <AlertDescription>
-          Something went wrong. Maybe try refreshing?
-        </AlertDescription>
-      </Alert>
-      <Suspense>
-        <LazyDevErrorStackDisplay error={error} />
-      </Suspense>
-    </div>
+    <PageWrapper breadcrumbs={["Wishes"]}>
+      <div className="container mx-auto grid max-w-3xl gap-4 p-4">
+        <Alert variant="destructive">
+          <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
+          <AlertTitle>Couldn't load wishes</AlertTitle>
+          <AlertDescription>
+            Something went wrong. Maybe try refreshing?
+          </AlertDescription>
+        </Alert>
+        <Suspense>
+          <LazyDevErrorStackDisplay error={error} />
+        </Suspense>
+      </div>
+    </PageWrapper>
   );
 }
 

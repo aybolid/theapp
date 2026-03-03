@@ -1,4 +1,3 @@
-import { isProduction } from "elysia/error";
 import { z } from "zod";
 import { logger } from "./utils/logger";
 
@@ -22,10 +21,8 @@ const envSchema = z
   .readonly();
 
 export function checkEnv() {
-  const parsed = envSchema.parse(process.env);
-  if (!isProduction) {
-    logger.debug(parsed, "Environment loaded");
-  }
+  envSchema.parse(process.env);
+  logger.info("Environment loaded");
 }
 
 declare global {

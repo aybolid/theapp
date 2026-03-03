@@ -248,30 +248,34 @@ const COLUMNS = [
 
 function PendingComponent() {
   return (
-    <Empty className="size-full">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Spinner />
-        </EmptyMedia>
-        <EmptyTitle>Loading users...</EmptyTitle>
-      </EmptyHeader>
-    </Empty>
+    <PageWrapper breadcrumbs={["Users"]}>
+      <Empty className="size-full">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Spinner />
+          </EmptyMedia>
+          <EmptyTitle>Loading users...</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    </PageWrapper>
   );
 }
 
 function ErrorComponent({ error }: ErrorComponentProps) {
   return (
-    <div className="container mx-auto grid max-w-3xl gap-4 p-4">
-      <Alert variant="destructive">
-        <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-        <AlertTitle>Couldn't load the users</AlertTitle>
-        <AlertDescription>
-          Something broke. Give it another shot in a bit.
-        </AlertDescription>
-      </Alert>
-      <Suspense>
-        <LazyDevErrorStackDisplay error={error} />
-      </Suspense>
-    </div>
+    <PageWrapper breadcrumbs={["Users"]}>
+      <div className="container mx-auto grid max-w-3xl gap-4 p-4">
+        <Alert variant="destructive">
+          <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
+          <AlertTitle>Couldn't load the users</AlertTitle>
+          <AlertDescription>
+            Something broke. Give it another shot in a bit.
+          </AlertDescription>
+        </Alert>
+        <Suspense>
+          <LazyDevErrorStackDisplay error={error} />
+        </Suspense>
+      </div>
+    </PageWrapper>
   );
 }

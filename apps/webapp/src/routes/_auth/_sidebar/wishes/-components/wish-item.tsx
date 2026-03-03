@@ -22,6 +22,7 @@ import { Spinner } from "@theapp/ui/components/spinner";
 import { EllipsisVertical, ExternalLink } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { toast } from "@theapp/ui/lib/sonner";
+import { cn } from "@theapp/ui/lib/utils";
 import { LinkPreview } from "@theapp/webapp/components/link-preview";
 import { UserChip } from "@theapp/webapp/components/user-chip";
 import {
@@ -56,6 +57,8 @@ export const WishItem: FC<{
     },
     onError: () => toast.error("Failed to reserve wish"),
   });
+
+  const showUpdatedAt = wish.createdAt.toString() !== wish.updatedAt.toString();
 
   return (
     <Card size="sm">
@@ -114,18 +117,23 @@ export const WishItem: FC<{
               )}
             </ItemContent>
           </Item>
-          <Item variant="muted" className="justify-between">
+          <Item
+            variant="muted"
+            className={cn("justify-between", !showUpdatedAt && "sm:col-span-2")}
+          >
             <ItemTitle>Added on</ItemTitle>
             <ItemDescription>
               {dayjs(wish.createdAt).format("MMM DD, YYYY, HH:mm")}
             </ItemDescription>
           </Item>
-          <Item variant="muted" className="justify-between">
-            <ItemTitle>Updated on</ItemTitle>
-            <ItemDescription>
-              {dayjs(wish.updatedAt).format("MMM DD, YYYY, HH:mm")}
-            </ItemDescription>
-          </Item>
+          {showUpdatedAt && (
+            <Item variant="muted" className="justify-between">
+              <ItemTitle>Updated on</ItemTitle>
+              <ItemDescription>
+                {dayjs(wish.updatedAt).format("MMM DD, YYYY, HH:mm")}
+              </ItemDescription>
+            </Item>
+          )}
         </ItemGroup>
       </CardContent>
       <CardFooter>

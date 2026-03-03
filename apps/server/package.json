@@ -2,6 +2,7 @@
   "name": "@theapp/server",
   "version": "0.0.0",
   "types": "src/index.ts",
+  "type": "module",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "email": "email dev --dir src/emails",

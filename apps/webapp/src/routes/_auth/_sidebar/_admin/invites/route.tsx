@@ -310,30 +310,34 @@ const COLUMNS = [
 
 function PendingComponent() {
   return (
-    <Empty className="size-full">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Spinner />
-        </EmptyMedia>
-        <EmptyTitle>Loading invites</EmptyTitle>
-      </EmptyHeader>
-    </Empty>
+    <PageWrapper breadcrumbs={["Invites"]}>
+      <Empty className="size-full">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Spinner />
+          </EmptyMedia>
+          <EmptyTitle>Loading invites</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+    </PageWrapper>
   );
 }
 
 function ErrorComponent({ error }: ErrorComponentProps) {
   return (
-    <div className="container mx-auto grid max-w-3xl gap-4 p-4">
-      <Alert variant="destructive">
-        <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-        <AlertTitle>Couldn't load invites</AlertTitle>
-        <AlertDescription>
-          Something's broken. Give it another shot?
-        </AlertDescription>
-      </Alert>
-      <Suspense>
-        <LazyDevErrorStackDisplay error={error} />
-      </Suspense>
-    </div>
+    <PageWrapper breadcrumbs={["Invites"]}>
+      <div className="container mx-auto grid max-w-3xl gap-4 p-4">
+        <Alert variant="destructive">
+          <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
+          <AlertTitle>Couldn't load invites</AlertTitle>
+          <AlertDescription>
+            Something's broken. Give it another shot?
+          </AlertDescription>
+        </Alert>
+        <Suspense>
+          <LazyDevErrorStackDisplay error={error} />
+        </Suspense>
+      </div>
+    </PageWrapper>
   );
 }
