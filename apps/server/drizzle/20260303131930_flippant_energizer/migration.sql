@@ -1,11 +1,5 @@
 CREATE TYPE "user_role" AS ENUM('admin', 'viewer');--> statement-breakpoint
-CREATE TABLE "invites" (
-	"invite_id" uuid PRIMARY KEY DEFAULT uuidv7(),
-	"email" varchar NOT NULL UNIQUE,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"expires_at" timestamp DEFAULT now() + interval '30 days' NOT NULL
-);
---> statement-breakpoint
+CREATE TYPE "user_status" AS ENUM('active', 'inactive');--> statement-breakpoint
 CREATE TABLE "profiles" (
 	"profile_id" uuid PRIMARY KEY DEFAULT uuidv7(),
 	"user_id" uuid NOT NULL UNIQUE,
@@ -28,6 +22,7 @@ CREATE TABLE "sessions" (
 CREATE TABLE "users" (
 	"user_id" uuid PRIMARY KEY DEFAULT uuidv7(),
 	"role" "user_role" DEFAULT 'viewer'::"user_role" NOT NULL,
+	"status" "user_status" DEFAULT 'inactive'::"user_status" NOT NULL,
 	"email" varchar NOT NULL UNIQUE,
 	"password_hash" varchar(255) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,

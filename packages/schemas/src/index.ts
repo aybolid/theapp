@@ -1,5 +1,4 @@
 export * from "./auth";
-export * from "./invites";
 export * from "./misc";
 export * from "./profiles";
 export * from "./sessions";

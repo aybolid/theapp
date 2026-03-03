@@ -41,6 +41,7 @@ import {
   wishesQueryOptions,
 } from "@theapp/webapp/lib/query/wishes";
 import { type ComponentProps, type FC, useState } from "react";
+import z from "zod";
 
 type DialogTriggerProps = ComponentProps<typeof DialogTrigger>;
 
@@ -134,9 +135,9 @@ export const NewWishDialog: FC<{
             <form.Field
               name="link"
               listeners={{
-                onChangeDebounceMs: 200,
-                onChange: ({ value, fieldApi }) => {
-                  if (fieldApi.state.meta.isValid) {
+                onChangeDebounceMs: 300,
+                onChange: ({ value }) => {
+                  if (z.url().safeParse(value).success) {
                     getUrlMetadataMutation.mutate({ url: value });
                   }
                 },
@@ -157,6 +158,7 @@ export const NewWishDialog: FC<{
                         aria-invalid={isInvalid}
                         autoComplete="off"
                         placeholder="https://"
+                        type="url"
                       />
                       {getUrlMetadataMutation.isPending && (
                         <InputGroupAddon align="inline-end">

@@ -42,18 +42,8 @@ export const auth = new Elysia({
   .post(
     "/signup",
     async (ctx) => {
-      const invite = await db.query.invites.findFirst({
-        where: { inviteId: { eq: ctx.body.inviteId } },
-      });
-      if (!invite) {
-        throw ctx.status(400, "Invalid invite");
-      }
-      if (new Date(invite.expiresAt).getTime() < Date.now()) {
-        throw ctx.status(400, "Invite expired");
-      }
-
       const userWithEmail = await db.query.users.findFirst({
-        where: { email: { eq: invite.email.toLowerCase() } },
+        where: { email: { eq: ctx.body.email.toLowerCase() } },
       });
       if (userWithEmail !== undefined) {
         throw ctx.status(409, "Email already in use");
@@ -65,7 +55,7 @@ export const auth = new Elysia({
         const user = await tx
           .insert(schema.users)
           .values({
-            email: invite.email.toLowerCase(),
+            email: ctx.body.email.toLowerCase(),
             passwordHash,
           })
           .returning()
@@ -82,10 +72,6 @@ export const auth = new Elysia({
         if (!profile) {
           throw new Error("Failed to create profile");
         }
-
-        await tx
-          .delete(schema.invites)
-          .where(eq(schema.invites.inviteId, ctx.body.inviteId));
       });
 
       return ctx.status(201, "User created");
@@ -98,7 +84,8 @@ export const auth = new Elysia({
         400: singupBadRequestErrorSchema,
       },
       detail: {
-        description: "Sign up with a valid invite. Creates a new user account.",
+        description:
+          "Sign up with a valid email and password. Creates a new user account that needs to be activated before it can be used.",
       },
     },
   )
@@ -106,7 +93,10 @@ export const auth = new Elysia({
     "/signin",
     async (ctx) => {
       const candidate = await db.query.users.findFirst({
-        where: { email: { eq: ctx.body.email.toLowerCase() } },
+        where: {
+          email: { eq: ctx.body.email.toLowerCase() },
+          status: { eq: "active" },
+        },
       });
       if (!candidate) throw ctx.status(400, "Invalid email or password");
 
@@ -168,7 +158,7 @@ export const auth = new Elysia({
       response: { 400: signinBadRequestSchema, 200: signinOkSchema },
       detail: {
         description:
-          "Sign in with email and password. Returns session and auth tokens.",
+          "Sign in with email and password. Only activated user can sign in. Returns session and auth tokens.",
       },
     },
   )

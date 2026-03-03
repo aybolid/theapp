@@ -15,19 +15,15 @@ const timestamps = {
 
 export const userRoleEnum = pg.pgEnum("user_role", ["admin", "viewer"]);
 
+export const userStatusEnum = pg.pgEnum("user_status", ["active", "inactive"]);
+
 export const users = pg.pgTable("users", {
   userId: uuidv7pk(),
   role: userRoleEnum().notNull().default("viewer"),
+  status: userStatusEnum().notNull().default("inactive"),
   email: pg.varchar().notNull().unique(),
   passwordHash: pg.varchar({ length: 255 }).notNull(),
   ...timestamps,
-});
-
-export const invites = pg.pgTable("invites", {
-  inviteId: uuidv7pk(),
-  email: pg.varchar().notNull().unique(),
-  createdAt: timestamps.createdAt,
-  expiresAt: pg.timestamp().notNull().default(sql`now() + interval '30 days'`),
 });
 
 export const sessions = pg.pgTable("sessions", {
@@ -90,5 +86,4 @@ export const schema = {
   sessions,
   profiles,
   wishes,
-  invites,
 };

@@ -187,7 +187,7 @@ function RouteComponent() {
         <Activity mode={isMobile ? "hidden" : "visible"}>
           <div className="sticky top-0 z-50 flex flex-wrap gap-2 bg-background py-4 outline outline-background">
             <SearchInput
-              className="w-80"
+              className="max-w-80"
               defaultValue={query}
               onDebouncedChange={(v) => setSearchParams({ query: v })}
             />

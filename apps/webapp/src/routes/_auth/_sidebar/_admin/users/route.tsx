@@ -1,7 +1,6 @@
 import {
   createFileRoute,
   type ErrorComponentProps,
-  Link,
 } from "@tanstack/react-router";
 import {
   createColumnHelper,
@@ -19,6 +18,7 @@ import {
   AlertTitle,
 } from "@theapp/ui/components/alert";
 import { Badge } from "@theapp/ui/components/badge";
+import { Button } from "@theapp/ui/components/button";
 import {
   Empty,
   EmptyHeader,
@@ -26,7 +26,7 @@ import {
   EmptyTitle,
 } from "@theapp/ui/components/empty";
 import { Spinner } from "@theapp/ui/components/spinner";
-import { Alert01Icon } from "@theapp/ui/icons/huge";
+import { Alert01Icon, EllipsisVertical } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { DataTable } from "@theapp/webapp/components/data-table";
 import { DataTableColumnHeader } from "@theapp/webapp/components/data-table-column-header";
@@ -48,6 +48,7 @@ import {
 import { Suspense, useMemo } from "react";
 import z from "zod";
 import { PageWrapper } from "../../../-components/page-wrapper";
+import { UserActionsMenu } from "./-components/user-actions-menu";
 
 type UserTableEntry = UserResponse & { isMe: boolean };
 
@@ -90,7 +91,7 @@ function RouteComponent() {
       ...user,
       isMe: user.userId === meQuery.data.userId,
     }));
-  }, []);
+  }, [usersQuery.data]);
 
   const table = useReactTable({
     data,
@@ -133,7 +134,7 @@ function RouteComponent() {
       <div className="flex h-full flex-col">
         <div className="sticky top-0 z-50 flex flex-wrap gap-2 bg-background py-4 outline outline-background">
           <SearchInput
-            className="w-80"
+            className="max-w-80"
             defaultValue={query}
             onDebouncedChange={(v) => setSearchParams({ query: v })}
           />
@@ -143,6 +144,7 @@ function RouteComponent() {
             labelsMap={{
               userId: "ID",
               role: "Role",
+              status: "Status",
               profile_name: "Name",
               email: "Email",
               createdAt: "Member since",
@@ -154,6 +156,7 @@ function RouteComponent() {
             labelsMap={{
               userId: "ID",
               role: "Role",
+              status: "Status",
               profile_name: "Name",
               email: "Email",
               createdAt: "Member since",
@@ -161,18 +164,7 @@ function RouteComponent() {
           />
           <div className="flex-1" />
         </div>
-        <DataTable
-          table={table}
-          caption={
-            <span>
-              See{" "}
-              <Link className="text-primary underline" to="/invites">
-                invites page
-              </Link>{" "}
-              to add new users.
-            </span>
-          }
-        />
+        <DataTable table={table} />
       </div>
     </PageWrapper>
   );
@@ -215,6 +207,18 @@ const COLUMNS = [
       );
     },
   }),
+  helper.accessor("status", {
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
+    cell: (props) => {
+      return props.getValue() === "active" ? (
+        <Badge>Active</Badge>
+      ) : (
+        <Badge variant="destructive">Inactive</Badge>
+      );
+    },
+  }),
   helper.accessor("profile.name", {
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Name" />
@@ -242,7 +246,20 @@ const COLUMNS = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Actions" />
     ),
-    cell: () => null,
+    cell: (props) => {
+      const { isMe, ...user } = props.row.original;
+      return (
+        <UserActionsMenu
+          user={user}
+          isMe={isMe}
+          render={
+            <Button size="icon" variant="secondary">
+              <HugeiconsIcon icon={EllipsisVertical} strokeWidth={2} />
+            </Button>
+          }
+        />
+      );
+    },
   }),
 ];
 

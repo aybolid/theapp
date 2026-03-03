@@ -47,8 +47,6 @@ export const profilePictureBodySchema = z.object({
 export const PROFILE_PICTURE_FILE_TYPES: FileType[] = [
   "image/jpeg",
   "image/png",
-  // "image/svg",
-  // "image/webp",
 ];
 
 export type ProfilePictureBody = z.infer<typeof profilePictureBodySchema>;

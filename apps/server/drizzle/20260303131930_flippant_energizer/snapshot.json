@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "efa6e8ec-7a99-445f-a8e6-c78126151301",
+  "id": "f303ebc4-74a8-41ce-882b-c8e564cca7a1",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -16,9 +16,12 @@
       "schema": "public"
     },
     {
-      "isRlsEnabled": false,
-      "name": "invites",
-      "entityType": "tables",
+      "values": [
+        "active",
+        "inactive"
+      ],
+      "name": "user_status",
+      "entityType": "enums",
       "schema": "public"
     },
     {
@@ -44,58 +47,6 @@
       "name": "wishes",
       "entityType": "tables",
       "schema": "public"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "uuidv7()",
-      "generated": null,
-      "identity": null,
-      "name": "invite_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "invites"
-    },
-    {
-      "type": "varchar",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "email",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "invites"
-    },
-    {
-      "type": "timestamp",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "invites"
-    },
-    {
-      "type": "timestamp",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now() + interval '30 days'",
-      "generated": null,
-      "identity": null,
-      "name": "expires_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "invites"
     },
     {
       "type": "uuid",
@@ -288,6 +239,19 @@
       "generated": null,
       "identity": null,
       "name": "role",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "user_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'inactive'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
       "entityType": "columns",
       "schema": "public",
       "table": "users"
@@ -531,16 +495,6 @@
     },
     {
       "columns": [
-        "invite_id"
-      ],
-      "nameExplicit": false,
-      "name": "invites_pkey",
-      "schema": "public",
-      "table": "invites",
-      "entityType": "pks"
-    },
-    {
-      "columns": [
         "profile_id"
       ],
       "nameExplicit": false,
@@ -578,17 +532,6 @@
       "schema": "public",
       "table": "wishes",
       "entityType": "pks"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "email"
-      ],
-      "nullsNotDistinct": false,
-      "name": "invites_email_key",
-      "schema": "public",
-      "table": "invites",
-      "entityType": "uniques"
     },
     {
       "nameExplicit": false,

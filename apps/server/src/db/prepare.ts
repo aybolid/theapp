@@ -44,14 +44,14 @@ async function createAdminUserIfNotExists() {
 
   logger.info("Creating admin user and profile");
 
-  const email = process.env.ADMIN_EMAIL;
+  const email = process.env.ADMIN_EMAIL.toLowerCase();
   const passwordHash = await hashPassword(process.env.ADMIN_PASSWORD);
 
   await db.transaction(async (tx) => {
     logger.info("Creating admin user");
     const user = await tx
       .insert(schema.users)
-      .values({ email, passwordHash, role: "admin" })
+      .values({ email, passwordHash, role: "admin", status: "active" })
       .returning()
       .then((rows) => rows[0]);
     if (!user) {

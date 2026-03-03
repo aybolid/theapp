@@ -3,7 +3,7 @@ import { profileResponseSchema } from "./profiles";
 import { zDate } from "./zdate";
 
 export const signupBodySchema = z.object({
-  inviteId: z.uuidv7(),
+  email: z.email("Must be a valid email"),
   password: z
     .string()
     .regex(/[a-z]/, "Must contain at least one lowercase letter")
@@ -57,10 +57,15 @@ export const userRoleSchema = z.enum(["admin", "viewer"]);
 
 export type UserRole = z.infer<typeof userRoleSchema>;
 
+export const userStatusSchema = z.enum(["active", "inactive"]);
+
+export type UserStatus = z.infer<typeof userStatusSchema>;
+
 export const userResponseSchema = z.object({
   userId: z.uuidv7(),
   email: z.email(),
   role: userRoleSchema,
+  status: userStatusSchema,
   createdAt: zDate,
   updatedAt: zDate,
   profile: profileResponseSchema,
