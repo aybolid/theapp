@@ -2,24 +2,16 @@
   "version": "8",
   "dialect": "postgres",
   "id": "f303ebc4-74a8-41ce-882b-c8e564cca7a1",
-  "prevIds": [
-    "00000000-0000-0000-0000-000000000000"
-  ],
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
-      "values": [
-        "admin",
-        "viewer"
-      ],
+      "values": ["admin", "viewer"],
       "name": "user_role",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "active",
-        "inactive"
-      ],
+      "values": ["active", "inactive"],
       "name": "user_status",
       "entityType": "enums",
       "schema": "public"
@@ -427,14 +419,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "user_id"
-      ],
+      "columnsTo": ["user_id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "profiles_user_id_users_user_id_fkey",
@@ -444,14 +432,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "user_id"
-      ],
+      "columnsTo": ["user_id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "sessions_user_id_users_user_id_fkey",
@@ -461,14 +445,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "owner_id"
-      ],
+      "columns": ["owner_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "user_id"
-      ],
+      "columnsTo": ["user_id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "wishes_owner_id_users_user_id_fkey",
@@ -478,14 +458,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "reserver_id"
-      ],
+      "columns": ["reserver_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "user_id"
-      ],
+      "columnsTo": ["user_id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "wishes_reserver_id_users_user_id_fkey",
@@ -494,9 +470,7 @@
       "table": "wishes"
     },
     {
-      "columns": [
-        "profile_id"
-      ],
+      "columns": ["profile_id"],
       "nameExplicit": false,
       "name": "profiles_pkey",
       "schema": "public",
@@ -504,9 +478,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "session_id"
-      ],
+      "columns": ["session_id"],
       "nameExplicit": false,
       "name": "sessions_pkey",
       "schema": "public",
@@ -514,9 +486,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",
@@ -524,9 +494,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "wish_id"
-      ],
+      "columns": ["wish_id"],
       "nameExplicit": false,
       "name": "wishes_pkey",
       "schema": "public",
@@ -535,9 +503,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "nullsNotDistinct": false,
       "name": "profiles_user_id_key",
       "schema": "public",
@@ -546,9 +512,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "email"
-      ],
+      "columns": ["email"],
       "nullsNotDistinct": false,
       "name": "users_email_key",
       "schema": "public",

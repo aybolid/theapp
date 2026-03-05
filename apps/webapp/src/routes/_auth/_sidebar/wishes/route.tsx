@@ -12,7 +12,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import type { WishResponse } from "@theapp/schemas";
+import type { UserResponse, WishResponse } from "@theapp/schemas";
 import {
   Alert,
   AlertDescription,
@@ -26,6 +26,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@theapp/ui/components/empty";
+import { Field, FieldLabel } from "@theapp/ui/components/field";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@theapp/ui/components/popover";
 import { Spinner } from "@theapp/ui/components/spinner";
 import {
   ToggleGroup,
@@ -37,6 +43,7 @@ import {
   Cards01Icon,
   EllipsisVertical,
   ExternalLink,
+  FilterIcon,
   ListViewIcon,
   PlusSignIcon,
 } from "@theapp/ui/icons/huge";
@@ -50,6 +57,7 @@ import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
 import { LinkPreview } from "@theapp/webapp/components/link-preview";
 import { SearchInput } from "@theapp/webapp/components/search-input";
 import { UserChip } from "@theapp/webapp/components/user-chip";
+import { UserSelect } from "@theapp/webapp/components/user-select";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import {
   useUpdateWishReservationMutation,
@@ -87,6 +95,7 @@ const searchParams = {
   sorting: parseAsJson(z.record(z.string(), z.boolean())).withDefault({
     createdAt: true,
   }),
+  columnFilters: parseAsJson(z.record(z.string(), z.unknown())).withDefault({}),
 };
 
 export const Route = createFileRoute("/_auth/_sidebar/wishes")({
@@ -112,8 +121,10 @@ type WishTableEntry = WishResponse & {
 
 function RouteComponent() {
   const isMobile = useIsMobile();
-  const [{ query, view, columnVisibility, sorting }, setSearchParams] =
-    useQueryStates(searchParams);
+  const [
+    { query, view, columnVisibility, sorting, columnFilters },
+    setSearchParams,
+  ] = useQueryStates(searchParams);
 
   const meQuery = useMeSuspenseQuery();
   const wishesQuery = useWishesSuspenseQuery();
@@ -128,9 +139,30 @@ function RouteComponent() {
     [wishesQuery.data],
   );
 
+  const owners = useMemo(() => {
+    const map: Record<string, UserResponse> = {};
+    for (const wish of data) {
+      map[wish.owner.userId] = wish.owner;
+    }
+    return Object.values(map);
+  }, [data]);
+
+  const reservers = useMemo(() => {
+    const map: Record<string, UserResponse> = {};
+    for (const wish of data) {
+      if (!wish.reserver) continue;
+      map[wish.reserver.userId] = wish.reserver;
+    }
+    return Object.values(map);
+  }, [data]);
+
   const sortingState = useMemo(() => {
     return Object.entries(sorting).map(([id, desc]) => ({ id, desc }));
   }, [sorting]);
+
+  const columnFiltersState = useMemo(() => {
+    return Object.entries(columnFilters).map(([id, value]) => ({ id, value }));
+  }, [columnFilters]);
 
   const table = useReactTable({
     data,
@@ -168,6 +200,7 @@ function RouteComponent() {
       },
       sorting: sortingState,
       globalFilter: query || undefined,
+      columnFilters: columnFiltersState,
     },
   });
 
@@ -219,6 +252,90 @@ function RouteComponent() {
                 name: "Name",
               }}
             />
+            <Popover>
+              <PopoverTrigger
+                render={
+                  <Button variant="outline">
+                    <HugeiconsIcon icon={FilterIcon} strokeWidth={2} />
+                    <span>Filters</span>
+                  </Button>
+                }
+              />
+              <PopoverContent>
+                <Field>
+                  <FieldLabel>Whose wish</FieldLabel>
+                  <UserSelect
+                    users={owners}
+                    value={columnFilters["owner.userId"] as string | undefined}
+                    onValueChange={(user) => {
+                      const shallow = { ...columnFilters };
+                      delete shallow["owner.userId"];
+                      if (user) {
+                        shallow["owner.userId"] = user.userId;
+                      }
+                      setSearchParams({
+                        columnFilters: shallow,
+                      });
+                    }}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Getting it</FieldLabel>
+                  <UserSelect
+                    users={reservers}
+                    value={
+                      columnFilters["reserver.userId"] as string | undefined
+                    }
+                    onValueChange={(user) => {
+                      const shallow = { ...columnFilters };
+                      delete shallow["reserver.userId"];
+                      if (user) {
+                        shallow["reserver.userId"] = user.userId;
+                      }
+                      setSearchParams({
+                        columnFilters: shallow,
+                      });
+                    }}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Status</FieldLabel>
+                  <ToggleGroup
+                    variant="outline"
+                    multiple={false}
+                    value={
+                      columnFilters.isCompleted !== undefined
+                        ? columnFilters.isCompleted
+                          ? ["completed"]
+                          : ["pending"]
+                        : ["any"]
+                    }
+                    onValueChange={(value) => {
+                      const status = value[0] ?? "any";
+                      const shallow = { ...columnFilters };
+                      if (status === "any") {
+                        delete shallow.isCompleted;
+                      } else {
+                        shallow.isCompleted = status === "completed";
+                      }
+                      setSearchParams({
+                        columnFilters: shallow,
+                      });
+                    }}
+                  >
+                    <ToggleGroupItem className="basis-1/3 text-xs" value="any">
+                      Any
+                    </ToggleGroupItem>
+                    <ToggleGroupItem className="basis-1/3" value="completed">
+                      <Badge>Completed</Badge>
+                    </ToggleGroupItem>
+                    <ToggleGroupItem className="basis-1/3" value="pending">
+                      <Badge variant="secondary">Pending</Badge>
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </Field>
+              </PopoverContent>
+            </Popover>
             {view === "table" && (
               <DataTableViewOptions
                 table={table}
@@ -293,7 +410,6 @@ function RouteComponent() {
               onDebouncedChange={(v) => setSearchParams({ query: v })}
             />
             <DataTableSortingOptions
-              className="bg-background!"
               onlyIcon
               table={table}
               variant="outline"
@@ -307,6 +423,94 @@ function RouteComponent() {
                 name: "Name",
               }}
             />
+            <Popover>
+              <PopoverTrigger
+                render={
+                  <Button variant="outline" size="icon">
+                    <HugeiconsIcon icon={FilterIcon} strokeWidth={2} />
+                  </Button>
+                }
+              />
+              <PopoverContent>
+                <Field>
+                  <FieldLabel>Whose wish</FieldLabel>
+                  <UserSelect
+                    users={owners}
+                    value={
+                      (columnFilters["owner.userId"] as string | undefined) ??
+                      ""
+                    }
+                    onValueChange={(user) => {
+                      const shallow = { ...columnFilters };
+                      delete shallow["owner.userId"];
+                      if (user) {
+                        shallow["owner.userId"] = user.userId;
+                      }
+                      setSearchParams({
+                        columnFilters: shallow,
+                      });
+                    }}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Getting it</FieldLabel>
+                  <UserSelect
+                    users={reservers}
+                    value={
+                      (columnFilters["reserver.userId"] as
+                        | string
+                        | undefined) ?? ""
+                    }
+                    onValueChange={(user) => {
+                      const shallow = { ...columnFilters };
+                      delete shallow["reserver.userId"];
+                      if (user) {
+                        shallow["reserver.userId"] = user.userId;
+                      }
+                      setSearchParams({
+                        columnFilters: shallow,
+                      });
+                    }}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Status</FieldLabel>
+                  <ToggleGroup
+                    variant="outline"
+                    multiple={false}
+                    value={
+                      columnFilters.isCompleted !== undefined
+                        ? columnFilters.isCompleted
+                          ? ["completed"]
+                          : ["pending"]
+                        : ["any"]
+                    }
+                    onValueChange={(value) => {
+                      const status = value[0] ?? "any";
+                      const shallow = { ...columnFilters };
+                      if (status === "any") {
+                        delete shallow.isCompleted;
+                      } else {
+                        shallow.isCompleted = status === "completed";
+                      }
+                      setSearchParams({
+                        columnFilters: shallow,
+                      });
+                    }}
+                  >
+                    <ToggleGroupItem className="basis-1/3 text-xs" value="any">
+                      Any
+                    </ToggleGroupItem>
+                    <ToggleGroupItem className="basis-1/3" value="completed">
+                      <Badge>Completed</Badge>
+                    </ToggleGroupItem>
+                    <ToggleGroupItem className="basis-1/3" value="pending">
+                      <Badge variant="secondary">Pending</Badge>
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </Field>
+              </PopoverContent>
+            </Popover>
             <Suspense
               fallback={
                 <Button size="icon" disabled>
