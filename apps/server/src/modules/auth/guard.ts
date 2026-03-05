@@ -72,7 +72,10 @@ export function authGuard(config?: { adminOnly: boolean }) {
         const now = new Date();
 
         const session = await db.query.sessions.findFirst({
-          where: { sessionId: { eq: sessionId } },
+          where: {
+            sessionId: { eq: sessionId },
+            user: { status: { eq: "active" } },
+          },
           with: { user: { with: { profile: true } } },
         });
         if (!session) {
