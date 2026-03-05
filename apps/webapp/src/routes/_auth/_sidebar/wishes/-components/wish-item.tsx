@@ -73,7 +73,7 @@ export const WishItem: FC<{
             className="absolute inset-0 z-0 m-3 overflow-hidden rounded-lg bg-center bg-cover bg-no-repeat"
             style={{ backgroundImage: `url(${banner})` }}
           />
-          <div className="absolute inset-0 z-0 bg-background/80 backdrop-blur-lg" />
+          <div className="absolute inset-0 z-0 bg-card/80 backdrop-blur-lg" />
         </>
       )}
       <CardHeader className="z-10">
