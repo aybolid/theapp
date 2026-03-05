@@ -22,7 +22,6 @@ import { Spinner } from "@theapp/ui/components/spinner";
 import { EllipsisVertical, ExternalLink } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { toast } from "@theapp/ui/lib/sonner";
-import { cn } from "@theapp/ui/lib/utils";
 import { LinkPreview } from "@theapp/webapp/components/link-preview";
 import { UserChip } from "@theapp/webapp/components/user-chip";
 import { useUrlMetadataQuery } from "@theapp/webapp/lib/query/misc";
@@ -133,12 +132,7 @@ export const WishItem: FC<{
               )}
             </ItemContent>
           </Item>
-          <Item
-            className={cn(
-              "justify-between p-0",
-              !showUpdatedAt && "sm:col-span-2",
-            )}
-          >
+          <Item className="justify-between p-0">
             <ItemTitle className="text-xs">Added on</ItemTitle>
             <ItemDescription className="text-xs">
               {dayjs(wish.createdAt).format("MMM DD, YYYY, HH:mm")}
