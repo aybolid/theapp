@@ -1,4 +1,8 @@
 import { getUrlMetadataQuerySchema, urlMetadataSchema } from "@theapp/schemas";
+import {
+  cacheUrlMetadata,
+  getCachedUrlMetadata,
+} from "@theapp/server/cache/url-metadata";
 import * as cheerio from "cheerio";
 import Elysia from "elysia";
 import { authGuard } from "../auth/guard";
@@ -13,7 +17,14 @@ export const misc = new Elysia({
   .get(
     "/url-metadata",
     async (ctx) => {
-      const response = await fetch(ctx.query.url.trim());
+      const url = ctx.query.url.trim();
+
+      const cachedMetadata = await getCachedUrlMetadata(url);
+      if (cachedMetadata) {
+        return ctx.status(200, cachedMetadata);
+      }
+
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch url");
       }
@@ -29,7 +40,9 @@ export const misc = new Elysia({
         head.find('meta[property="og:image"]').attr("content") ||
         "";
 
-      return ctx.status(200, { title, description, banner });
+      const metadata = { title, description, banner };
+      cacheUrlMetadata(url, metadata);
+      return ctx.status(200, metadata);
     },
     {
       query: getUrlMetadataQuerySchema,

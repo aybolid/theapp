@@ -31,6 +31,13 @@ services:
     environment:
       RUST_LOG: info
 
+  valkey:
+    image: valkey/valkey
+    container_name: theapp_valkey
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+
   # Production services
 
   server:

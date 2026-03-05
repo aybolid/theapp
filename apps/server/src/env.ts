@@ -4,6 +4,7 @@ import { logger } from "./utils/logger";
 const envSchema = z
   .object({
     DATABASE_URL: z.url(),
+    CACHE_URL: z.url(),
     JWT_SECRET: z
       .string()
       .min(32, "JWT_SECRET should be at least 32 characters for security"),
