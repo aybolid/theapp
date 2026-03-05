@@ -79,7 +79,7 @@ const LazyNewWishDialog = lazy(() =>
 
 const searchParams = {
   query: parseAsString.withDefault(""),
-  view: parseAsStringLiteral(["table", "cards"]).withDefault("table"),
+  view: parseAsStringLiteral(["table", "cards"]).withDefault("cards"),
   columnVisibility: parseAsJson(z.record(z.string(), z.boolean())).withDefault({
     createdAt: false,
     updatedAt: false,
@@ -199,11 +199,11 @@ function RouteComponent() {
                 setSearchParams({ view: searchParams.view.parse(v[0] ?? "") })
               }
             >
-              <ToggleGroupItem value="table">
-                <HugeiconsIcon icon={ListViewIcon} strokeWidth={2} />
-              </ToggleGroupItem>
               <ToggleGroupItem value="cards">
                 <HugeiconsIcon icon={Cards01Icon} strokeWidth={2} />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="table">
+                <HugeiconsIcon icon={ListViewIcon} strokeWidth={2} />
               </ToggleGroupItem>
             </ToggleGroup>
             <DataTableSortingOptions

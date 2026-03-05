@@ -25,6 +25,7 @@ import { toast } from "@theapp/ui/lib/sonner";
 import { cn } from "@theapp/ui/lib/utils";
 import { LinkPreview } from "@theapp/webapp/components/link-preview";
 import { UserChip } from "@theapp/webapp/components/user-chip";
+import { useUrlMetadataQuery } from "@theapp/webapp/lib/query/misc";
 import {
   useUpdateWishReservationMutation,
   wishesQueryOptions,
@@ -38,6 +39,10 @@ export const WishItem: FC<{
   isOwnedByMe: boolean;
   isReservedByMe: boolean;
 }> = ({ wish, isOwnedByMe, isReservedByMe }) => {
+  const metadataQuery = useUrlMetadataQuery(wish.link);
+
+  const banner = metadataQuery.data?.banner ?? "";
+
   let linkLabel = "Follow link";
   try {
     linkLabel = new URL(wish.link).hostname;
@@ -61,17 +66,28 @@ export const WishItem: FC<{
   const showUpdatedAt = wish.createdAt.toString() !== wish.updatedAt.toString();
 
   return (
-    <Card size="sm">
-      <CardHeader>
+    <Card size="sm" className="relative overflow-hidden">
+      {banner && (
+        <>
+          <div
+            className="absolute inset-0 z-0 m-3 overflow-hidden rounded-lg bg-center bg-cover bg-no-repeat"
+            style={{ backgroundImage: `url(${banner})` }}
+          />
+          <div className="absolute inset-0 z-0 bg-background/80 backdrop-blur-lg" />
+        </>
+      )}
+      <CardHeader className="z-10">
         <CardTitle className="flex flex-wrap items-center gap-2">
-          <span>{wish.name}</span>
           {wish.isCompleted ? (
             <Badge>Completed</Badge>
           ) : (
             <Badge variant="secondary">Pending</Badge>
           )}
+          <span className="max-w-86 truncate">{wish.name}</span>
         </CardTitle>
-        {wish.note && <CardDescription>{wish.note}</CardDescription>}
+        {wish.note && (
+          <CardDescription className="text-xs">{wish.note}</CardDescription>
+        )}
         <CardAction>
           <WishActionsMenu
             wish={wish}
@@ -85,7 +101,7 @@ export const WishItem: FC<{
           />
         </CardAction>
       </CardHeader>
-      <CardContent className="flex h-full flex-col">
+      <CardContent className="z-10 flex h-full flex-col">
         <div className="flex-1" />
         <ItemGroup className="grid gap-2 sm:grid-cols-2">
           <Item variant="muted" className="items-start">
@@ -118,25 +134,27 @@ export const WishItem: FC<{
             </ItemContent>
           </Item>
           <Item
-            variant="muted"
-            className={cn("justify-between", !showUpdatedAt && "sm:col-span-2")}
+            className={cn(
+              "justify-between p-0",
+              !showUpdatedAt && "sm:col-span-2",
+            )}
           >
-            <ItemTitle>Added on</ItemTitle>
-            <ItemDescription>
+            <ItemTitle className="text-xs">Added on</ItemTitle>
+            <ItemDescription className="text-xs">
               {dayjs(wish.createdAt).format("MMM DD, YYYY, HH:mm")}
             </ItemDescription>
           </Item>
           {showUpdatedAt && (
-            <Item variant="muted" className="justify-between">
-              <ItemTitle>Updated on</ItemTitle>
-              <ItemDescription>
+            <Item className="justify-between p-0">
+              <ItemTitle className="text-xs">Updated on</ItemTitle>
+              <ItemDescription className="text-xs">
                 {dayjs(wish.updatedAt).format("MMM DD, YYYY, HH:mm")}
               </ItemDescription>
             </Item>
           )}
         </ItemGroup>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="z-10">
         <LinkPreview
           url={wish.link}
           render={

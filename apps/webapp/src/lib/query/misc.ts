@@ -2,8 +2,10 @@ import type { Treaty } from "@elysiajs/eden";
 import {
   queryOptions,
   type UseMutationOptions,
+  type UseQueryOptions,
   type UseSuspenseQueryOptions,
   useMutation,
+  useQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import type { GetUrlMetadataQuery, UrlMetadata } from "@theapp/schemas";
@@ -39,6 +41,22 @@ export function useUrlMetadataSuspenseQuery(
   >,
 ) {
   return useSuspenseQuery({
+    ...urlMetadataQueryOptions(url),
+    ...options,
+  });
+}
+
+export function useUrlMetadataQuery(
+  url: string,
+  options?: Omit<
+    UseQueryOptions<
+      UrlMetadata,
+      Treaty.Error<(typeof server.api.misc)["url-metadata"]["get"]>
+    >,
+    "queryFn" | "queryKey"
+  >,
+) {
+  return useQuery({
     ...urlMetadataQueryOptions(url),
     ...options,
   });
