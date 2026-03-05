@@ -45,6 +45,8 @@ import {
 import { type FC, Suspense } from "react";
 
 export const AppSidebar: FC = () => {
+  const { setOpenMobile } = useSidebar();
+
   return (
     <Sidebar variant="floating" collapsible="icon">
       <SidebarHeader>
@@ -72,7 +74,7 @@ export const AppSidebar: FC = () => {
             <SidebarMenuItem>
               <SidebarMenuButton
                 render={
-                  <Link to="/wishes">
+                  <Link to="/wishes" onClick={() => setOpenMobile(false)}>
                     <HugeiconsIcon icon={Gift} strokeWidth={2} />
                     <span>Wishes</span>
                   </Link>
@@ -81,7 +83,7 @@ export const AppSidebar: FC = () => {
               <SidebarMenuButton
                 disabled
                 render={
-                  <Link to="/">
+                  <Link to="/" onClick={() => setOpenMobile(false)}>
                     <HugeiconsIcon icon={Chat01Icon} strokeWidth={2} />
                     <span>Quotes</span>
                     <Badge variant="secondary">Work in progress</Badge>
@@ -98,7 +100,7 @@ export const AppSidebar: FC = () => {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   render={
-                    <Link to="/users">
+                    <Link to="/users" onClick={() => setOpenMobile(false)}>
                       <HugeiconsIcon icon={Users} strokeWidth={2} />
                       <span>Users</span>
                     </Link>
@@ -126,7 +128,7 @@ const UserButton: FC = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const meQuery = useMeSuspenseQuery();
 
   const signoutMutation = useSignoutMutation({
@@ -168,6 +170,7 @@ const UserButton: FC = () => {
           <DropdownMenuItem
             render={
               <Link
+                onClick={() => setOpenMobile(false)}
                 to="/profile/$userId"
                 params={{ userId: meQuery.data.userId }}
               >
