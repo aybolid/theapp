@@ -24,6 +24,7 @@ import {
 } from "@theapp/ui/components/sidebar";
 import { Spinner } from "@theapp/ui/components/spinner";
 import {
+  ChampionIcon,
   Chat01Icon,
   DashboardSquareIcon,
   Gift,
@@ -73,6 +74,14 @@ export const AppSidebar: FC = () => {
                   <Link to="/wishes" onClick={() => setOpenMobile(false)}>
                     <HugeiconsIcon icon={Gift} strokeWidth={2} />
                     <span>Wishes</span>
+                  </Link>
+                }
+              />
+              <SidebarMenuButton
+                render={
+                  <Link to="/f1" onClick={() => setOpenMobile(false)}>
+                    <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} />
+                    <span>Formula 1</span>
                   </Link>
                 }
               />

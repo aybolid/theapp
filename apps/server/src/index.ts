@@ -7,6 +7,7 @@ import z from "zod";
 import { pool } from "./db";
 import { prepareDatabase } from "./db/prepare";
 import { checkEnv } from "./env";
+import { f1 } from "./modules/f1";
 import { misc } from "./modules/misc";
 import { users } from "./modules/users";
 import { wishes } from "./modules/wishes";
@@ -23,7 +24,8 @@ const api = new Elysia({ prefix: "/api" })
   .use(profiles)
   .use(wishes)
   .use(misc)
-  .use(users);
+  .use(users)
+  .use(f1);
 
 const app = new Elysia({ allowUnsafeValidationDetails: true })
   .on("stop", async () => {
