@@ -1,6 +1,7 @@
 import {
   createFileRoute,
   type ErrorComponentProps,
+  Link,
 } from "@tanstack/react-router";
 import type { F1Session } from "@theapp/schemas";
 import {
@@ -15,6 +16,7 @@ import {
   AlertTitle,
 } from "@theapp/ui/components/alert";
 import { Badge } from "@theapp/ui/components/badge";
+import { Button } from "@theapp/ui/components/button";
 import {
   Empty,
   EmptyHeader,
@@ -23,6 +25,8 @@ import {
 } from "@theapp/ui/components/empty";
 import {
   Item,
+  ItemActions,
+  ItemContent,
   ItemDescription,
   ItemGroup,
   ItemTitle,
@@ -38,7 +42,7 @@ import dayjs from "dayjs";
 import { type FC, Suspense } from "react";
 import { PageWrapper } from "../../-components/page-wrapper";
 
-export const Route = createFileRoute("/_auth/_sidebar/f1")({
+export const Route = createFileRoute("/_auth/_sidebar/f1/")({
   component: RouteComponent,
   errorComponent: ErrorComponent,
   pendingComponent: PendingComponent,
@@ -134,7 +138,7 @@ function RouteComponent() {
                     </ItemDescription>
                   </Item>
                 </AccordionTrigger>
-                <AccordionContent className="rounded-md bg-muted/20 p-4">
+                <AccordionContent className="p-4">
                   <p className="text-muted-foreground">{circuit}</p>
                   <MeetingDisplay
                     sessions={sortedSessions}
@@ -175,11 +179,30 @@ const MeetingDisplay: FC<{
               isNextSession && "border-primary bg-primary/10",
             )}
           >
-            <ItemTitle>{session.session_name}</ItemTitle>
-            <ItemDescription>
-              {dayjs(session.date_start).format("ddd, MMM D, HH:mm")} -{" "}
-              {dayjs(session.date_end).format("HH:mm")}
-            </ItemDescription>
+            <ItemContent>
+              <ItemTitle>{session.session_name}</ItemTitle>
+              <ItemDescription>
+                {dayjs(session.date_start).format("ddd, MMM D, HH:mm")} -{" "}
+                {dayjs(session.date_end).format("HH:mm")}
+              </ItemDescription>
+            </ItemContent>
+            {dayjs(session.date_start).isBefore(dayjs()) && (
+              <ItemActions>
+                <Button
+                  size="xs"
+                  variant="link"
+                  nativeButton={false}
+                  render={
+                    <Link
+                      to="/f1/session/$sessionKey"
+                      params={{ sessionKey: session.session_key.toString() }}
+                    >
+                      View
+                    </Link>
+                  }
+                />
+              </ItemActions>
+            )}
           </Item>
         );
       })}

@@ -17,9 +17,10 @@ import { Route as AuthSidebarRouteImport } from './routes/_auth/_sidebar'
 import { Route as AuthSidebarIndexRouteImport } from './routes/_auth/_sidebar/index'
 import { Route as AuthSidebarAdminRouteImport } from './routes/_auth/_sidebar/_admin'
 import { Route as AuthSidebarWishesRouteRouteImport } from './routes/_auth/_sidebar/wishes/route'
-import { Route as AuthSidebarF1RouteRouteImport } from './routes/_auth/_sidebar/f1/route'
+import { Route as AuthSidebarF1IndexRouteImport } from './routes/_auth/_sidebar/f1/index'
 import { Route as AuthSidebarProfileUserIdRouteImport } from './routes/_auth/_sidebar/profile/$userId'
 import { Route as AuthSidebarAdminUsersRouteRouteImport } from './routes/_auth/_sidebar/_admin/users/route'
+import { Route as AuthSidebarF1SessionSessionKeyRouteImport } from './routes/_auth/_sidebar/f1/session/$sessionKey'
 
 const No_authRoute = No_authRouteImport.update({
   id: '/_no_auth',
@@ -57,9 +58,9 @@ const AuthSidebarWishesRouteRoute = AuthSidebarWishesRouteRouteImport.update({
   path: '/wishes',
   getParentRoute: () => AuthSidebarRoute,
 } as any)
-const AuthSidebarF1RouteRoute = AuthSidebarF1RouteRouteImport.update({
-  id: '/f1',
-  path: '/f1',
+const AuthSidebarF1IndexRoute = AuthSidebarF1IndexRouteImport.update({
+  id: '/f1/',
+  path: '/f1/',
   getParentRoute: () => AuthSidebarRoute,
 } as any)
 const AuthSidebarProfileUserIdRoute =
@@ -74,24 +75,32 @@ const AuthSidebarAdminUsersRouteRoute =
     path: '/users',
     getParentRoute: () => AuthSidebarAdminRoute,
   } as any)
+const AuthSidebarF1SessionSessionKeyRoute =
+  AuthSidebarF1SessionSessionKeyRouteImport.update({
+    id: '/f1/session/$sessionKey',
+    path: '/f1/session/$sessionKey',
+    getParentRoute: () => AuthSidebarRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthSidebarIndexRoute
   '/signin': typeof No_authSigninRoute
   '/signup': typeof No_authSignupRoute
-  '/f1': typeof AuthSidebarF1RouteRoute
   '/wishes': typeof AuthSidebarWishesRouteRoute
   '/users': typeof AuthSidebarAdminUsersRouteRoute
   '/profile/$userId': typeof AuthSidebarProfileUserIdRoute
+  '/f1/': typeof AuthSidebarF1IndexRoute
+  '/f1/session/$sessionKey': typeof AuthSidebarF1SessionSessionKeyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AuthSidebarIndexRoute
   '/signin': typeof No_authSigninRoute
   '/signup': typeof No_authSignupRoute
-  '/f1': typeof AuthSidebarF1RouteRoute
   '/wishes': typeof AuthSidebarWishesRouteRoute
   '/users': typeof AuthSidebarAdminUsersRouteRoute
   '/profile/$userId': typeof AuthSidebarProfileUserIdRoute
+  '/f1': typeof AuthSidebarF1IndexRoute
+  '/f1/session/$sessionKey': typeof AuthSidebarF1SessionSessionKeyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -100,12 +109,13 @@ export interface FileRoutesById {
   '/_auth/_sidebar': typeof AuthSidebarRouteWithChildren
   '/_no_auth/signin': typeof No_authSigninRoute
   '/_no_auth/signup': typeof No_authSignupRoute
-  '/_auth/_sidebar/f1': typeof AuthSidebarF1RouteRoute
   '/_auth/_sidebar/wishes': typeof AuthSidebarWishesRouteRoute
   '/_auth/_sidebar/_admin': typeof AuthSidebarAdminRouteWithChildren
   '/_auth/_sidebar/': typeof AuthSidebarIndexRoute
   '/_auth/_sidebar/_admin/users': typeof AuthSidebarAdminUsersRouteRoute
   '/_auth/_sidebar/profile/$userId': typeof AuthSidebarProfileUserIdRoute
+  '/_auth/_sidebar/f1/': typeof AuthSidebarF1IndexRoute
+  '/_auth/_sidebar/f1/session/$sessionKey': typeof AuthSidebarF1SessionSessionKeyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -113,19 +123,21 @@ export interface FileRouteTypes {
     | '/'
     | '/signin'
     | '/signup'
-    | '/f1'
     | '/wishes'
     | '/users'
     | '/profile/$userId'
+    | '/f1/'
+    | '/f1/session/$sessionKey'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/signin'
     | '/signup'
-    | '/f1'
     | '/wishes'
     | '/users'
     | '/profile/$userId'
+    | '/f1'
+    | '/f1/session/$sessionKey'
   id:
     | '__root__'
     | '/_auth'
@@ -133,12 +145,13 @@ export interface FileRouteTypes {
     | '/_auth/_sidebar'
     | '/_no_auth/signin'
     | '/_no_auth/signup'
-    | '/_auth/_sidebar/f1'
     | '/_auth/_sidebar/wishes'
     | '/_auth/_sidebar/_admin'
     | '/_auth/_sidebar/'
     | '/_auth/_sidebar/_admin/users'
     | '/_auth/_sidebar/profile/$userId'
+    | '/_auth/_sidebar/f1/'
+    | '/_auth/_sidebar/f1/session/$sessionKey'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -204,11 +217,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSidebarWishesRouteRouteImport
       parentRoute: typeof AuthSidebarRoute
     }
-    '/_auth/_sidebar/f1': {
-      id: '/_auth/_sidebar/f1'
+    '/_auth/_sidebar/f1/': {
+      id: '/_auth/_sidebar/f1/'
       path: '/f1'
-      fullPath: '/f1'
-      preLoaderRoute: typeof AuthSidebarF1RouteRouteImport
+      fullPath: '/f1/'
+      preLoaderRoute: typeof AuthSidebarF1IndexRouteImport
       parentRoute: typeof AuthSidebarRoute
     }
     '/_auth/_sidebar/profile/$userId': {
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSidebarAdminUsersRouteRouteImport
       parentRoute: typeof AuthSidebarAdminRoute
     }
+    '/_auth/_sidebar/f1/session/$sessionKey': {
+      id: '/_auth/_sidebar/f1/session/$sessionKey'
+      path: '/f1/session/$sessionKey'
+      fullPath: '/f1/session/$sessionKey'
+      preLoaderRoute: typeof AuthSidebarF1SessionSessionKeyRouteImport
+      parentRoute: typeof AuthSidebarRoute
+    }
   }
 }
 
@@ -240,19 +260,21 @@ const AuthSidebarAdminRouteWithChildren =
   AuthSidebarAdminRoute._addFileChildren(AuthSidebarAdminRouteChildren)
 
 interface AuthSidebarRouteChildren {
-  AuthSidebarF1RouteRoute: typeof AuthSidebarF1RouteRoute
   AuthSidebarWishesRouteRoute: typeof AuthSidebarWishesRouteRoute
   AuthSidebarAdminRoute: typeof AuthSidebarAdminRouteWithChildren
   AuthSidebarIndexRoute: typeof AuthSidebarIndexRoute
   AuthSidebarProfileUserIdRoute: typeof AuthSidebarProfileUserIdRoute
+  AuthSidebarF1IndexRoute: typeof AuthSidebarF1IndexRoute
+  AuthSidebarF1SessionSessionKeyRoute: typeof AuthSidebarF1SessionSessionKeyRoute
 }
 
 const AuthSidebarRouteChildren: AuthSidebarRouteChildren = {
-  AuthSidebarF1RouteRoute: AuthSidebarF1RouteRoute,
   AuthSidebarWishesRouteRoute: AuthSidebarWishesRouteRoute,
   AuthSidebarAdminRoute: AuthSidebarAdminRouteWithChildren,
   AuthSidebarIndexRoute: AuthSidebarIndexRoute,
   AuthSidebarProfileUserIdRoute: AuthSidebarProfileUserIdRoute,
+  AuthSidebarF1IndexRoute: AuthSidebarF1IndexRoute,
+  AuthSidebarF1SessionSessionKeyRoute: AuthSidebarF1SessionSessionKeyRoute,
 }
 
 const AuthSidebarRouteWithChildren = AuthSidebarRoute._addFileChildren(
