@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useRouter } from "@tanstack/react-router";
-import { Badge } from "@theapp/ui/components/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +24,6 @@ import {
 import { Spinner } from "@theapp/ui/components/spinner";
 import {
   ChampionIcon,
-  Chat01Icon,
   DashboardSquareIcon,
   Gift,
   Logout01Icon,
@@ -51,7 +49,11 @@ export const AppSidebar: FC = () => {
           <SidebarMenuItem>
             <SidebarMenuButton
               render={
-                <Link className="font-bold text-lg" to="/">
+                <Link
+                  className="font-bold text-lg"
+                  to="/"
+                  onClick={() => setOpenMobile(false)}
+                >
                   <HugeiconsIcon
                     className="text-primary"
                     icon={DashboardSquareIcon}
@@ -82,16 +84,6 @@ export const AppSidebar: FC = () => {
                   <Link to="/f1" onClick={() => setOpenMobile(false)}>
                     <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} />
                     <span>Formula 1</span>
-                  </Link>
-                }
-              />
-              <SidebarMenuButton
-                disabled
-                render={
-                  <Link to="/" onClick={() => setOpenMobile(false)}>
-                    <HugeiconsIcon icon={Chat01Icon} strokeWidth={2} />
-                    <span>Quotes</span>
-                    <Badge variant="secondary">Work in progress</Badge>
                   </Link>
                 }
               />

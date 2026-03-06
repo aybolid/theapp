@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Badge } from "@theapp/ui/components/badge";
 import {
   Item,
   ItemContent,
@@ -7,7 +6,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@theapp/ui/components/item";
-import { Chat01Icon, Gift } from "@theapp/ui/icons/huge";
+import { ChampionIcon, Gift } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { PageWrapper } from "../-components/page-wrapper";
 
@@ -36,27 +35,24 @@ function RouteComponent() {
               <ItemContent>
                 <ItemTitle>Wishes</ItemTitle>
                 <ItemDescription className="line-clamp-none">
-                  Share what you're wishing for and see what others want. No
-                  more awkward "what do you want for your birthday?" talks.
+                  Share what you're wishing for and see what others want.
                 </ItemDescription>
               </ItemContent>
             </Item>
           </Link>
-          <Item variant="muted" className="opacity-50">
-            <ItemMedia variant="icon">
-              <HugeiconsIcon icon={Chat01Icon} strokeWidth={2} />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>
-                <span>Quotes</span>
-                <Badge variant="secondary">Work in progress</Badge>
-              </ItemTitle>
-              <ItemDescription className="line-clamp-none">
-                Someone said something wild? Write it down! Nothing beats
-                reading it later, completely out of context.
-              </ItemDescription>
-            </ItemContent>
-          </Item>
+          <Link to="/f1">
+            <Item variant="muted" className="hover:bg-muted">
+              <ItemMedia variant="icon">
+                <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>Formula 1</ItemTitle>
+                <ItemDescription className="line-clamp-none">
+                  Track current Formula 1 season progress and results.
+                </ItemDescription>
+              </ItemContent>
+            </Item>
+          </Link>
         </section>
       </div>
     </PageWrapper>
