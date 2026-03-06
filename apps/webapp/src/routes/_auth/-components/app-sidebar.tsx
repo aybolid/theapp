@@ -1,10 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useRouter } from "@tanstack/react-router";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@theapp/ui/components/avatar";
 import { Badge } from "@theapp/ui/components/badge";
 import {
   DropdownMenu,
@@ -38,6 +33,7 @@ import {
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { AdminOnly } from "@theapp/webapp/components/role-guard";
+import { UserAvatar } from "@theapp/webapp/components/user-avatar";
 import {
   useMeSuspenseQuery,
   useSignoutMutation,
@@ -143,15 +139,7 @@ const UserButton: FC = () => {
       <DropdownMenuTrigger
         render={
           <SidebarMenuButton size="lg">
-            <Avatar>
-              <AvatarImage
-                src={meQuery.data.profile.picture}
-                alt="User Avatar"
-              />
-              <AvatarFallback>
-                <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar user={meQuery.data} />
             <div className="flex flex-col">
               <span className="text-nowrap font-medium">
                 {meQuery.data.profile.name}

@@ -7,11 +7,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@theapp/ui/components/alert";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@theapp/ui/components/avatar";
 import { Badge } from "@theapp/ui/components/badge";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -34,10 +29,10 @@ import {
   Edit01Icon,
   Mail01Icon,
   Photo,
-  UserIcon,
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
+import { UserAvatar } from "@theapp/webapp/components/user-avatar";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
 import { useUserByIdSuspenseQuery } from "@theapp/webapp/lib/query/users";
 import { lazy, Suspense } from "react";
@@ -79,12 +74,7 @@ function RouteComponent() {
       <div className="container mx-auto grid max-w-3xl gap-4">
         <Card>
           <CardHeader className="flex items-center gap-4">
-            <Avatar className="size-12">
-              <AvatarImage src={user.profile.picture} alt={user.profile.name} />
-              <AvatarFallback>
-                <HugeiconsIcon icon={UserIcon} strokeWidth={2} />
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar user={user} className="size-12" />
             <div className="space-y-1">
               <CardTitle>{user.profile.name}</CardTitle>
               <CardDescription className="flex gap-1">

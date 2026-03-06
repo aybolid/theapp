@@ -80,30 +80,24 @@ export const profiles = new Elysia({
         }),
       );
 
-      const picture = `${process.env.S3_PUBLIC_BASE_URL}/${key}`;
-
       await db
         .update(schema.profiles)
         .set({
-          picture,
+          picture: key,
         })
         .where(eq(schema.profiles.userId, ctx.userId));
 
-      if (profile?.picture.startsWith(process.env.S3_PUBLIC_BASE_URL)) {
-        const oldKey = profile.picture.replace(
-          `${process.env.S3_PUBLIC_BASE_URL}/`,
-          "",
-        );
+      if (profile?.picture) {
         try {
           await s3.send(
             new DeleteObjectCommand({
               Bucket: process.env.S3_BUCKET,
-              Key: oldKey,
+              Key: profile.picture,
             }),
           );
         } catch (error) {
           logger.error(
-            { error, oldKey },
+            { error, key: profile.picture },
             "Failed to delete old avatar from S3",
           );
         }

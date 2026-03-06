@@ -44,6 +44,11 @@ export default defineConfig(({ mode, command }) => {
                 target: expectEnv("API_BASE_URL"),
                 changeOrigin: true,
               },
+              "/s3": {
+                target: expectEnv("S3_BASE_URL"),
+                rewrite: (path) => path.replace(/^\/s3/, ""),
+                changeOrigin: true,
+              },
             },
           },
         }

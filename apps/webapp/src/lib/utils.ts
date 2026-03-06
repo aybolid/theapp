@@ -18,3 +18,7 @@ export function normalize(str: string) {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 }
+
+export function s3ObjectUrl(key: string) {
+  return `${window.location.origin}/s3/${key}`;
+}

@@ -1,10 +1,5 @@
 import type { UserResponse } from "@theapp/schemas";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@theapp/ui/components/avatar";
-import {
   Combobox,
   ComboboxContent,
   ComboboxEmpty,
@@ -18,10 +13,9 @@ import {
   ItemDescription,
   ItemTitle,
 } from "@theapp/ui/components/item";
-import { User02Icon } from "@theapp/ui/icons/huge";
-import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import type { FC } from "react";
 import { normalize } from "../lib/utils";
+import { UserAvatar } from "./user-avatar";
 
 export const UserSelect: FC<{
   users: UserResponse[];
@@ -58,15 +52,7 @@ export const UserSelect: FC<{
           {(user: UserResponse) => (
             <ComboboxItem key={user.userId} value={user}>
               <Item className="flex-nowrap p-1">
-                <Avatar>
-                  <AvatarImage
-                    src={user.profile.picture || undefined}
-                    alt="User Avatar"
-                  />
-                  <AvatarFallback>
-                    <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar user={user} />
                 <ItemContent className="gap-0">
                   <ItemTitle className="text-nowrap">
                     {user.profile.name}

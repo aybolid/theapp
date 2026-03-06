@@ -1,11 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { UserResponse } from "@theapp/schemas";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@theapp/ui/components/avatar";
-import {
   Glimpse,
   GlimpseContent,
   GlimpseDescription,
@@ -19,10 +14,10 @@ import {
   ItemDescription,
   ItemTitle,
 } from "@theapp/ui/components/item";
-import { User02Icon } from "@theapp/ui/icons/huge";
-import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { cn } from "@theapp/ui/lib/utils";
 import type { ComponentPropsWithoutRef, FC } from "react";
+import { s3ObjectUrl } from "../lib/utils";
+import { UserAvatar } from "./user-avatar";
 
 export const UserChip: FC<
   { user: UserResponse } & ComponentPropsWithoutRef<typeof Item>
@@ -33,15 +28,7 @@ export const UserChip: FC<
         render={
           <Link to="/profile/$userId" params={{ userId: user.userId }}>
             <Item {...props} className={cn("flex-nowrap p-1", props.className)}>
-              <Avatar>
-                <AvatarImage
-                  src={user.profile.picture || undefined}
-                  alt="User Avatar"
-                />
-                <AvatarFallback>
-                  <HugeiconsIcon icon={User02Icon} strokeWidth={2} />
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar user={user} />
               <ItemContent className="gap-0">
                 <ItemTitle className="text-nowrap">
                   {user.profile.name}
@@ -56,7 +43,9 @@ export const UserChip: FC<
         closeDelay={0}
       />
       <GlimpseContent className="w-80">
-        {user.profile.picture && <GlimpseImage src={user.profile.picture} />}
+        {user.profile.picture && (
+          <GlimpseImage src={s3ObjectUrl(user.profile.picture)} />
+        )}
         <GlimpseTitle>{user.profile.name}</GlimpseTitle>
         {user.profile.bio && (
           <GlimpseDescription>{user.profile.bio}</GlimpseDescription>

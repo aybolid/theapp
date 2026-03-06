@@ -3,6 +3,12 @@
         reverse_proxy server:3000
     }
 
+    handle_path /s3/* {
+        reverse_proxy garage:3902 {
+            header_up Host {$S3_BUCKET}.web.{$S3_REGION}.localhost
+        }
+    }
+
     handle {
         reverse_proxy webapp:80
     }

@@ -31,7 +31,7 @@ export const profileResponseSchema = z.object({
   userId: z.uuidv7(),
   name: z.string(),
   bio: z.string(),
-  picture: z.url().or(z.literal("")),
+  picture: z.string(),
   createdAt: zDate,
   updatedAt: zDate,
 });
