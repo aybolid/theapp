@@ -13,7 +13,6 @@ import { s3 } from "@theapp/server/s3";
 import { generateSecureRandomString } from "@theapp/server/utils/crypto";
 import { eq } from "drizzle-orm";
 import Elysia, { fileType } from "elysia";
-import { Jimp } from "jimp";
 import z from "zod";
 import { logger } from "../../utils/logger";
 import { authGuard } from "../auth/guard";
@@ -54,13 +53,9 @@ export const profiles = new Elysia({
   .post(
     "/picture",
     async (ctx) => {
+      // TODO: optimize image
       const buffer = await ctx.body.file.arrayBuffer();
-
-      // TODO: sharp is better in every way but i cant figure out how to compile
-      // server when using it due its native deps
-      const image = await Jimp.read(buffer);
-      image.resize({ w: 400, h: 400 });
-      const optimizedBuffer = await image.getBuffer("image/jpeg");
+      const u8Buffer = new Uint8Array(buffer);
 
       const profile = await db
         .select({ picture: schema.profiles.picture })
@@ -68,14 +63,14 @@ export const profiles = new Elysia({
         .where(eq(schema.profiles.userId, ctx.userId))
         .then((rows) => rows[0]);
 
-      const key = `avatars/${ctx.userId}/${generateSecureRandomString()}.jpeg`;
+      const key = `avatars/${ctx.userId}/${generateSecureRandomString()}.${ctx.body.file.type.split("/")[1]}`;
 
       await s3.send(
         new PutObjectCommand({
           Bucket: process.env.S3_BUCKET,
           Key: key,
-          Body: optimizedBuffer,
-          ContentType: "image/jpeg",
+          Body: u8Buffer,
+          ContentType: ctx.body.file.type,
           CacheControl: "public, max-age=31536000, immutable",
         }),
       );

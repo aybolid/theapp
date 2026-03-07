@@ -11,14 +11,14 @@
   "dependencies": {
     "@elysiajs/eden": "^1.4.8",
     "@tailwindcss/vite": "^4.2.0",
-    "@tanstack/devtools-vite": "^0.5.1",
-    "@tanstack/react-devtools": "^0.9.6",
-    "@tanstack/react-form": "^1.28.3",
-    "@tanstack/react-form-devtools": "^0.2.16",
+    "@tanstack/devtools-vite": "^0.5.3",
+    "@tanstack/react-devtools": "^0.9.10",
+    "@tanstack/react-form": "^1.28.4",
+    "@tanstack/react-form-devtools": "^0.2.17",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-query-devtools": "^5.91.3",
-    "@tanstack/react-router": "^1.161.3",
-    "@tanstack/react-router-devtools": "^1.161.3",
+    "@tanstack/react-router": "^1.166.2",
+    "@tanstack/react-router-devtools": "^1.166.2",
     "@tanstack/react-table": "^8.21.3",
     "@theapp/schemas": "workspace:*",
     "@theapp/ui": "workspace:*",
@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@theapp/server": "workspace:*",
-    "@tanstack/router-plugin": "^1.161.3",
+    "@tanstack/router-plugin": "^1.166.2",
     "@theapp/typescript-config": "workspace:*",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -39,9 +39,6 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "bun-types": "catalog:",
     "elysia": "catalog:",
-    "vite": "^8.0.0-beta.15"
-  },
-  "overrides": {
-    "vite": "^8.0.0-beta.15"
+    "vite": "^8.0.0-beta.16"
   }
 }

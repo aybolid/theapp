@@ -56,7 +56,10 @@ export default defineConfig(({ mode, command }) => {
 
     build: {
       rolldownOptions: {
+        checks: { pluginTimings: false, circularDependency: true },
         output: {
+          comments: false,
+          minify: true,
           codeSplitting: {
             groups: [
               {

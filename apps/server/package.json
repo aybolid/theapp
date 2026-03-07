@@ -8,16 +8,15 @@
     "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile dist/server src/index.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.995.0",
+    "@aws-sdk/client-s3": "^3.1004.0",
     "@elysiajs/cron": "^1.4.1",
     "@elysiajs/openapi": "^1.4.14",
     "@theapp/schemas": "workspace:*",
     "cheerio": "^1.2.0",
     "drizzle-orm": "^1.0.0-beta.9-e89174b",
     "elysia": "catalog:",
-    "jimp": "^1.6.0",
-    "jose": "^6.1.3",
-    "pg": "^8.18.0",
+    "jose": "^6.2.0",
+    "pg": "^8.20.0",
     "pino": "^10.3.1",
     "ua-parser-js": "^2.0.9",
     "zod": "catalog:"
