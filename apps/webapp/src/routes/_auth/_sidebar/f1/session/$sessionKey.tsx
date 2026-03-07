@@ -24,9 +24,14 @@ import { Alert01Icon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
 import { useF1SessionByKeySuspenseQuery } from "@theapp/webapp/lib/query/f1";
+import { parseAsStringLiteral, useQueryStates } from "nuqs";
 import { Suspense } from "react";
 import { PageWrapper } from "../../../-components/page-wrapper";
 import { ResultsTab } from "./-tabs/results";
+
+const searchParams = {
+  tab: parseAsStringLiteral(["results"]).withDefault("results"),
+};
 
 export const Route = createFileRoute("/_auth/_sidebar/f1/session/$sessionKey")({
   component: RouteComponent,
@@ -35,6 +40,8 @@ export const Route = createFileRoute("/_auth/_sidebar/f1/session/$sessionKey")({
 });
 
 function RouteComponent() {
+  const [{ tab }, setSearchParams] = useQueryStates(searchParams);
+
   const sessionKey = parseInt(Route.useParams().sessionKey, 10);
   const sessionQuery = useF1SessionByKeySuspenseQuery({ sessionKey });
 
@@ -45,12 +52,21 @@ function RouteComponent() {
         `${sessionQuery.data.country_name} - ${sessionQuery.data.session_name}`,
       ]}
     >
-      <Tabs className="contents">
-        <TabsList className="hidden">
-          <TabsTrigger value="results">Results</TabsTrigger>
+      <Tabs
+        className="contents"
+        value={tab}
+        onValueChange={(v) =>
+          setSearchParams({ tab: searchParams.tab.parse(v) })
+        }
+      >
+        <TabsList className="mb-4 hidden">
+          <TabsTrigger value="results">Session results</TabsTrigger>
         </TabsList>
         <TabsContent value="results" className="contents">
-          <ResultsTab sessionKey={sessionKey} />
+          <ResultsTab
+            sessionKey={sessionKey}
+            isQualifying={sessionQuery.data.session_type === "Qualifying"}
+          />
         </TabsContent>
       </Tabs>
     </PageWrapper>

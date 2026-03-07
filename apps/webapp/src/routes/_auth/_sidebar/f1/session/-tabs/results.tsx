@@ -47,7 +47,10 @@ import {
 import { type FC, Suspense, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-export const ResultsTab: FC<{ sessionKey: number }> = ({ sessionKey }) => {
+export const ResultsTab: FC<{ sessionKey: number; isQualifying: boolean }> = ({
+  sessionKey,
+  isQualifying,
+}) => {
   return (
     <QueryErrorResetBoundary>
       {({ reset }) => (
@@ -89,7 +92,10 @@ export const ResultsTab: FC<{ sessionKey: number }> = ({ sessionKey }) => {
               </Empty>
             }
           >
-            <ResultsTabImpl sessionKey={sessionKey} />
+            <ResultsTabImpl
+              sessionKey={sessionKey}
+              isQualifying={isQualifying}
+            />
           </Suspense>
         </ErrorBoundary>
       )}
@@ -99,7 +105,10 @@ export const ResultsTab: FC<{ sessionKey: number }> = ({ sessionKey }) => {
 
 type ResultTableEntry = SessionResult & { driver: F1Driver };
 
-const ResultsTabImpl: FC<{ sessionKey: number }> = ({ sessionKey }) => {
+const ResultsTabImpl: FC<{ sessionKey: number; isQualifying: boolean }> = ({
+  sessionKey,
+  isQualifying,
+}) => {
   const [driversQuery, resultsQuery] = useSuspenseQueries({
     queries: [
       f1SessionDriversQueryOptions({ sessionKey }),
@@ -134,6 +143,18 @@ const ResultsTabImpl: FC<{ sessionKey: number }> = ({ sessionKey }) => {
     data,
     columns: COLUMNS,
     getCoreRowModel: getCoreRowModel(),
+    initialState: {
+      columnVisibility: isQualifying
+        ? {
+            gap_to_leader: false,
+            duration: false,
+          }
+        : {
+            q1: false,
+            q2: false,
+            q3: false,
+          },
+    },
   });
 
   return <DataTable table={table} />;
@@ -141,13 +162,62 @@ const ResultsTabImpl: FC<{ sessionKey: number }> = ({ sessionKey }) => {
 
 const helper = createColumnHelper<ResultTableEntry>();
 
+const createQualifyingColumn = (qualifyingRound: number) =>
+  helper.display({
+    id: `q${qualifyingRound}`,
+    enableSorting: false,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={`Q${qualifyingRound}`} />
+    ),
+    cell: (props) => {
+      const gap = props.row.original.gap_to_leader;
+      const duration = props.row.original.duration;
+      if (!Array.isArray(gap) || !Array.isArray(duration)) {
+        return;
+      }
+      const q1Gap = gap[qualifyingRound - 1] ?? null;
+      const q1Duration = duration[qualifyingRound - 1] ?? 0;
+
+      if (q1Gap === null) {
+        return;
+      }
+
+      if (q1Gap === 0) {
+        return (
+          <span className="font-mono text-lg text-primary">
+            {q1Duration.toFixed(3)}
+            <span className="text-muted-foreground text-sm">s</span>
+          </span>
+        );
+      }
+
+      return (
+        <span className="font-mono text-lg">
+          {q1Duration.toFixed(3)}
+          <span className="text-muted-foreground text-sm">s</span>{" "}
+          <span className="text-muted-foreground text-sm">
+            +{q1Gap.toFixed(3)}s
+          </span>
+        </span>
+      );
+    },
+  });
+
 const COLUMNS = [
   helper.accessor("position", {
+    enableSorting: false,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Position" />
     ),
     cell: (props) => {
       const position = props.getValue();
+
+      if (position === null) {
+        return (
+          <span className="font-mono text-lg text-muted-foreground">??</span>
+        );
+      }
+
       return (
         <span
           className={cn(
@@ -164,15 +234,19 @@ const COLUMNS = [
     },
   }),
   helper.accessor("driver", {
+    enableSorting: false,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Driver" />
     ),
     cell: (props) => {
       const driver = props.row.original.driver;
       return (
-        <Item {...props} className="flex-nowrap p-1">
+        <Item {...props} className="flex-nowrap p-0">
           <Avatar style={{ backgroundColor: `#${driver.team_colour}` }}>
-            <AvatarImage src={driver.headshot_url} alt={driver.full_name} />
+            <AvatarImage
+              src={driver.headshot_url ?? undefined}
+              alt={driver.full_name}
+            />
             <AvatarFallback>{driver.name_acronym}</AvatarFallback>
           </Avatar>
           <ItemContent className="gap-0">
@@ -185,14 +259,18 @@ const COLUMNS = [
       );
     },
   }),
+  createQualifyingColumn(3),
+  createQualifyingColumn(2),
+  createQualifyingColumn(1),
   helper.accessor("gap_to_leader", {
+    enableSorting: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Gap to leader" />
+      <DataTableColumnHeader column={column} title="Interval" />
     ),
     cell: (props) => {
       const isLeader = props.row.original.position === 1;
       if (isLeader) {
-        return <span className="text-primary">Leader</span>;
+        return <span className="font-mono text-lg text-primary">Leader</span>;
       }
 
       const gap = props.getValue();
@@ -202,15 +280,22 @@ const COLUMNS = [
         );
       }
 
-      return (
-        <span className="font-mono text-lg">
-          +{gap.toFixed(3)}
-          <span className="text-muted-foreground text-sm">s</span>
-        </span>
-      );
+      if (!Array.isArray(gap)) {
+        if (typeof gap === "string") {
+          return <span className="font-mono text-lg">{gap}</span>;
+        }
+
+        return (
+          <span className="font-mono text-lg">
+            +{gap.toFixed(3)}
+            <span className="text-muted-foreground text-sm">s</span>
+          </span>
+        );
+      }
     },
   }),
   helper.accessor("duration", {
+    enableSorting: false,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Duration" />
     ),
@@ -221,23 +306,37 @@ const COLUMNS = [
           <span className="font-mono text-lg text-muted-foreground">??</span>
         );
       }
-      return <span className="font-mono text-lg">{duration}</span>;
+
+      if (!Array.isArray(duration)) {
+        return (
+          <span className="font-mono text-lg">
+            {duration.toFixed(3)}
+            <span className="text-muted-foreground text-sm">s</span>
+          </span>
+        );
+      }
     },
   }),
   helper.accessor("number_of_laps", {
+    enableSorting: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Number of laps" />
+      <DataTableColumnHeader column={column} title="Laps" />
     ),
     cell: (props) => {
       const laps = props.getValue();
+
+      if (laps === null) {
+        return (
+          <span className="font-mono text-lg text-muted-foreground">??</span>
+        );
+      }
+
       return <span className="font-mono text-lg">{laps}</span>;
     },
   }),
   helper.display({
     id: "statuses",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Statuses" />
-    ),
+    header: "",
     cell: (props) => {
       const result = props.row.original;
       return (

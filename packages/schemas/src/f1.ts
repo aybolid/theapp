@@ -50,7 +50,7 @@ export const f1DriverSchema = z.object({
   driver_number: z.number(),
   first_name: z.string(),
   full_name: z.string(),
-  headshot_url: z.url(),
+  headshot_url: z.url().nullable(),
   last_name: z.string(),
   meeting_key: z.number(),
   name_acronym: z.string(),
@@ -80,11 +80,30 @@ export const sessionResultSchema = z.object({
   dns: z.boolean(),
   dsq: z.boolean(),
   driver_number: z.number(),
-  duration: z.number().nullable(),
-  gap_to_leader: z.number().nullable(),
-  number_of_laps: z.number(),
+  duration: z
+    .number()
+    .nullable()
+    .or(
+      z.tuple([
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+      ]),
+    ),
+  gap_to_leader: z
+    .number()
+    .nullable()
+    .or(
+      z.tuple([
+        z.number().nullable(),
+        z.number().nullable(),
+        z.number().nullable(),
+      ]),
+    )
+    .or(z.string()),
+  number_of_laps: z.number().nullable(),
   meeting_key: z.number(),
-  position: z.number(),
+  position: z.number().nullable(),
   session_key: z.number(),
 });
 
