@@ -11,6 +11,8 @@ import { eq } from "drizzle-orm";
 import Elysia, { ElysiaCustomStatusResponse } from "elysia";
 import { isProduction } from "elysia/error";
 
+// TODO: use valkey to store user sessions
+
 /** Delimiter used to separate parts of the session token (session id and secret). */
 export const SESSION_TOKEN_DELIMITER = ".";
 /** 10 days */
