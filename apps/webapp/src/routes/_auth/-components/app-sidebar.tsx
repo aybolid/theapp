@@ -31,7 +31,7 @@ import {
   Users,
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
-import { AdminOnly } from "@theapp/webapp/components/role-guard";
+import { AccessGuard } from "@theapp/webapp/components/access-guard";
 import { UserAvatar } from "@theapp/webapp/components/user-avatar";
 import {
   useMeSuspenseQuery,
@@ -70,27 +70,33 @@ export const AppSidebar: FC = () => {
         <SidebarGroup>
           <SidebarGroupLabel>Apps</SidebarGroupLabel>
           <SidebarMenu className="gap-2">
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                render={
-                  <Link to="/wishes" onClick={() => setOpenMobile(false)}>
-                    <HugeiconsIcon icon={Gift} strokeWidth={2} />
-                    <span>Wishes</span>
-                  </Link>
-                }
-              />
-              <SidebarMenuButton
-                render={
-                  <Link to="/f1" onClick={() => setOpenMobile(false)}>
-                    <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} />
-                    <span>Formula 1</span>
-                  </Link>
-                }
-              />
-            </SidebarMenuItem>
+            <AccessGuard access={["wishes"]}>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  render={
+                    <Link to="/wishes" onClick={() => setOpenMobile(false)}>
+                      <HugeiconsIcon icon={Gift} strokeWidth={2} />
+                      <span>Wishes</span>
+                    </Link>
+                  }
+                />
+              </SidebarMenuItem>
+            </AccessGuard>
+            <AccessGuard access={["f1"]}>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  render={
+                    <Link to="/f1" onClick={() => setOpenMobile(false)}>
+                      <HugeiconsIcon icon={ChampionIcon} strokeWidth={2} />
+                      <span>Formula 1</span>
+                    </Link>
+                  }
+                />
+              </SidebarMenuItem>
+            </AccessGuard>
           </SidebarMenu>
         </SidebarGroup>
-        <AdminOnly>
+        <AccessGuard access={["admin"]}>
           <SidebarGroup>
             <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarMenu className="gap-2">
@@ -106,7 +112,7 @@ export const AppSidebar: FC = () => {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
-        </AdminOnly>
+        </AccessGuard>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

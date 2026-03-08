@@ -64,6 +64,7 @@ import {
   useWishesSuspenseQuery,
   wishesQueryOptions,
 } from "@theapp/webapp/lib/query/wishes";
+import { beforeLoadAccessGuard } from "@theapp/webapp/lib/utils";
 import dayjs from "dayjs";
 import {
   createStandardSchemaV1,
@@ -99,6 +100,9 @@ const searchParams = {
 };
 
 export const Route = createFileRoute("/_auth/_sidebar/wishes")({
+  beforeLoad: async (ctx) => {
+    await beforeLoadAccessGuard(ctx.context.queryClient, ["wishes"]);
+  },
   validateSearch: createStandardSchemaV1(searchParams, { partialOutput: true }),
   head: () => ({
     meta: [

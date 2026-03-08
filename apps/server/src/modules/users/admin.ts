@@ -1,9 +1,13 @@
 import {
   getUsersResponseSchema,
+  updateUserAccessBadRequestSchema,
+  updateUserAccessBodySchema,
+  updateUserAccessNotFoundErrorSchema,
+  updateUserAccessParamsSchema,
   updateUserBodySchema,
   updateUserNotFoundErrorSchema,
   updateUserParamsSchema,
-  userResponseSchema,
+  userWithAccessSchema,
 } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
@@ -16,13 +20,13 @@ export const usersAdmin = new Elysia({
     tags: ["users", "admin"],
   },
 })
-  .use(authGuard({ adminOnly: true }))
+  .use(authGuard({ access: ["admin"] }))
   .get(
     "/",
     async (ctx) => {
       const users = await db.query.users.findMany({
         columns: { passwordHash: false },
-        with: { profile: true },
+        with: { profile: true, access: true },
       });
       return ctx.status(200, users);
     },
@@ -39,7 +43,7 @@ export const usersAdmin = new Elysia({
       const user = await db.query.users.findFirst({
         where: { userId: { eq: ctx.params.userId } },
         columns: { passwordHash: false },
-        with: { profile: true },
+        with: { profile: true, access: true },
       });
       if (!user) throw ctx.status(404, "User not found");
 
@@ -52,14 +56,62 @@ export const usersAdmin = new Elysia({
       if (!updatedUser) throw new Error("Failed to update user");
 
       const { passwordHash: _, ...safeUser } = updatedUser;
-      return ctx.status(200, { ...safeUser, profile: user.profile });
+      return ctx.status(200, {
+        ...safeUser,
+        profile: user.profile,
+        access: user.access,
+      });
     },
     {
       params: updateUserParamsSchema,
       body: updateUserBodySchema,
-      response: { 200: userResponseSchema, 404: updateUserNotFoundErrorSchema },
+      response: {
+        200: userWithAccessSchema,
+        404: updateUserNotFoundErrorSchema,
+      },
       detail: {
         description: "Update a user. Admin only.",
+      },
+    },
+  )
+  .patch(
+    "/:userId/access",
+    async (ctx) => {
+      const user = await db.query.users.findFirst({
+        where: { userId: { eq: ctx.params.userId } },
+        columns: { passwordHash: false },
+        with: { profile: true, access: true },
+      });
+      if (!user) throw ctx.status(404, "User not found");
+
+      const isUpdatingSelf = ctx.params.userId === ctx.userId;
+
+      if (isUpdatingSelf) {
+        if (ctx.body.admin !== user.access.admin) {
+          throw ctx.status(400, "Cannot update admin access for self");
+        }
+      }
+
+      const updatedAccess = await db
+        .update(schema.accesses)
+        .set(ctx.body)
+        .where(eq(schema.accesses.accessId, user.access.accessId))
+        .returning()
+        .then((rows) => rows[0]);
+      if (!updatedAccess) throw new Error("Failed to update access");
+
+      return ctx.status(200, { ...user, access: updatedAccess });
+    },
+    {
+      params: updateUserAccessParamsSchema,
+      body: updateUserAccessBodySchema,
+      response: {
+        200: userWithAccessSchema,
+        404: updateUserAccessNotFoundErrorSchema,
+        400: updateUserAccessBadRequestSchema,
+      },
+      detail: {
+        description: "Update a user's access config. Admin only.",
       },
     },
   );

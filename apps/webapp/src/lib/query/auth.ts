@@ -13,12 +13,12 @@ import type {
   SignoutQuery,
   SignupBody,
   SignupCreated,
-  UserResponse,
+  UserWithAccessResponse,
 } from "@theapp/schemas";
 import { server } from "../api";
 
 export const meQueryOptions = queryOptions<
-  UserResponse,
+  UserWithAccessResponse,
   Treaty.Error<typeof server.api.auth.me.get>
 >({
   queryKey: ["me"],
@@ -35,7 +35,7 @@ export const meQueryOptions = queryOptions<
 export function useMeSuspenseQuery(
   options?: Omit<
     UseSuspenseQueryOptions<
-      UserResponse,
+      UserWithAccessResponse,
       Treaty.Error<typeof server.api.auth.me.get>
     >,
     "queryFn" | "queryKey"

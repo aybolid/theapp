@@ -19,10 +19,28 @@ export const userStatusEnum = pg.pgEnum("user_status", ["active", "inactive"]);
 
 export const users = pg.pgTable("users", {
   userId: uuidv7pk(),
-  role: userRoleEnum().notNull().default("viewer"),
   status: userStatusEnum().notNull().default("inactive"),
   email: pg.varchar().notNull().unique(),
   passwordHash: pg.varchar({ length: 255 }).notNull(),
+  ...timestamps,
+});
+
+export const accesses = pg.pgTable("accesses", {
+  accessId: uuidv7pk(),
+  userId: pg
+    .uuid()
+    .unique()
+    .notNull()
+    .references(() => users.userId, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+  /** Indicates if the user can access admin features */
+  admin: pg.boolean().notNull().default(false),
+  /** Indicates if the user can access wishes app features */
+  wishes: pg.boolean().notNull().default(false),
+  /** Indicates if the user can access f1 app features */
+  f1: pg.boolean().notNull().default(true),
   ...timestamps,
 });
 
@@ -86,4 +104,5 @@ export const schema = {
   sessions,
   profiles,
   wishes,
+  accesses,
 };

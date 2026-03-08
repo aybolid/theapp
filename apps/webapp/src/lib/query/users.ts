@@ -8,9 +8,12 @@ import {
 } from "@tanstack/react-query";
 import type {
   GetUsersResponse,
+  UpdateUserAccessBody,
+  UpdateUserAccessParams,
   UpdateUserBody,
   UpdateUserParams,
   UserResponse,
+  UserWithAccessResponse,
 } from "@theapp/schemas";
 import { server } from "../api";
 
@@ -79,8 +82,8 @@ export function useUserByIdSuspenseQuery(
 export function useUpdateUserMutation(
   options?: Omit<
     UseMutationOptions<
-      UserResponse,
-      Treaty.Error<ReturnType<typeof server.api.wishes>["patch"]>,
+      UserWithAccessResponse,
+      Treaty.Error<ReturnType<typeof server.api.users>["patch"]>,
       UpdateUserParams & UpdateUserBody
     >,
     "mutationKey" | "mutationFn"
@@ -90,9 +93,38 @@ export function useUpdateUserMutation(
     mutationKey: ["update", "user"],
     mutationFn: async (data: UpdateUserParams & UpdateUserBody) => {
       const resp = await server.api.users({ userId: data.userId }).patch({
-        role: data.role,
         status: data.status,
       });
+      if (resp.error) {
+        throw resp.error;
+      } else {
+        return resp.data;
+      }
+    },
+    ...options,
+  });
+}
+
+export function useUpdateUserAccessMutation(
+  options?: Omit<
+    UseMutationOptions<
+      UserWithAccessResponse,
+      Treaty.Error<ReturnType<typeof server.api.users>["access"]["patch"]>,
+      UpdateUserAccessParams & UpdateUserAccessBody
+    >,
+    "mutationKey" | "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationKey: ["update", "user", "access"],
+    mutationFn: async (data: UpdateUserAccessParams & UpdateUserAccessBody) => {
+      const resp = await server.api
+        .users({ userId: data.userId })
+        .access.patch({
+          admin: data.admin,
+          wishes: data.wishes,
+          f1: data.f1,
+        });
       if (resp.error) {
         throw resp.error;
       } else {

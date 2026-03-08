@@ -1,4 +1,5 @@
 import z from "zod";
+import { accessResponseSchema } from "./accesses";
 import { profileResponseSchema } from "./profiles";
 import { zDate } from "./zdate";
 
@@ -53,10 +54,6 @@ export const userNotFoundErrorSchema = z.literal("User not found");
 
 export type UserNotFoundError = z.infer<typeof userNotFoundErrorSchema>;
 
-export const userRoleSchema = z.enum(["admin", "viewer"]);
-
-export type UserRole = z.infer<typeof userRoleSchema>;
-
 export const userStatusSchema = z.enum(["active", "inactive"]);
 
 export type UserStatus = z.infer<typeof userStatusSchema>;
@@ -64,7 +61,6 @@ export type UserStatus = z.infer<typeof userStatusSchema>;
 export const userResponseSchema = z.object({
   userId: z.uuidv7(),
   email: z.email(),
-  role: userRoleSchema,
   status: userStatusSchema,
   createdAt: zDate,
   updatedAt: zDate,
@@ -72,6 +68,13 @@ export const userResponseSchema = z.object({
 });
 
 export type UserResponse = z.infer<typeof userResponseSchema>;
+
+export const userWithAccessSchema = z.object({
+  ...userResponseSchema.shape,
+  access: accessResponseSchema,
+});
+
+export type UserWithAccessResponse = z.infer<typeof userWithAccessSchema>;
 
 export const signoutQuerySchema = z.object({
   sessionId: z.string().optional(),

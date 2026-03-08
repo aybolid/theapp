@@ -24,6 +24,7 @@ import { Alert01Icon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
 import { useF1SessionByKeySuspenseQuery } from "@theapp/webapp/lib/query/f1";
+import { beforeLoadAccessGuard } from "@theapp/webapp/lib/utils";
 import { parseAsStringLiteral, useQueryStates } from "nuqs";
 import { Suspense } from "react";
 import { PageWrapper } from "../../../-components/page-wrapper";
@@ -34,6 +35,9 @@ const searchParams = {
 };
 
 export const Route = createFileRoute("/_auth/_sidebar/f1/session/$sessionKey")({
+  beforeLoad: async (ctx) => {
+    await beforeLoadAccessGuard(ctx.context.queryClient, ["f1"]);
+  },
   component: RouteComponent,
   errorComponent: ErrorComponent,
   pendingComponent: PendingComponent,

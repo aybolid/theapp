@@ -11,7 +11,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import type { UserResponse } from "@theapp/schemas";
+import type { UserWithAccessResponse } from "@theapp/schemas";
 import {
   Alert,
   AlertDescription,
@@ -50,7 +50,7 @@ import z from "zod";
 import { PageWrapper } from "../../../-components/page-wrapper";
 import { UserActionsMenu } from "./-components/user-actions-menu";
 
-type UserTableEntry = UserResponse & { isMe: boolean };
+type UserTableEntry = UserWithAccessResponse & { isMe: boolean };
 
 const searchParams = {
   query: parseAsString.withDefault(""),
@@ -143,7 +143,6 @@ function RouteComponent() {
             variant="outline"
             labelsMap={{
               userId: "ID",
-              role: "Role",
               status: "Status",
               profile_name: "Name",
               email: "Email",
@@ -155,11 +154,11 @@ function RouteComponent() {
             variant="outline"
             labelsMap={{
               userId: "ID",
-              role: "Role",
               status: "Status",
               profile_name: "Name",
               email: "Email",
               createdAt: "Member since",
+              access: "Access",
             }}
           />
           <div className="flex-1" />
@@ -195,15 +194,29 @@ const COLUMNS = [
       return <UserChip user={props.row.original} />;
     },
   }),
-  helper.accessor("role", {
+  helper.accessor("access", {
+    enableSorting: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Role" />
+      <DataTableColumnHeader column={column} title="Access" />
     ),
     cell: (props) => {
-      return props.getValue() === "admin" ? (
-        <Badge>Admin</Badge>
-      ) : (
-        <Badge variant="secondary">Viewer</Badge>
+      const data = props.getValue();
+      const accessValues = Object.entries(data).filter(
+        ([, value]) => typeof value === "boolean",
+      );
+
+      return (
+        <div className="flex gap-1">
+          {accessValues.map(([key, value]) => (
+            <Badge
+              variant={value ? "default" : "destructive"}
+              className="capitalize"
+              key={key}
+            >
+              {key}
+            </Badge>
+          ))}
+        </div>
       );
     },
   }),

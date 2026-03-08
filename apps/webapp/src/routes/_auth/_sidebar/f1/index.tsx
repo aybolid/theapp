@@ -37,12 +37,18 @@ import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { cn } from "@theapp/ui/lib/utils";
 import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
 import { useF1SessionsSuspenseQuery } from "@theapp/webapp/lib/query/f1";
-import { countryCodeEmoji } from "@theapp/webapp/lib/utils";
+import {
+  beforeLoadAccessGuard,
+  countryCodeEmoji,
+} from "@theapp/webapp/lib/utils";
 import dayjs from "dayjs";
 import { type FC, Suspense } from "react";
 import { PageWrapper } from "../../-components/page-wrapper";
 
 export const Route = createFileRoute("/_auth/_sidebar/f1/")({
+  beforeLoad: async (ctx) => {
+    await beforeLoadAccessGuard(ctx.context.queryClient, ["f1"]);
+  },
   component: RouteComponent,
   errorComponent: ErrorComponent,
   pendingComponent: PendingComponent,

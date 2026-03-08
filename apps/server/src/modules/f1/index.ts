@@ -23,7 +23,7 @@ export const f1 = new Elysia({
     tags: ["f1"],
   },
 })
-  .use(authGuard())
+  .use(authGuard({ access: ["f1"] }))
   .get(
     "/sessions/:sessionKey",
     async (ctx) => {

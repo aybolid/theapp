@@ -1,3 +1,8 @@
+import type { QueryClient } from "@tanstack/react-query";
+import { notFound } from "@tanstack/react-router";
+import type { AccessKeys } from "../components/access-guard";
+import { meQueryOptions } from "./query/auth";
+
 export async function copyToClipboard(
   text: string,
   hooks?: { onSuccess?: () => void; onError?: () => void },
@@ -67,4 +72,18 @@ export function countryCodeEmoji(cc: string) {
   const codePoints = [...code].map((c) => (c.codePointAt(0) ?? 0) + OFFSET);
 
   return String.fromCodePoint(...codePoints);
+}
+
+export async function beforeLoadAccessGuard(
+  queryClient: QueryClient,
+  access: AccessKeys,
+) {
+  const user =
+    queryClient.getQueryData(meQueryOptions.queryKey) ??
+    (await queryClient.fetchQuery(meQueryOptions).catch(() => null));
+  if (!user) throw notFound();
+
+  for (const key of access) {
+    if (!user.access[key]) throw notFound();
+  }
 }

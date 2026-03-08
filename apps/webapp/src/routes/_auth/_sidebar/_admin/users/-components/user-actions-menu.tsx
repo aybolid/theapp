@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import type { UserResponse } from "@theapp/schemas";
+import type { UserWithAccessResponse } from "@theapp/schemas";
 import { Badge } from "@theapp/ui/components/badge";
 import {
   DropdownMenu,
@@ -15,13 +15,16 @@ import {
   usersQueryOptions,
   useUpdateUserMutation,
 } from "@theapp/webapp/lib/query/users";
+import { type ComponentProps, type FC, lazy, Suspense } from "react";
 
-import type { ComponentProps, FC } from "react";
+const LazyEditAccessDialog = lazy(() =>
+  import("./edit-access-dailog").then((m) => ({ default: m.EditAccessDialog })),
+);
 
 type DropdownMenuTriggerProps = ComponentProps<typeof DropdownMenuTrigger>;
 
 export const UserActionsMenu: FC<{
-  user: UserResponse;
+  user: UserWithAccessResponse;
   isMe: boolean;
   render: NonNullable<DropdownMenuTriggerProps["render"]>;
   nativeButton?: DropdownMenuTriggerProps["nativeButton"];
@@ -38,8 +41,6 @@ export const UserActionsMenu: FC<{
     onError: () => toast.error("Failed to update user"),
   });
 
-  if (isMe) return null;
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger nativeButton={nativeButton} render={render} />
@@ -48,40 +49,45 @@ export const UserActionsMenu: FC<{
         onKeyDown={(e) => e.preventBaseUIHandler()}
       >
         <DropdownMenuGroup>
-          <DropdownMenuItem
-            disabled={updateMutation.isPending}
-            onClick={() =>
-              updateMutation.mutate({
-                userId: user.userId,
-                role: user.role === "admin" ? "viewer" : "admin",
-              })
+          <Suspense
+            fallback={
+              <DropdownMenuItem disabled>
+                <HugeiconsIcon icon={UserCog} strokeWidth={2} />
+                <span>Edit access</span>
+              </DropdownMenuItem>
             }
           >
-            <HugeiconsIcon icon={UserCog} strokeWidth={2} />
-            Set role to{" "}
-            {user.role === "admin" ? (
-              <Badge variant="secondary">Viewer</Badge>
-            ) : (
-              <Badge>Admin</Badge>
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={updateMutation.isPending}
-            onClick={() =>
-              updateMutation.mutate({
-                userId: user.userId,
-                status: user.status === "active" ? "inactive" : "active",
-              })
-            }
-          >
-            <HugeiconsIcon icon={UserLock01Icon} strokeWidth={2} />
-            Set status to{" "}
-            {user.status === "active" ? (
-              <Badge variant="destructive">Inactive</Badge>
-            ) : (
-              <Badge>Active</Badge>
-            )}
-          </DropdownMenuItem>
+            <LazyEditAccessDialog
+              isMe={isMe}
+              access={user.access}
+              nativeButton={false}
+              render={
+                <DropdownMenuItem closeOnClick={false}>
+                  <HugeiconsIcon icon={UserCog} strokeWidth={2} />
+                  <span>Edit access</span>
+                </DropdownMenuItem>
+              }
+            />
+          </Suspense>
+          {!isMe && (
+            <DropdownMenuItem
+              disabled={updateMutation.isPending}
+              onClick={() =>
+                updateMutation.mutate({
+                  userId: user.userId,
+                  status: user.status === "active" ? "inactive" : "active",
+                })
+              }
+            >
+              <HugeiconsIcon icon={UserLock01Icon} strokeWidth={2} />
+              Set status to{" "}
+              {user.status === "active" ? (
+                <Badge variant="destructive">Inactive</Badge>
+              ) : (
+                <Badge>Active</Badge>
+              )}
+            </DropdownMenuItem>
+          )}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

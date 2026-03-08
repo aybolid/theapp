@@ -1,7 +1,7 @@
-import type { UserRole } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
 import {
+  type AccessMap,
   constantTimeEqual,
   hashSecret,
   signAuthJwt,
@@ -22,26 +22,28 @@ const ACTIVITY_UPDATE_INTERVAL_SECONDS = 60 * 60;
 /** 1 minute */
 export const JWT_EXPIRATION_SECONDS = 60;
 
-export function authGuard(config?: { adminOnly: boolean }) {
+export function authGuard(config?: { access?: (keyof AccessMap)[] }) {
   return new Elysia({ name: "auth-guard", seed: config })
     .derive(
       async (
         ctx,
-      ): Promise<{ userId: string; sessionId: string; role: UserRole }> => {
+      ): Promise<{ userId: string; sessionId: string; access: AccessMap }> => {
         const authJwt = ctx.cookie.authToken;
 
         if (authJwt && typeof authJwt.value === "string") {
           try {
             const result = await verifyAuthJwt(authJwt.value);
 
-            if (config?.adminOnly && result.payload.role !== "admin") {
-              throw ctx.status(403, "Admin access required");
+            for (const key of config?.access ?? []) {
+              if (!result.payload.access[key]) {
+                throw ctx.status(403, `${key} access is required`);
+              }
             }
 
             return {
               userId: result.payload.userId,
               sessionId: result.payload.sessionId,
-              role: result.payload.role,
+              access: result.payload.access,
             };
           } catch (e) {
             if (e instanceof ElysiaCustomStatusResponse) {
@@ -78,7 +80,7 @@ export function authGuard(config?: { adminOnly: boolean }) {
             sessionId: { eq: sessionId },
             user: { status: { eq: "active" } },
           },
-          with: { user: { with: { profile: true } } },
+          with: { user: { with: { profile: true, access: true } } },
         });
         if (!session) {
           sessionToken.remove();
@@ -106,7 +108,11 @@ export function authGuard(config?: { adminOnly: boolean }) {
           {
             userId: session.userId,
             sessionId: session.sessionId,
-            role: session.user.role,
+            access: {
+              admin: session.user.access.admin,
+              wishes: session.user.access.wishes,
+              f1: session.user.access.f1,
+            },
           },
           JWT_EXPIRATION_SECONDS,
         );
@@ -129,14 +135,20 @@ export function authGuard(config?: { adminOnly: boolean }) {
             .where(eq(schema.sessions.sessionId, sessionId));
         }
 
-        if (config?.adminOnly && session.user.role !== "admin") {
-          throw ctx.status(403, "Admin access required");
+        for (const key of config?.access ?? []) {
+          if (!session.user.access[key]) {
+            throw ctx.status(403, `${key} access is required`);
+          }
         }
 
         return {
           userId: session.userId,
           sessionId: session.sessionId,
-          role: session.user.role,
+          access: {
+            admin: session.user.access.admin,
+            wishes: session.user.access.wishes,
+            f1: session.user.access.f1,
+          },
         };
       },
     )

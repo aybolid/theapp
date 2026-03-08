@@ -10,6 +10,11 @@ export const relations = defineRelations(schema, (r) => ({
     }),
   },
   users: {
+    access: r.one.accesses({
+      from: r.users.userId,
+      to: r.accesses.userId,
+      optional: false,
+    }),
     profile: r.one.profiles({
       from: r.users.userId,
       to: r.profiles.userId,

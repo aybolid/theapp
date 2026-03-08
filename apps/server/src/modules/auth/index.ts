@@ -9,7 +9,7 @@ import {
   singupBadRequestErrorSchema,
   singupConflictErrorSchema,
   userNotFoundErrorSchema,
-  userResponseSchema,
+  userWithAccessSchema,
 } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
@@ -64,6 +64,17 @@ export const auth = new Elysia({
           throw new Error("Failed to create user");
         }
 
+        const access = await tx
+          .insert(schema.accesses)
+          .values({
+            userId: user.userId,
+          })
+          .returning()
+          .then((rows) => rows[0]);
+        if (!access) {
+          throw new Error("Failed to create access");
+        }
+
         const profile = await tx
           .insert(schema.profiles)
           .values({ userId: user.userId })
@@ -97,6 +108,7 @@ export const auth = new Elysia({
           email: { eq: ctx.body.email.toLowerCase() },
           status: { eq: "active" },
         },
+        with: { access: true },
       });
       if (!candidate) throw ctx.status(400, "Invalid email or password");
 
@@ -130,7 +142,11 @@ export const auth = new Elysia({
         {
           sessionId,
           userId: candidate.userId,
-          role: candidate.role,
+          access: {
+            admin: candidate.access.admin,
+            wishes: candidate.access.wishes,
+            f1: candidate.access.f1,
+          },
         },
         JWT_EXPIRATION_SECONDS,
       );
@@ -169,13 +185,16 @@ export const auth = new Elysia({
       const user = await db.query.users.findFirst({
         where: { userId: { eq: ctx.userId } },
         columns: { passwordHash: false },
-        with: { profile: true },
+        with: { profile: true, access: true },
       });
       if (!user) throw ctx.status(404, "User not found");
-      return ctx.status(200, user);
+      return ctx.status(200, {
+        ...user,
+        access: { ...user.access, ...ctx.access },
+      });
     },
     {
-      response: { 200: userResponseSchema, 404: userNotFoundErrorSchema },
+      response: { 200: userWithAccessSchema, 404: userNotFoundErrorSchema },
       detail: {
         description: "Get the currently authenticated user's profile.",
       },

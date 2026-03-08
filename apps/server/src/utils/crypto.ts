@@ -1,4 +1,4 @@
-import type { UserRole } from "@theapp/schemas";
+import type { AccessResponse } from "@theapp/schemas/src/accesses";
 import { type JWTVerifyResult, jwtVerify, SignJWT } from "jose";
 
 /** Human readable alphabet (a-z, 0-9 without l, o, 0, 1 to avoid confusion) */
@@ -9,11 +9,16 @@ const PASSWORD_ALGORITHM = "argon2id";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
+export type AccessMap = Omit<
+  AccessResponse,
+  "userId" | "accessId" | "createdAt" | "updatedAt"
+>;
+
 export function signAuthJwt(
   payload: {
     userId: string;
     sessionId: string;
-    role: UserRole;
+    access: AccessMap;
   },
   expirationSeconds: number,
 ): Promise<string> {
@@ -28,7 +33,7 @@ export function verifyAuthJwt(token: string): Promise<
   JWTVerifyResult<{
     userId: string;
     sessionId: string;
-    role: UserRole;
+    access: AccessMap;
   }>
 > {
   return jwtVerify(token, JWT_SECRET);

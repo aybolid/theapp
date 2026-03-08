@@ -1,4 +1,3 @@
-import { count, eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { isProduction } from "elysia/error";
 import { hashPassword } from "../utils/crypto";
@@ -32,11 +31,13 @@ async function runMigrations() {
 
 async function createAdminUserIfNotExists() {
   logger.info("Checking if admin user exists");
-  const adminsCount = await db
-    .select({ count: count() })
-    .from(schema.users)
-    .where(eq(schema.users.role, "admin"))
-    .then((rows) => rows[0]?.count ?? 0);
+  const admins = await db.query.users.findMany({
+    where: {
+      status: "active",
+      access: { admin: true },
+    },
+  });
+  const adminsCount = admins.length;
   if (adminsCount > 0) {
     logger.info("Admin user already exists");
     return;
@@ -51,7 +52,7 @@ async function createAdminUserIfNotExists() {
     logger.info("Creating admin user");
     const user = await tx
       .insert(schema.users)
-      .values({ email, passwordHash, role: "admin", status: "active" })
+      .values({ email, passwordHash, status: "active" })
       .returning()
       .then((rows) => rows[0]);
     if (!user) {
@@ -59,6 +60,21 @@ async function createAdminUserIfNotExists() {
       return tx.rollback();
     }
     logger.info("Admin user created");
+
+    logger.info("Creating admin access");
+    const access = await tx
+      .insert(schema.accesses)
+      .values({
+        userId: user.userId,
+        admin: true,
+      })
+      .returning()
+      .then((rows) => rows[0]);
+    if (!access) {
+      logger.error("Failed to create admin access");
+      return tx.rollback();
+    }
+    logger.info("Admin access created");
 
     logger.info("Creating admin profile");
     const profile = await tx
