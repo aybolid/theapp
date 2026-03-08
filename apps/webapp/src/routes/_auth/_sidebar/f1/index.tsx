@@ -1,51 +1,47 @@
 import {
   createFileRoute,
   type ErrorComponentProps,
-  Link,
 } from "@tanstack/react-router";
-import type { F1Session } from "@theapp/schemas";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@theapp/ui/components/accordion";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@theapp/ui/components/alert";
-import { Badge } from "@theapp/ui/components/badge";
-import { Button } from "@theapp/ui/components/button";
 import {
   Empty,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "@theapp/ui/components/empty";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemTitle,
-} from "@theapp/ui/components/item";
 import { Spinner } from "@theapp/ui/components/spinner";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@theapp/ui/components/tabs";
 import { Alert01Icon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
-import { cn } from "@theapp/ui/lib/utils";
 import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
-import { useF1SessionsSuspenseQuery } from "@theapp/webapp/lib/query/f1";
+import { beforeLoadAccessGuard } from "@theapp/webapp/lib/utils";
 import {
-  beforeLoadAccessGuard,
-  countryCodeEmoji,
-} from "@theapp/webapp/lib/utils";
-import dayjs from "dayjs";
-import { type FC, Suspense } from "react";
+  createStandardSchemaV1,
+  parseAsStringLiteral,
+  useQueryStates,
+} from "nuqs";
+import { Suspense } from "react";
 import { PageWrapper } from "../../-components/page-wrapper";
+import { DriverStandingsTab } from "./-tabs/driver-standings";
+import { ScheduleTab } from "./-tabs/schedule";
+
+const searchParams = {
+  tab: parseAsStringLiteral(["schedule", "driver-standings"]).withDefault(
+    "schedule",
+  ),
+};
 
 export const Route = createFileRoute("/_auth/_sidebar/f1/")({
+  validateSearch: createStandardSchemaV1(searchParams, { partialOutput: true }),
   beforeLoad: async (ctx) => {
     await beforeLoadAccessGuard(ctx.context.queryClient, ["f1"]);
   },
@@ -55,166 +51,34 @@ export const Route = createFileRoute("/_auth/_sidebar/f1/")({
 });
 
 function RouteComponent() {
-  const sessionsQuery = useF1SessionsSuspenseQuery();
-
-  const groupedByMeetingKey = sessionsQuery.data.reduce<
-    Record<F1Session["meeting_key"], F1Session[]>
-  >((acc, curr) => {
-    // remove test sessions
-    if (curr.session_name.includes("Day")) {
-      return acc;
-    }
-    if (!acc[curr.meeting_key]) {
-      acc[curr.meeting_key] = [];
-    }
-    acc[curr.meeting_key]?.push(curr);
-    return acc;
-  }, {});
-
-  const now = Date.now();
-  let nextMeetingKey: string | undefined;
-
-  const sortedMeetings = Object.entries(groupedByMeetingKey).sort((a, b) => {
-    const aFirst = a[1][0];
-    const bFirst = b[1][0];
-    return (
-      new Date(aFirst?.date_start || 0).getTime() -
-      new Date(bFirst?.date_start || 0).getTime()
-    );
-  });
-
-  for (const [key, sessions] of sortedMeetings) {
-    const sortedSessions = [...sessions].sort(
-      (a, b) =>
-        new Date(a.date_start).getTime() - new Date(b.date_start).getTime(),
-    );
-    const lastSession = sortedSessions[sortedSessions.length - 1];
-    if (lastSession && new Date(lastSession.date_end).getTime() > now) {
-      nextMeetingKey = key;
-      break;
-    }
-  }
+  const [{ tab }, setSearchParams] = useQueryStates(searchParams);
 
   return (
     <PageWrapper breadcrumbs={["Formula 1"]}>
-      <div className="container mx-auto grid max-w-3xl gap-4">
+      <Tabs
+        className="container mx-auto grid max-w-3xl gap-4"
+        value={tab}
+        onValueChange={(v) =>
+          setSearchParams({ tab: searchParams.tab.parse(v) })
+        }
+      >
         <h1 className="font-semibold text-lg">
           Formula 1 Season {new Date().getFullYear()}
         </h1>
-        <Accordion defaultValue={nextMeetingKey ? [nextMeetingKey] : undefined}>
-          {sortedMeetings.map(([key, sessions]) => {
-            const sortedSessions = [...sessions].sort(
-              (a, b) =>
-                new Date(a.date_start).getTime() -
-                new Date(b.date_start).getTime(),
-            );
-            const firstSession = sortedSessions[0];
-            const lastSession = sortedSessions[sortedSessions.length - 1];
-
-            const country = firstSession?.country_name ?? "Unknown Country";
-            const countryCode = firstSession?.country_code;
-            const circuit =
-              firstSession?.circuit_short_name ?? "Unknown Circuit";
-            const isSprintWeekend = sortedSessions.some((session) =>
-              session.session_name.includes("Sprint"),
-            );
-            const isNext = key === nextMeetingKey;
-
-            const startDate = dayjs(firstSession?.date_start);
-            const endDate = dayjs(lastSession?.date_end);
-            const weekendDates =
-              startDate.month() === endDate.month()
-                ? `${startDate.format("MMM DD")} - ${endDate.format("DD")}`
-                : `${startDate.format("MMM DD")} - ${endDate.format("MMM DD")}`;
-
-            return (
-              <AccordionItem key={key} value={key}>
-                <AccordionTrigger className="hover:no-underline">
-                  <Item className="justify-between p-0 pr-4">
-                    <ItemTitle className={cn(isNext && "text-primary")}>
-                      {countryCode &&
-                        countryCodeEmoji(countryCode.toLowerCase())}{" "}
-                      {country}
-                    </ItemTitle>
-                    <ItemDescription className="flex items-center gap-2">
-                      {isSprintWeekend && <Badge>Sprint</Badge>}
-                      <span className="whitespace-nowrap font-normal text-muted-foreground text-xs">
-                        {weekendDates}
-                      </span>
-                    </ItemDescription>
-                  </Item>
-                </AccordionTrigger>
-                <AccordionContent className="p-4">
-                  <p className="text-muted-foreground">{circuit}</p>
-                  <MeetingDisplay
-                    sessions={sortedSessions}
-                    nextSessionIndex={
-                      isNext
-                        ? sortedSessions.findIndex(
-                            (s) => new Date(s.date_end).getTime() > now,
-                          )
-                        : -1
-                    }
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
-        </Accordion>
-      </div>
+        <TabsList>
+          <TabsTrigger value="schedule">Schedule</TabsTrigger>
+          <TabsTrigger value="driver-standings">Driver Standings</TabsTrigger>
+        </TabsList>
+        <TabsContent value="schedule">
+          <ScheduleTab />
+        </TabsContent>
+        <TabsContent value="driver-standings">
+          <DriverStandingsTab />
+        </TabsContent>
+      </Tabs>
     </PageWrapper>
   );
 }
-
-const MeetingDisplay: FC<{
-  sessions: F1Session[];
-  nextSessionIndex?: number;
-}> = ({ sessions, nextSessionIndex }) => {
-  return (
-    <ItemGroup>
-      {sessions.map((session, index) => {
-        const isNextSession = index === nextSessionIndex;
-
-        return (
-          <Item
-            key={session.session_key}
-            variant={session.session_type === "Practice" ? "default" : "muted"}
-            size="xs"
-            className={cn(
-              "justify-between",
-              isNextSession && "border-primary bg-primary/10",
-            )}
-          >
-            <ItemContent>
-              <ItemTitle>{session.session_name}</ItemTitle>
-              <ItemDescription>
-                {dayjs(session.date_start).format("ddd, MMM D, HH:mm")} -{" "}
-                {dayjs(session.date_end).format("HH:mm")}
-              </ItemDescription>
-            </ItemContent>
-            {dayjs(session.date_start).isBefore(dayjs()) && (
-              <ItemActions>
-                <Button
-                  size="xs"
-                  variant="link"
-                  nativeButton={false}
-                  render={
-                    <Link
-                      to="/f1/session/$sessionKey"
-                      params={{ sessionKey: session.session_key.toString() }}
-                    >
-                      View
-                    </Link>
-                  }
-                />
-              </ItemActions>
-            )}
-          </Item>
-        );
-      })}
-    </ItemGroup>
-  );
-};
 
 function PendingComponent() {
   return (
@@ -237,7 +101,7 @@ function ErrorComponent({ error }: ErrorComponentProps) {
       <div className="container mx-auto grid max-w-3xl gap-4 p-4">
         <Alert variant="destructive">
           <HugeiconsIcon icon={Alert01Icon} strokeWidth={2} />
-          <AlertTitle>Couldn't load Formula 1 sessions</AlertTitle>
+          <AlertTitle>Unexpected error happened</AlertTitle>
           <AlertDescription>
             Something went wrong. Maybe try refreshing?
           </AlertDescription>

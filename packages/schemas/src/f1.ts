@@ -34,7 +34,7 @@ export type GetSessionByKeyNotFoundError = z.infer<
 >;
 
 export const getSessionDriversParamsSchema = z.object({
-  sessionKey: z.coerce.number(),
+  sessionKey: z.coerce.number().or(z.literal("latest")),
 });
 export type GetSessionDriversParams = z.infer<
   typeof getSessionDriversParamsSchema
@@ -100,3 +100,23 @@ export type F1SessionResult = z.infer<typeof f1SessionResultSchema>;
 
 export const f1SessionResults = z.array(f1SessionResultSchema);
 export type F1SessionResults = z.infer<typeof f1SessionResults>;
+
+export const f1DriverChampionshipStandingSchema = z.object({
+  driver_number: z.number(),
+  meeting_key: z.number(),
+  points_current: z.number().nullable(),
+  points_start: z.number().nullable(),
+  position_current: z.number(),
+  position_start: z.number().nullable(),
+  session_key: z.number(),
+});
+export type F1DriverChampionshipStanding = z.infer<
+  typeof f1DriverChampionshipStandingSchema
+>;
+
+export const f1DriverChampionshipStandingsSchema = z.array(
+  f1DriverChampionshipStandingSchema,
+);
+export type F1DriverChampionshipStandings = z.infer<
+  typeof f1DriverChampionshipStandingsSchema
+>;

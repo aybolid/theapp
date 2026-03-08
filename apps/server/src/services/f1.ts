@@ -1,4 +1,9 @@
-import type { F1Driver, F1Session, F1SessionResult } from "@theapp/schemas";
+import type {
+  F1Driver,
+  F1DriverChampionshipStandings,
+  F1Session,
+  F1SessionResult,
+} from "@theapp/schemas";
 import { logger } from "../utils/logger";
 
 const F1_API_BASE_URL = "https://api.openf1.org";
@@ -48,7 +53,7 @@ export async function fetchF1SeasonSessions(
 }
 
 export async function fetchF1SessionDrivers(
-  sessionKey: number,
+  sessionKey: number | "latest",
 ): Promise<F1Driver[]> {
   return fetchF1Api<F1Driver[]>(`/v1/drivers?session_key=${sessionKey}`);
 }
@@ -58,5 +63,11 @@ export async function fetchF1SessionResults(
 ): Promise<F1SessionResult[]> {
   return fetchF1Api<F1SessionResult[]>(
     `/v1/session_result?session_key=${sessionKey}`,
+  );
+}
+
+export async function fetchF1DriverChampionshipStandings(): Promise<F1DriverChampionshipStandings> {
+  return fetchF1Api<F1DriverChampionshipStandings>(
+    "/v1/championship_drivers?session_key=latest",
   );
 }

@@ -1,4 +1,5 @@
 import {
+  f1DriverChampionshipStandingsSchema,
   f1DriversSchema,
   f1SessionResults,
   f1SessionSchema,
@@ -9,6 +10,7 @@ import {
   getSessionResultsParamsSchema,
 } from "@theapp/schemas";
 import {
+  fetchF1DriverChampionshipStandings,
   fetchF1SeasonSessions,
   fetchF1SessionByKey,
   fetchF1SessionDrivers,
@@ -24,6 +26,22 @@ export const f1 = new Elysia({
   },
 })
   .use(authGuard({ access: ["f1"] }))
+  .get(
+    "/championship/drivers",
+    async (ctx) => {
+      const data = await fetchF1DriverChampionshipStandings();
+      return ctx.status(200, data);
+    },
+    {
+      response: {
+        200: f1DriverChampionshipStandingsSchema,
+      },
+      detail: {
+        description:
+          "Get the driver championship standings for the current season.",
+      },
+    },
+  )
   .get(
     "/sessions/:sessionKey",
     async (ctx) => {

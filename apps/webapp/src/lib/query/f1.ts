@@ -5,6 +5,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import type {
+  F1DriverChampionshipStandings,
   F1Drivers,
   F1Session,
   F1SessionResults,
@@ -140,6 +141,36 @@ export function useF1SessionResultsSuspenseQuery(
 ) {
   return useSuspenseQuery({
     ...f1SessionResultsQueryOptions(params),
+    ...options,
+  });
+}
+
+export const f1DriverChampionshipStandingsQueryOptions = queryOptions<
+  F1DriverChampionshipStandings,
+  Treaty.Error<typeof server.api.f1.championship.drivers.get>
+>({
+  queryKey: ["f1", "championship", "drivers"],
+  queryFn: async () => {
+    const resp = await server.api.f1.championship.drivers.get();
+    if (resp.error) {
+      throw resp.error;
+    } else {
+      return resp.data;
+    }
+  },
+});
+
+export function useF1DriverChampionshipStandingsSuspenseQuery(
+  options?: Omit<
+    UseSuspenseQueryOptions<
+      F1DriverChampionshipStandings,
+      Treaty.Error<typeof server.api.f1.championship.drivers.get>
+    >,
+    "queryFn" | "queryKey"
+  >,
+) {
+  return useSuspenseQuery({
+    ...f1DriverChampionshipStandingsQueryOptions,
     ...options,
   });
 }
