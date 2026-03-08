@@ -11,16 +11,6 @@ import {
   getSessionResultsResponseSchema,
   type SessionResult,
 } from "@theapp/schemas";
-import {
-  cacheF1Session,
-  cacheF1SessionDrivers,
-  cacheF1SessionResults,
-  cacheF1Sessions,
-  getCachedF1Session,
-  getCachedF1SessionDrivers,
-  getCachedF1SessionResults,
-  getCachedF1Sessions,
-} from "@theapp/server/cache/f1";
 import { logger } from "@theapp/server/utils/logger";
 import Elysia from "elysia";
 import { authGuard } from "../auth/guard";
@@ -39,11 +29,6 @@ export const f1 = new Elysia({
     async (ctx) => {
       const sessionKey = ctx.params.sessionKey;
 
-      const cachedSession = await getCachedF1Session(sessionKey);
-      if (cachedSession) {
-        return ctx.status(200, cachedSession);
-      }
-
       const response = await fetch(
         `${F1_API_BASE_URL}/sessions?session_key=${sessionKey}`,
       );
@@ -54,6 +39,7 @@ export const f1 = new Elysia({
         );
         throw new Error("Failed to fetch f1 session");
       }
+
       const data: F1Session[] = await response.json();
       const session = data[0];
       if (!session) {
@@ -65,8 +51,6 @@ export const f1 = new Elysia({
         date_start: new Date(session.date_start).toISOString(),
         date_end: new Date(session.date_end).toISOString(),
       };
-
-      cacheF1Session(normalizedSession);
 
       return ctx.status(200, normalizedSession);
     },
@@ -86,11 +70,6 @@ export const f1 = new Elysia({
     async (ctx) => {
       const sessionKey = ctx.params.sessionKey;
 
-      const cachedDrivers = await getCachedF1SessionDrivers(sessionKey);
-      if (cachedDrivers) {
-        return ctx.status(200, cachedDrivers);
-      }
-
       const response = await fetch(
         `${F1_API_BASE_URL}/drivers?session_key=${sessionKey}`,
       );
@@ -102,8 +81,6 @@ export const f1 = new Elysia({
         throw new Error("Failed to fetch f1 session drivers");
       }
       const data: F1Driver[] = await response.json();
-
-      cacheF1SessionDrivers(sessionKey, data);
 
       return ctx.status(200, data);
     },
@@ -122,11 +99,6 @@ export const f1 = new Elysia({
     async (ctx) => {
       const sessionKey = ctx.params.sessionKey;
 
-      const cachedResults = await getCachedF1SessionResults(sessionKey);
-      if (cachedResults) {
-        return ctx.status(200, cachedResults);
-      }
-
       const response = await fetch(
         `${F1_API_BASE_URL}/session_result?session_key=${sessionKey}`,
       );
@@ -138,8 +110,6 @@ export const f1 = new Elysia({
         throw new Error("Failed to fetch f1 session results");
       }
       const data: SessionResult[] = await response.json();
-
-      cacheF1SessionResults(sessionKey, data);
 
       return ctx.status(200, data);
     },
@@ -157,11 +127,6 @@ export const f1 = new Elysia({
     "/sessions",
     async (ctx) => {
       const currentYear = new Date().getFullYear();
-
-      const cachedSessions = await getCachedF1Sessions(currentYear);
-      if (cachedSessions) {
-        return ctx.status(200, cachedSessions);
-      }
 
       const response = await fetch(
         `${F1_API_BASE_URL}/sessions?year=${currentYear}`,
@@ -181,8 +146,6 @@ export const f1 = new Elysia({
         date_start: new Date(s.date_start).toISOString(),
         date_end: new Date(s.date_end).toISOString(),
       }));
-
-      cacheF1Sessions(currentYear, normalizedData);
 
       return ctx.status(200, normalizedData);
     },

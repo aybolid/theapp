@@ -46,17 +46,17 @@ export type GetSessionDriversParams = z.infer<
 >;
 
 export const f1DriverSchema = z.object({
-  broadcast_name: z.string(),
+  broadcast_name: z.string().nullable(),
   driver_number: z.number(),
-  first_name: z.string(),
-  full_name: z.string(),
+  first_name: z.string().nullable(),
+  full_name: z.string().nullable(),
   headshot_url: z.url().nullable(),
-  last_name: z.string(),
+  last_name: z.string().nullable(),
   meeting_key: z.number(),
-  name_acronym: z.string(),
+  name_acronym: z.string().nullable(),
   session_key: z.number(),
-  team_colour: z.string(),
-  team_name: z.string(),
+  team_colour: z.string().nullable(),
+  team_name: z.string().nullable(),
 });
 
 export type F1Driver = z.infer<typeof f1DriverSchema>;
