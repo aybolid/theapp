@@ -7,7 +7,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import type { F1Driver, SessionResult } from "@theapp/schemas";
+import type { F1Driver, F1SessionResult } from "@theapp/schemas";
 import {
   Alert,
   AlertAction,
@@ -103,7 +103,7 @@ export const ResultsTab: FC<{ sessionKey: number; isQualifying: boolean }> = ({
   );
 };
 
-type ResultTableEntry = SessionResult & { driver: F1Driver };
+type ResultTableEntry = F1SessionResult & { driver: F1Driver };
 
 const ResultsTabImpl: FC<{ sessionKey: number; isQualifying: boolean }> = ({
   sessionKey,

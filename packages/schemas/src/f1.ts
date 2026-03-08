@@ -17,22 +17,18 @@ export const f1SessionSchema = z.object({
   session_type: z.string(),
   year: z.number(),
 });
-
 export type F1Session = z.infer<typeof f1SessionSchema>;
 
-export const getF1SessionsResponseSchema = z.array(f1SessionSchema);
-
-export type GetF1SessionsResponse = z.infer<typeof getF1SessionsResponseSchema>;
+export const f1SessionsSchema = z.array(f1SessionSchema);
+export type F1Sessions = z.infer<typeof f1SessionsSchema>;
 
 export const getSessionByKeyParamsSchema = z.object({
   sessionKey: z.coerce.number(),
 });
-
 export type GetSessionByKeyParams = z.infer<typeof getSessionByKeyParamsSchema>;
 
 export const getSessionByKeyNotFoundErrorSchema =
   z.literal("Session not found");
-
 export type GetSessionByKeyNotFoundError = z.infer<
   typeof getSessionByKeyNotFoundErrorSchema
 >;
@@ -40,7 +36,6 @@ export type GetSessionByKeyNotFoundError = z.infer<
 export const getSessionDriversParamsSchema = z.object({
   sessionKey: z.coerce.number(),
 });
-
 export type GetSessionDriversParams = z.infer<
   typeof getSessionDriversParamsSchema
 >;
@@ -58,24 +53,19 @@ export const f1DriverSchema = z.object({
   team_colour: z.string().nullable(),
   team_name: z.string().nullable(),
 });
-
 export type F1Driver = z.infer<typeof f1DriverSchema>;
 
-export const getSessionDriversResponseSchema = z.array(f1DriverSchema);
-
-export type GetSessionDriversResponse = z.infer<
-  typeof getSessionDriversResponseSchema
->;
+export const f1DriversSchema = z.array(f1DriverSchema);
+export type F1Drivers = z.infer<typeof f1DriversSchema>;
 
 export const getSessionResultsParamsSchema = z.object({
   sessionKey: z.coerce.number(),
 });
-
 export type GetSessionResultsParams = z.infer<
   typeof getSessionResultsParamsSchema
 >;
 
-export const sessionResultSchema = z.object({
+export const f1SessionResultSchema = z.object({
   dnf: z.boolean(),
   dns: z.boolean(),
   dsq: z.boolean(),
@@ -106,11 +96,7 @@ export const sessionResultSchema = z.object({
   position: z.number().nullable(),
   session_key: z.number(),
 });
+export type F1SessionResult = z.infer<typeof f1SessionResultSchema>;
 
-export type SessionResult = z.infer<typeof sessionResultSchema>;
-
-export const getSessionResultsResponseSchema = z.array(sessionResultSchema);
-
-export type GetSessionResultsResponse = z.infer<
-  typeof getSessionResultsResponseSchema
->;
+export const f1SessionResults = z.array(f1SessionResultSchema);
+export type F1SessionResults = z.infer<typeof f1SessionResults>;

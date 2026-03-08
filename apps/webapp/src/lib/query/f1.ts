@@ -5,18 +5,18 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import type {
-  F1Driver,
+  F1Drivers,
   F1Session,
-  GetF1SessionsResponse,
+  F1SessionResults,
+  F1Sessions,
   GetSessionByKeyParams,
   GetSessionDriversParams,
   GetSessionResultsParams,
-  SessionResult,
 } from "@theapp/schemas";
 import { server } from "../api";
 
 export const f1SessionsQueryOptions = queryOptions<
-  GetF1SessionsResponse,
+  F1Sessions,
   Treaty.Error<typeof server.api.f1.sessions.get>
 >({
   queryKey: ["f1", "sessions"],
@@ -33,7 +33,7 @@ export const f1SessionsQueryOptions = queryOptions<
 export function useF1SessionsSuspenseQuery(
   options?: Omit<
     UseSuspenseQueryOptions<
-      GetF1SessionsResponse,
+      F1Sessions,
       Treaty.Error<typeof server.api.f1.sessions.get>
     >,
     "queryFn" | "queryKey"
@@ -80,7 +80,7 @@ export function useF1SessionByKeySuspenseQuery(
 
 export function f1SessionDriversQueryOptions(params: GetSessionDriversParams) {
   return queryOptions<
-    F1Driver[],
+    F1Drivers,
     Treaty.Error<ReturnType<typeof server.api.f1.sessions>["drivers"]["get"]>
   >({
     queryKey: ["f1", "session", "drivers", params],
@@ -99,7 +99,7 @@ export function useF1SessionDriversSuspenseQuery(
   params: GetSessionDriversParams,
   options?: Omit<
     UseSuspenseQueryOptions<
-      F1Driver[],
+      F1Drivers,
       Treaty.Error<ReturnType<typeof server.api.f1.sessions>["drivers"]["get"]>
     >,
     "queryFn" | "queryKey"
@@ -113,7 +113,7 @@ export function useF1SessionDriversSuspenseQuery(
 
 export function f1SessionResultsQueryOptions(params: GetSessionResultsParams) {
   return queryOptions<
-    SessionResult[],
+    F1SessionResults,
     Treaty.Error<ReturnType<typeof server.api.f1.sessions>["results"]["get"]>
   >({
     queryKey: ["f1", "session", "results", params],
@@ -132,7 +132,7 @@ export function useF1SessionResultsSuspenseQuery(
   params: GetSessionResultsParams,
   options?: Omit<
     UseSuspenseQueryOptions<
-      SessionResult[],
+      F1SessionResults,
       Treaty.Error<ReturnType<typeof server.api.f1.sessions>["results"]["get"]>
     >,
     "queryFn" | "queryKey"
