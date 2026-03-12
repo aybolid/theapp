@@ -47,7 +47,7 @@ export const UploadAvatarDialog: FC<{
   const uploadMutation = useUploadProfilePictureMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: meQueryOptions.queryKey,
+        queryKey: meQueryOptions().queryKey,
       });
       form.reset();
       URL.revokeObjectURL(objectURL);

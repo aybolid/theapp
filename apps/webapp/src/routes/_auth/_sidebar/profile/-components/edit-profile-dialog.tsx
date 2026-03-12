@@ -57,13 +57,13 @@ export const EditProfileDialog: FC<{
 
   const updateMutation = useUpdateProfileMutation({
     onSuccess: (profile) => {
-      queryClient.setQueryData(meQueryOptions.queryKey, (prev) => {
+      queryClient.setQueryData(meQueryOptions().queryKey, (prev) => {
         if (!prev) return undefined;
         const clone = structuredClone(prev);
         clone.profile = profile;
         return clone;
       });
-      queryClient.invalidateQueries({ queryKey: meQueryOptions.queryKey });
+      queryClient.invalidateQueries({ queryKey: meQueryOptions().queryKey });
       setOpen(false);
     },
     onError: (err) => {

@@ -51,11 +51,13 @@ export const NewWishDialog: FC<{
 
   const createMutation = useCreateWishMutation({
     onSuccess: (wish) => {
-      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) => [
+      queryClient.setQueryData(wishesQueryOptions().queryKey, (prev) => [
         wish,
         ...(prev ?? []),
       ]);
-      queryClient.invalidateQueries({ queryKey: wishesQueryOptions.queryKey });
+      queryClient.invalidateQueries({
+        queryKey: wishesQueryOptions().queryKey,
+      });
       form.reset();
       setOpen(false);
     },

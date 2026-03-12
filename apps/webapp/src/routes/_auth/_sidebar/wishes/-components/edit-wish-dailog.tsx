@@ -60,10 +60,12 @@ export const EditWishDialog: FC<{
 
   const updateMutation = useUpdateWishMutation({
     onSuccess: (wish) => {
-      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+      queryClient.setQueryData(wishesQueryOptions().queryKey, (prev) =>
         prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
       );
-      queryClient.invalidateQueries({ queryKey: wishesQueryOptions.queryKey });
+      queryClient.invalidateQueries({
+        queryKey: wishesQueryOptions().queryKey,
+      });
       setOpen(false);
     },
     onError: (err) => {

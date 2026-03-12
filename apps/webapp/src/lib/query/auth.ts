@@ -1,44 +1,15 @@
 import type { Treaty } from "@elysiajs/eden";
-import {
-  queryOptions,
-  type UseMutationOptions,
-  type UseSuspenseQueryOptions,
-  useMutation,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import type { signin, signout, signup } from "@theapp/schemas";
 import type z from "zod";
 import { server } from "../api";
+import { createQueries } from ".";
 
-export const meQueryOptions = queryOptions<
-  Treaty.Data<typeof server.api.auth.me.get>,
-  Treaty.Error<typeof server.api.auth.me.get>
->({
-  queryKey: ["me"],
-  queryFn: async () => {
-    const resp = await server.api.auth.me.get();
-    if (resp.error) {
-      throw resp.error;
-    } else {
-      return resp.data;
-    }
-  },
-});
-
-export function useMeSuspenseQuery(
-  options?: Omit<
-    UseSuspenseQueryOptions<
-      Treaty.Data<typeof server.api.auth.me.get>,
-      Treaty.Error<typeof server.api.auth.me.get>
-    >,
-    "queryFn" | "queryKey"
-  >,
-) {
-  return useSuspenseQuery({
-    ...meQueryOptions,
-    ...options,
-  });
-}
+export const {
+  queryOptions: meQueryOptions,
+  useQuery: useMeQuery,
+  useSuspenseQuery: useMeSuspenseQuery,
+} = createQueries(["me"], () => server.api.auth.me.get());
 
 export function useSignupMutation(
   options?: Omit<

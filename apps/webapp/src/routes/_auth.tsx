@@ -4,9 +4,9 @@ import { meQueryOptions } from "../lib/query/auth";
 export const Route = createFileRoute("/_auth")({
   beforeLoad: async (ctx) => {
     const user =
-      ctx.context.queryClient.getQueryData(meQueryOptions.queryKey) ??
+      ctx.context.queryClient.getQueryData(meQueryOptions().queryKey) ??
       (await ctx.context.queryClient
-        .fetchQuery(meQueryOptions)
+        .fetchQuery(meQueryOptions())
         .catch(() => null));
     if (!user) {
       throw redirect({ to: "/signin" });

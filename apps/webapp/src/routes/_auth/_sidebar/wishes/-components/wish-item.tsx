@@ -51,11 +51,11 @@ export const WishItem: FC<{
 
   const updateReservationMutation = useUpdateWishReservationMutation({
     onSuccess: (wish) => {
-      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+      queryClient.setQueryData(wishesQueryOptions().queryKey, (prev) =>
         prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
       );
       queryClient.invalidateQueries({
-        queryKey: wishesQueryOptions.queryKey,
+        queryKey: wishesQueryOptions().queryKey,
       });
     },
     onError: () => toast.error("Failed to reserve wish"),

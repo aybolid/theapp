@@ -34,7 +34,7 @@ import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { LazyDevErrorStackDisplay } from "@theapp/webapp/components/lazy";
 import { UserAvatar } from "@theapp/webapp/components/user-avatar";
 import { useMeSuspenseQuery } from "@theapp/webapp/lib/query/auth";
-import { useUserByIdSuspenseQuery } from "@theapp/webapp/lib/query/users";
+import { useUserSuspenseQuery } from "@theapp/webapp/lib/query/users";
 import { lazy, Suspense } from "react";
 import { PageWrapper } from "../../-components/page-wrapper";
 
@@ -67,7 +67,7 @@ function RouteComponent() {
 
   const meQuery = useMeSuspenseQuery();
   const isMe = meQuery.data.userId === userId;
-  const user = isMe ? meQuery.data : useUserByIdSuspenseQuery(userId).data;
+  const user = isMe ? meQuery.data : useUserSuspenseQuery({ userId }).data;
 
   return (
     <PageWrapper breadcrumbs={[user.profile.name]}>

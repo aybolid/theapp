@@ -1,76 +1,23 @@
 import type { Treaty } from "@elysiajs/eden";
-import {
-  queryOptions,
-  type UseMutationOptions,
-  type UseSuspenseQueryOptions,
-  useMutation,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import type { patchUser, patchUserAccess } from "@theapp/schemas";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
+import type { getUser, patchUser, patchUserAccess } from "@theapp/schemas";
 import type z from "zod";
 import { server } from "../api";
+import { createQueries } from ".";
 
-export const usersQueryOptions = queryOptions<
-  Treaty.Data<typeof server.api.users.get>,
-  Treaty.Error<typeof server.api.users.get>
->({
-  queryKey: ["users"],
-  queryFn: async () => {
-    const resp = await server.api.users.get();
-    if (resp.error) {
-      throw resp.error;
-    } else {
-      return resp.data;
-    }
-  },
-});
+export const {
+  queryOptions: usersQueryOptions,
+  useQuery: useUsersQuery,
+  useSuspenseQuery: useUsersSuspenseQuery,
+} = createQueries(["users"], () => server.api.users.get());
 
-export function useUsersSuspenseQuery(
-  options?: Omit<
-    UseSuspenseQueryOptions<
-      Treaty.Data<typeof server.api.users.get>,
-      Treaty.Error<typeof server.api.users.get>
-    >,
-    "queryFn" | "queryKey"
-  >,
-) {
-  return useSuspenseQuery({
-    ...usersQueryOptions,
-    ...options,
-  });
-}
-
-export const userByIdQueryOptions = (userId: string) =>
-  queryOptions<
-    Treaty.Data<ReturnType<typeof server.api.users>["get"]>,
-    Treaty.Error<ReturnType<typeof server.api.users>["get"]>
-  >({
-    queryKey: ["users", userId] as const,
-    queryFn: async () => {
-      const resp = await server.api.users({ userId }).get();
-      if (resp.error) {
-        throw resp.error;
-      } else {
-        return resp.data;
-      }
-    },
-  });
-
-export function useUserByIdSuspenseQuery(
-  userId: string,
-  options?: Omit<
-    UseSuspenseQueryOptions<
-      Treaty.Data<ReturnType<typeof server.api.users>["get"]>,
-      Treaty.Error<ReturnType<typeof server.api.users>["get"]>
-    >,
-    "queryFn" | "queryKey"
-  >,
-) {
-  return useSuspenseQuery({
-    ...userByIdQueryOptions(userId),
-    ...options,
-  });
-}
+export const {
+  queryOptions: userQueryOptions,
+  useQuery: useUserQuery,
+  useSuspenseQuery: useUserSuspenseQuery,
+} = createQueries(["users"], (params: z.infer<typeof getUser.params>) =>
+  server.api.users(params).get(),
+);
 
 export function useUpdateUserMutation(
   options?: Omit<

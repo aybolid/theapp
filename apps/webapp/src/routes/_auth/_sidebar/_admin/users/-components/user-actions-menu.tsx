@@ -33,10 +33,10 @@ export const UserActionsMenu: FC<{
 
   const updateMutation = useUpdateUserMutation({
     onSuccess: (user) => {
-      queryClient.setQueryData(usersQueryOptions.queryKey, (prev) =>
+      queryClient.setQueryData(usersQueryOptions().queryKey, (prev) =>
         prev?.map((u) => (u.userId === user.userId ? user : u)),
       );
-      queryClient.invalidateQueries({ queryKey: usersQueryOptions.queryKey });
+      queryClient.invalidateQueries({ queryKey: usersQueryOptions().queryKey });
     },
     onError: () => toast.error("Failed to update user"),
   });

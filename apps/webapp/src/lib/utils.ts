@@ -79,8 +79,8 @@ export async function beforeLoadAccessGuard(
   access: AccessKey[],
 ) {
   const user =
-    queryClient.getQueryData(meQueryOptions.queryKey) ??
-    (await queryClient.fetchQuery(meQueryOptions).catch(() => null));
+    queryClient.getQueryData(meQueryOptions().queryKey) ??
+    (await queryClient.fetchQuery(meQueryOptions()).catch(() => null));
   if (!user) throw notFound();
 
   for (const key of access) {

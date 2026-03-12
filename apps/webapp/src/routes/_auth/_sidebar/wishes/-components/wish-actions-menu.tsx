@@ -49,11 +49,11 @@ export const WishActionsMenu: FC<{
 
   const deleteMutation = useDeleteWishMutation({
     onSuccess: (_, { wishId }) => {
-      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+      queryClient.setQueryData(wishesQueryOptions().queryKey, (prev) =>
         prev?.filter((w) => w.wishId !== wishId),
       );
       queryClient.invalidateQueries({
-        queryKey: wishesQueryOptions.queryKey,
+        queryKey: wishesQueryOptions().queryKey,
       });
     },
     onError: () => {
@@ -63,11 +63,11 @@ export const WishActionsMenu: FC<{
 
   const updateReservationMutation = useUpdateWishReservationMutation({
     onSuccess: (wish) => {
-      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+      queryClient.setQueryData(wishesQueryOptions().queryKey, (prev) =>
         prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
       );
       queryClient.invalidateQueries({
-        queryKey: wishesQueryOptions.queryKey,
+        queryKey: wishesQueryOptions().queryKey,
       });
     },
     onError: () => toast.error("Failed to remove wish reservation"),
@@ -75,10 +75,12 @@ export const WishActionsMenu: FC<{
 
   const updateMutation = useUpdateWishMutation({
     onSuccess: (wish) => {
-      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+      queryClient.setQueryData(wishesQueryOptions().queryKey, (prev) =>
         prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
       );
-      queryClient.invalidateQueries({ queryKey: wishesQueryOptions.queryKey });
+      queryClient.invalidateQueries({
+        queryKey: wishesQueryOptions().queryKey,
+      });
     },
     onError: () => toast.error("Failed to change wish status"),
   });

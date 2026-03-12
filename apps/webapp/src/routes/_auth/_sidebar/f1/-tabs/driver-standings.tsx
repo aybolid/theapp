@@ -93,7 +93,7 @@ type DriverStandingTableEntry = F1DriverChampionshipStanding & {
 const DriverStandingsTabImpl: FC = () => {
   const [standingsQuery, driversQuery] = useSuspenseQueries({
     queries: [
-      f1DriverChampionshipStandingsQueryOptions,
+      f1DriverChampionshipStandingsQueryOptions(),
       f1SessionDriversQueryOptions({ sessionKey: "latest" }),
     ],
   });

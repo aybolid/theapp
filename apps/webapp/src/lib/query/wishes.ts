@@ -1,11 +1,5 @@
 import type { Treaty } from "@elysiajs/eden";
-import {
-  queryOptions,
-  type UseMutationOptions,
-  type UseSuspenseQueryOptions,
-  useMutation,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import type {
   deleteWish,
   patchWish,
@@ -14,36 +8,13 @@ import type {
 } from "@theapp/schemas";
 import type z from "zod";
 import { server } from "../api";
+import { createQueries } from ".";
 
-export const wishesQueryOptions = queryOptions<
-  Treaty.Data<typeof server.api.wishes.get>,
-  Treaty.Error<typeof server.api.wishes.get>
->({
-  queryKey: ["wishes"],
-  queryFn: async () => {
-    const resp = await server.api.wishes.get();
-    if (resp.error) {
-      throw resp.error;
-    } else {
-      return resp.data;
-    }
-  },
-});
-
-export function useWishesSuspenseQuery(
-  options?: Omit<
-    UseSuspenseQueryOptions<
-      Treaty.Data<typeof server.api.wishes.get>,
-      Treaty.Error<typeof server.api.wishes.get>
-    >,
-    "queryFn" | "queryKey"
-  >,
-) {
-  return useSuspenseQuery({
-    ...wishesQueryOptions,
-    ...options,
-  });
-}
+export const {
+  queryOptions: wishesQueryOptions,
+  useQuery: useWishesQuery,
+  useSuspenseQuery: useWishesSuspenseQuery,
+} = createQueries(["wishes"], () => server.api.wishes.get());
 
 export function useCreateWishMutation(
   options?: Omit<

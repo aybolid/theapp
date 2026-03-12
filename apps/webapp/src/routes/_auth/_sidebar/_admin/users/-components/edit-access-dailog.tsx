@@ -54,10 +54,10 @@ export const EditAccessDialog: FC<{
 
   const updateMutation = useUpdateUserAccessMutation({
     onSuccess: (user) => {
-      queryClient.setQueryData(usersQueryOptions.queryKey, (prev) =>
+      queryClient.setQueryData(usersQueryOptions().queryKey, (prev) =>
         prev?.map((u) => (u.userId === user.userId ? user : u)),
       );
-      queryClient.invalidateQueries({ queryKey: usersQueryOptions.queryKey });
+      queryClient.invalidateQueries({ queryKey: usersQueryOptions().queryKey });
       setOpen(false);
     },
     onError: (err) => {
