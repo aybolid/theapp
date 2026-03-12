@@ -1,10 +1,8 @@
 import cron, { Patterns } from "@elysiajs/cron";
 import { getSessions } from "@theapp/schemas";
-import { db } from "@theapp/server/db";
-import { schema } from "@theapp/server/db/schema";
-import { lt } from "drizzle-orm";
 import Elysia from "elysia";
-import { authGuard, INACTIVITY_TIMEOUT_SECONDS } from "../guard";
+import { authGuard } from "../guard";
+import { deleteInactiveSessions, getActiveUserSessions } from "./service";
 
 export const sessions = new Elysia({
   prefix: "/sessions",
@@ -16,26 +14,21 @@ export const sessions = new Elysia({
     cron({
       name: "delete-inactive-sessions",
       pattern: Patterns.EVERY_DAY_AT_MIDNIGHT,
-      run: async () => {
-        const cutoff = new Date(Date.now() - INACTIVITY_TIMEOUT_SECONDS * 1000);
-        await db
-          .delete(schema.sessions)
-          .where(lt(schema.sessions.lastUsedAt, cutoff));
-      },
+      run: deleteInactiveSessions,
     }),
   )
   .use(authGuard())
   .get(
     "/",
     async (ctx) => {
-      const sessions = await db.query.sessions.findMany({
-        where: { userId: { eq: ctx.userId } },
-      });
-      const markedSessions = sessions.map((s) => ({
-        ...s,
-        isCurrent: s.sessionId === ctx.sessionId,
-      }));
-      return ctx.status(200, markedSessions);
+      const sessions = await getActiveUserSessions({ userId: ctx.userId }).then(
+        (sessions) =>
+          sessions.map((s) => ({
+            ...s,
+            isCurrent: s.sessionId === ctx.sessionId,
+          })),
+      );
+      return ctx.status(200, sessions);
     },
     {
       ...getSessions,
