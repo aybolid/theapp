@@ -4,7 +4,7 @@ import type {
   F1Session,
   F1SessionResult,
 } from "@theapp/schemas";
-import { logger } from "../utils/logger";
+import { logger } from "@theapp/server/utils/logger";
 
 const F1_API_BASE_URL = "https://api.openf1.org";
 

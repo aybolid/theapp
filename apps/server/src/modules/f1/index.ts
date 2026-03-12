@@ -5,15 +5,15 @@ import {
   getF1SessionResults,
   getF1Sessions,
 } from "@theapp/schemas";
+import Elysia from "elysia";
+import { authGuard } from "../auth/guard";
 import {
   fetchF1DriverChampionshipStandings,
   fetchF1SeasonSessions,
   fetchF1SessionByKey,
   fetchF1SessionDrivers,
   fetchF1SessionResults,
-} from "@theapp/server/services/f1";
-import Elysia from "elysia";
-import { authGuard } from "../auth/guard";
+} from "./service";
 
 export const f1 = new Elysia({
   prefix: "/f1",

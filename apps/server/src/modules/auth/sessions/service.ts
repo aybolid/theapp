@@ -1,17 +1,24 @@
-import type { Session } from "@theapp/schemas";
+import type { MarkedSession, Session } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
 import { and, eq, lt } from "drizzle-orm";
 import { INACTIVITY_TIMEOUT_SECONDS } from "../guard";
 
-export function makeSafeSession(
-  session: Session | (Session & { secretHash: Buffer }),
-): Session {
-  if ("secretHash" in session) {
-    const { secretHash: _, ...safeSession } = session;
-    return safeSession;
-  }
-  return session;
+export function makeSafeSession<T extends { secretHash: Buffer }>(
+  session: T,
+): Omit<T, "secretHash"> {
+  const { secretHash: _, ...safeSession } = session;
+  return safeSession;
+}
+
+export function markCurrentSession(
+  sessions: Session[],
+  currentSessionId: string,
+): MarkedSession[] {
+  return sessions.map((s) => ({
+    ...s,
+    isCurrent: s.sessionId === currentSessionId,
+  }));
 }
 
 export async function getActiveUserSessions(args: {
@@ -71,7 +78,7 @@ export async function deleteUserSessionById(args: {
 export async function updateUserSessionById(args: {
   sessionId: string;
   userId: string;
-  set: { lastUsedAt?: Date };
+  set: Partial<typeof schema.sessions.$inferInsert>;
 }): Promise<Session | undefined> {
   return db
     .update(schema.sessions)

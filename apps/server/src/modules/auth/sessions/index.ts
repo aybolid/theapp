@@ -2,7 +2,11 @@ import cron, { Patterns } from "@elysiajs/cron";
 import { getSessions } from "@theapp/schemas";
 import Elysia from "elysia";
 import { authGuard } from "../guard";
-import { deleteInactiveSessions, getActiveUserSessions } from "./service";
+import {
+  deleteInactiveSessions,
+  getActiveUserSessions,
+  markCurrentSession,
+} from "./service";
 
 export const sessions = new Elysia({
   prefix: "/sessions",
@@ -21,14 +25,10 @@ export const sessions = new Elysia({
   .get(
     "/",
     async (ctx) => {
-      const sessions = await getActiveUserSessions({ userId: ctx.userId }).then(
-        (sessions) =>
-          sessions.map((s) => ({
-            ...s,
-            isCurrent: s.sessionId === ctx.sessionId,
-          })),
-      );
-      return ctx.status(200, sessions);
+      const markedSessions = await getActiveUserSessions({
+        userId: ctx.userId,
+      }).then((sessions) => markCurrentSession(sessions, ctx.sessionId));
+      return ctx.status(200, markedSessions);
     },
     {
       ...getSessions,
