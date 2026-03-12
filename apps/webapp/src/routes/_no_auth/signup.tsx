@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { signupBodySchema } from "@theapp/schemas";
+import { signup } from "@theapp/schemas";
 import {
   Alert,
   AlertDescription,
@@ -55,9 +55,9 @@ function RouteComponent() {
           : null;
 
       switch (err.status) {
-        case 400:
+        case 409:
           form.setErrorMap({
-            onSubmit: { form: { message: err.value }, fields: {} },
+            onSubmit: { fields: { email: { message: err.value } } },
           });
           break;
         // biome-ignore lint/suspicious/noFallthroughSwitchClause: expected fallthrough
@@ -87,7 +87,7 @@ function RouteComponent() {
     validators: {
       onSubmit: z
         .object({
-          ...signupBodySchema.shape,
+          ...signup.body.shape,
           passwordConfirm: z.string().min(1, "Required"),
         })
         .refine((data) => data.password === data.passwordConfirm, {

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import type { UserResponse } from "@theapp/schemas";
+import type { UserWithProfile } from "@theapp/schemas";
 import {
   Glimpse,
   GlimpseContent,
@@ -20,7 +20,7 @@ import { s3ObjectUrl } from "../lib/utils";
 import { UserAvatar } from "./user-avatar";
 
 export const UserChip: FC<
-  { user: UserResponse } & ComponentPropsWithoutRef<typeof Item>
+  { user: UserWithProfile } & ComponentPropsWithoutRef<typeof Item>
 > = ({ user, ...props }) => {
   return (
     <Glimpse>

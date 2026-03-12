@@ -8,8 +8,11 @@ export const urlMetadataSchema = z.object({
 
 export type UrlMetadata = z.infer<typeof urlMetadataSchema>;
 
-export const getUrlMetadataQuerySchema = z.object({
-  url: z.url(),
-});
-
-export type GetUrlMetadataQuery = z.infer<typeof getUrlMetadataQuerySchema>;
+export const getUrlMetadata = {
+  query: z.object({
+    url: z.url(),
+  }),
+  response: {
+    200: urlMetadataSchema,
+  },
+};

@@ -11,7 +11,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import type { UserWithAccessResponse } from "@theapp/schemas";
+import type { UserWithProfileAndAccess } from "@theapp/schemas";
 import {
   Alert,
   AlertDescription,
@@ -50,7 +50,7 @@ import z from "zod";
 import { PageWrapper } from "../../../-components/page-wrapper";
 import { UserActionsMenu } from "./-components/user-actions-menu";
 
-type UserTableEntry = UserWithAccessResponse & { isMe: boolean };
+type UserTableEntry = UserWithProfileAndAccess & { isMe: boolean };
 
 const searchParams = {
   query: parseAsString.withDefault(""),

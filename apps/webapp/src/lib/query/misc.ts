@@ -8,18 +8,21 @@ import {
   useQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import type { GetUrlMetadataQuery, UrlMetadata } from "@theapp/schemas";
+import type { getUrlMetadata } from "@theapp/schemas";
+import type z from "zod";
 import { server } from "../api";
 
-export const urlMetadataQueryOptions = (url: string) =>
+export const urlMetadataQueryOptions = (
+  query: z.infer<typeof getUrlMetadata.query>,
+) =>
   queryOptions<
-    UrlMetadata,
+    Treaty.Data<(typeof server.api.misc)["url-metadata"]["get"]>,
     Treaty.Error<(typeof server.api.misc)["url-metadata"]["get"]>
   >({
-    queryKey: ["metadata", url],
+    queryKey: ["metadata", query],
     queryFn: async () => {
       const resp = await server.api.misc["url-metadata"].get({
-        query: { url },
+        query,
       });
       if (resp.error) {
         throw resp.error;
@@ -31,33 +34,33 @@ export const urlMetadataQueryOptions = (url: string) =>
   });
 
 export function useUrlMetadataSuspenseQuery(
-  url: string,
+  query: z.infer<typeof getUrlMetadata.query>,
   options?: Omit<
     UseSuspenseQueryOptions<
-      UrlMetadata,
+      Treaty.Data<(typeof server.api.misc)["url-metadata"]["get"]>,
       Treaty.Error<(typeof server.api.misc)["url-metadata"]["get"]>
     >,
     "queryFn" | "queryKey"
   >,
 ) {
   return useSuspenseQuery({
-    ...urlMetadataQueryOptions(url),
+    ...urlMetadataQueryOptions(query),
     ...options,
   });
 }
 
 export function useUrlMetadataQuery(
-  url: string,
+  query: z.infer<typeof getUrlMetadata.query>,
   options?: Omit<
     UseQueryOptions<
-      UrlMetadata,
+      Treaty.Data<(typeof server.api.misc)["url-metadata"]["get"]>,
       Treaty.Error<(typeof server.api.misc)["url-metadata"]["get"]>
     >,
     "queryFn" | "queryKey"
   >,
 ) {
   return useQuery({
-    ...urlMetadataQueryOptions(url),
+    ...urlMetadataQueryOptions(query),
     ...options,
   });
 }
@@ -65,18 +68,18 @@ export function useUrlMetadataQuery(
 export function useGetUrlMetadataMutation(
   options?: Omit<
     UseMutationOptions<
-      UrlMetadata,
+      Treaty.Data<(typeof server.api.misc)["url-metadata"]["get"]>,
       Treaty.Error<(typeof server.api.misc)["url-metadata"]["get"]>,
-      GetUrlMetadataQuery
+      z.infer<typeof getUrlMetadata.query>
     >,
     "mutationKey" | "mutationFn"
   >,
 ) {
   return useMutation({
     mutationKey: ["create", "wish"],
-    mutationFn: async (data: GetUrlMetadataQuery) => {
+    mutationFn: async (query) => {
       const resp = await server.api.misc["url-metadata"].get({
-        query: { url: data.url },
+        query,
       });
       if (resp.error) {
         throw resp.error;

@@ -1,11 +1,8 @@
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import {
   PROFILE_PICTURE_FILE_TYPES,
-  profilePictureBodySchema,
-  profilePictureOkSchema,
-  profileResponseSchema,
-  profilesPatchBodySchema,
-  profilesPatchNotFoundErrorSchema,
+  patchProfile,
+  uploadPicture,
 } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
@@ -40,11 +37,7 @@ export const profiles = new Elysia({
       return ctx.status(200, profile);
     },
     {
-      body: profilesPatchBodySchema,
-      response: {
-        404: profilesPatchNotFoundErrorSchema,
-        200: profileResponseSchema,
-      },
+      ...patchProfile,
       detail: {
         description: "Update the current user's profile (name and bio).",
       },
@@ -101,8 +94,9 @@ export const profiles = new Elysia({
       return ctx.status(200, "Profile picture updated");
     },
     {
+      ...uploadPicture,
       body: z.object({
-        file: profilePictureBodySchema.shape.file.refine(
+        file: uploadPicture.body.shape.file.refine(
           (file) =>
             fileType(file, PROFILE_PICTURE_FILE_TYPES).catch(() => false),
           {
@@ -110,9 +104,6 @@ export const profiles = new Elysia({
           },
         ),
       }),
-      response: {
-        200: profilePictureOkSchema,
-      },
       detail: {
         description: "Upload and set the user's profile picture.",
       },

@@ -1,4 +1,6 @@
 import z from "zod";
+import { timestamps } from "../common";
+import { zDate } from "../zdate";
 
 export const userAgentSchema = z.object({
   ua: z.string(),
@@ -93,3 +95,13 @@ export const userAgentSchema = z.object({
 });
 
 export type UserAgentData = z.infer<typeof userAgentSchema>;
+
+export const sessionSchema = z.object({
+  sessionId: z.string(),
+  userId: z.uuidv7(),
+  uaData: userAgentSchema,
+  createdAt: timestamps.createdAt,
+  lastUsedAt: zDate,
+});
+
+export type Session = z.infer<typeof sessionSchema>;

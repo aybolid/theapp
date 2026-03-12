@@ -5,19 +5,15 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import type {
-  F1DriverChampionshipStandings,
-  F1Drivers,
-  F1Session,
-  F1SessionResults,
-  F1Sessions,
-  GetSessionByKeyParams,
-  GetSessionDriversParams,
-  GetSessionResultsParams,
+  getF1Session,
+  getF1SessionDrivers,
+  getF1SessionResults,
 } from "@theapp/schemas";
+import type z from "zod";
 import { server } from "../api";
 
 export const f1SessionsQueryOptions = queryOptions<
-  F1Sessions,
+  Treaty.Data<typeof server.api.f1.sessions.get>,
   Treaty.Error<typeof server.api.f1.sessions.get>
 >({
   queryKey: ["f1", "sessions"],
@@ -34,7 +30,7 @@ export const f1SessionsQueryOptions = queryOptions<
 export function useF1SessionsSuspenseQuery(
   options?: Omit<
     UseSuspenseQueryOptions<
-      F1Sessions,
+      Treaty.Data<typeof server.api.f1.sessions.get>,
       Treaty.Error<typeof server.api.f1.sessions.get>
     >,
     "queryFn" | "queryKey"
@@ -46,9 +42,11 @@ export function useF1SessionsSuspenseQuery(
   });
 }
 
-export function f1SessionByKeyQueryOptions(params: GetSessionByKeyParams) {
+export function f1SessionByKeyQueryOptions(
+  params: z.infer<typeof getF1Session.params>,
+) {
   return queryOptions<
-    F1Session,
+    Treaty.Data<ReturnType<typeof server.api.f1.sessions>["get"]>,
     Treaty.Error<ReturnType<typeof server.api.f1.sessions>["get"]>
   >({
     queryKey: ["f1", "session", params],
@@ -64,10 +62,10 @@ export function f1SessionByKeyQueryOptions(params: GetSessionByKeyParams) {
 }
 
 export function useF1SessionByKeySuspenseQuery(
-  params: GetSessionByKeyParams,
+  params: z.infer<typeof getF1Session.params>,
   options?: Omit<
     UseSuspenseQueryOptions<
-      F1Session,
+      Treaty.Data<ReturnType<typeof server.api.f1.sessions>["get"]>,
       Treaty.Error<ReturnType<typeof server.api.f1.sessions>["get"]>
     >,
     "queryFn" | "queryKey"
@@ -79,9 +77,11 @@ export function useF1SessionByKeySuspenseQuery(
   });
 }
 
-export function f1SessionDriversQueryOptions(params: GetSessionDriversParams) {
+export function f1SessionDriversQueryOptions(
+  params: z.infer<typeof getF1SessionDrivers.params>,
+) {
   return queryOptions<
-    F1Drivers,
+    Treaty.Data<ReturnType<typeof server.api.f1.sessions>["drivers"]["get"]>,
     Treaty.Error<ReturnType<typeof server.api.f1.sessions>["drivers"]["get"]>
   >({
     queryKey: ["f1", "session", "drivers", params],
@@ -97,10 +97,10 @@ export function f1SessionDriversQueryOptions(params: GetSessionDriversParams) {
 }
 
 export function useF1SessionDriversSuspenseQuery(
-  params: GetSessionDriversParams,
+  params: z.infer<typeof getF1SessionDrivers.params>,
   options?: Omit<
     UseSuspenseQueryOptions<
-      F1Drivers,
+      Treaty.Data<ReturnType<typeof server.api.f1.sessions>["drivers"]["get"]>,
       Treaty.Error<ReturnType<typeof server.api.f1.sessions>["drivers"]["get"]>
     >,
     "queryFn" | "queryKey"
@@ -112,9 +112,11 @@ export function useF1SessionDriversSuspenseQuery(
   });
 }
 
-export function f1SessionResultsQueryOptions(params: GetSessionResultsParams) {
+export function f1SessionResultsQueryOptions(
+  params: z.infer<typeof getF1SessionResults.params>,
+) {
   return queryOptions<
-    F1SessionResults,
+    Treaty.Data<ReturnType<typeof server.api.f1.sessions>["results"]["get"]>,
     Treaty.Error<ReturnType<typeof server.api.f1.sessions>["results"]["get"]>
   >({
     queryKey: ["f1", "session", "results", params],
@@ -130,10 +132,10 @@ export function f1SessionResultsQueryOptions(params: GetSessionResultsParams) {
 }
 
 export function useF1SessionResultsSuspenseQuery(
-  params: GetSessionResultsParams,
+  params: z.infer<typeof getF1SessionResults.params>,
   options?: Omit<
     UseSuspenseQueryOptions<
-      F1SessionResults,
+      Treaty.Data<ReturnType<typeof server.api.f1.sessions>["results"]["get"]>,
       Treaty.Error<ReturnType<typeof server.api.f1.sessions>["results"]["get"]>
     >,
     "queryFn" | "queryKey"
@@ -146,7 +148,7 @@ export function useF1SessionResultsSuspenseQuery(
 }
 
 export const f1DriverChampionshipStandingsQueryOptions = queryOptions<
-  F1DriverChampionshipStandings,
+  Treaty.Data<typeof server.api.f1.championship.drivers.get>,
   Treaty.Error<typeof server.api.f1.championship.drivers.get>
 >({
   queryKey: ["f1", "championship", "drivers"],
@@ -163,7 +165,7 @@ export const f1DriverChampionshipStandingsQueryOptions = queryOptions<
 export function useF1DriverChampionshipStandingsSuspenseQuery(
   options?: Omit<
     UseSuspenseQueryOptions<
-      F1DriverChampionshipStandings,
+      Treaty.Data<typeof server.api.f1.championship.drivers.get>,
       Treaty.Error<typeof server.api.f1.championship.drivers.get>
     >,
     "queryFn" | "queryKey"

@@ -1,7 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { updateUserAccessBodySchema } from "@theapp/schemas";
-import type { AccessResponse } from "@theapp/schemas/src/accesses";
+import { type Access, patchUserAccess } from "@theapp/schemas";
 import { Button } from "@theapp/ui/components/button";
 import {
   Dialog,
@@ -38,14 +37,14 @@ import z from "zod";
 type DialogTriggerProps = ComponentProps<typeof DialogTrigger>;
 
 const schema = z.object({
-  admin: updateUserAccessBodySchema.shape.admin.nonoptional(),
-  wishes: updateUserAccessBodySchema.shape.wishes.nonoptional(),
-  f1: updateUserAccessBodySchema.shape.f1.nonoptional(),
+  admin: patchUserAccess.body.shape.admin.nonoptional(),
+  wishes: patchUserAccess.body.shape.wishes.nonoptional(),
+  f1: patchUserAccess.body.shape.f1.nonoptional(),
 });
 
 export const EditAccessDialog: FC<{
   isMe: boolean;
-  access: AccessResponse;
+  access: Access;
   render: NonNullable<DialogTriggerProps["render"]>;
   nativeButton?: DialogTriggerProps["nativeButton"];
 }> = ({ render, nativeButton, access, isMe }) => {

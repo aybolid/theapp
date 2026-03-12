@@ -6,19 +6,12 @@ import {
   useMutation,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import type {
-  SigninBody,
-  SigninOk,
-  SignoutOk,
-  SignoutQuery,
-  SignupBody,
-  SignupCreated,
-  UserWithAccessResponse,
-} from "@theapp/schemas";
+import type { signin, signout, signup } from "@theapp/schemas";
+import type z from "zod";
 import { server } from "../api";
 
 export const meQueryOptions = queryOptions<
-  UserWithAccessResponse,
+  Treaty.Data<typeof server.api.auth.me.get>,
   Treaty.Error<typeof server.api.auth.me.get>
 >({
   queryKey: ["me"],
@@ -35,7 +28,7 @@ export const meQueryOptions = queryOptions<
 export function useMeSuspenseQuery(
   options?: Omit<
     UseSuspenseQueryOptions<
-      UserWithAccessResponse,
+      Treaty.Data<typeof server.api.auth.me.get>,
       Treaty.Error<typeof server.api.auth.me.get>
     >,
     "queryFn" | "queryKey"
@@ -50,16 +43,16 @@ export function useMeSuspenseQuery(
 export function useSignupMutation(
   options?: Omit<
     UseMutationOptions<
-      SignupCreated,
+      Treaty.Data<typeof server.api.auth.signup.post>,
       Treaty.Error<typeof server.api.auth.signup.post>,
-      SignupBody
+      z.infer<typeof signup.body>
     >,
     "mutationKey" | "mutationFn"
   >,
 ) {
   return useMutation({
     mutationKey: ["signup"],
-    mutationFn: async (data: SignupBody) => {
+    mutationFn: async (data) => {
       const resp = await server.api.auth.signup.post(data);
       if (resp.error) {
         throw resp.error;
@@ -74,16 +67,16 @@ export function useSignupMutation(
 export function useSigninMutation(
   options?: Omit<
     UseMutationOptions<
-      SigninOk,
+      Treaty.Data<typeof server.api.auth.signin.post>,
       Treaty.Error<typeof server.api.auth.signin.post>,
-      SigninBody
+      z.infer<typeof signin.body>
     >,
     "mutationKey" | "mutationFn"
   >,
 ) {
   return useMutation({
     mutationKey: ["signin"],
-    mutationFn: async (data: SigninBody) => {
+    mutationFn: async (data) => {
       const resp = await server.api.auth.signin.post(data);
       if (resp.error) {
         throw resp.error;
@@ -98,17 +91,17 @@ export function useSigninMutation(
 export function useSignoutMutation(
   options?: Omit<
     UseMutationOptions<
-      SignoutOk,
-      Treaty.Error<typeof server.api.auth.signout.post>,
-      SignoutQuery | undefined
+      Treaty.Data<typeof server.api.auth.signout.delete>,
+      Treaty.Error<typeof server.api.auth.signout.delete>,
+      z.infer<typeof signout.query>
     >,
     "mutationKey" | "mutationFn"
   >,
 ) {
   return useMutation({
     mutationKey: ["signout"],
-    mutationFn: async (data: SignoutQuery) => {
-      const resp = await server.api.auth.signout.post(undefined, {
+    mutationFn: async (data) => {
+      const resp = await server.api.auth.signout.delete({
         query: data,
       });
       if (resp.error) {
@@ -124,8 +117,8 @@ export function useSignoutMutation(
 export function useSignoutAllMutation(
   options?: Omit<
     UseMutationOptions<
-      SignoutOk,
-      Treaty.Error<typeof server.api.auth.signout.all.post>
+      Treaty.Data<typeof server.api.auth.signout.all.delete>,
+      Treaty.Error<typeof server.api.auth.signout.all.delete>
     >,
     "mutationKey" | "mutationFn"
   >,
@@ -133,7 +126,7 @@ export function useSignoutAllMutation(
   return useMutation({
     mutationKey: ["signout", "all"],
     mutationFn: async () => {
-      const resp = await server.api.auth.signout.all.post();
+      const resp = await server.api.auth.signout.all.delete();
       if (resp.error) {
         throw resp.error;
       } else {

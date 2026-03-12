@@ -1,6 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { notFound } from "@tanstack/react-router";
-import type { AccessKeys } from "../components/access-guard";
+import type { AccessKey } from "@theapp/schemas";
 import { meQueryOptions } from "./query/auth";
 
 export async function copyToClipboard(
@@ -76,7 +76,7 @@ export function countryCodeEmoji(cc: string) {
 
 export async function beforeLoadAccessGuard(
   queryClient: QueryClient,
-  access: AccessKeys,
+  access: AccessKey[],
 ) {
   const user =
     queryClient.getQueryData(meQueryOptions.queryKey) ??

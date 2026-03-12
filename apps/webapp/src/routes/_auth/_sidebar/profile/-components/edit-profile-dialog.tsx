@@ -1,9 +1,9 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  MAX_BIO_LEN_AFTER_TRIM,
-  type ProfileResponse,
-  profilesPatchBodySchema,
+  MAX_PROFILE_BIO_LEN_AFTER_TRIM,
+  type Profile,
+  patchProfile,
 } from "@theapp/schemas";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -42,12 +42,12 @@ import z from "zod";
 type DialogTriggerProps = ComponentProps<typeof DialogTrigger>;
 
 const schema = z.object({
-  name: profilesPatchBodySchema.shape.name.nonoptional(),
-  bio: profilesPatchBodySchema.shape.bio.nonoptional(),
+  name: patchProfile.body.shape.name.nonoptional(),
+  bio: patchProfile.body.shape.bio.nonoptional(),
 });
 
 export const EditProfileDialog: FC<{
-  profile: ProfileResponse;
+  profile: Profile;
   render: NonNullable<DialogTriggerProps["render"]>;
   nativeButton?: DialogTriggerProps["nativeButton"];
 }> = ({ render, nativeButton, profile }) => {
@@ -172,10 +172,11 @@ export const EditProfileDialog: FC<{
                         <InputGroupText
                           className={cn("font-mono text-xs", {
                             "text-destructive":
-                              trimmedValue.length > MAX_BIO_LEN_AFTER_TRIM,
+                              trimmedValue.length >
+                              MAX_PROFILE_BIO_LEN_AFTER_TRIM,
                           })}
                         >
-                          {trimmedValue.length}/{MAX_BIO_LEN_AFTER_TRIM}
+                          {trimmedValue.length}/{MAX_PROFILE_BIO_LEN_AFTER_TRIM}
                         </InputGroupText>
                       </InputGroupAddon>
                     </InputGroup>

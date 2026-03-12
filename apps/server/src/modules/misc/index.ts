@@ -1,4 +1,4 @@
-import { getUrlMetadataQuerySchema, urlMetadataSchema } from "@theapp/schemas";
+import { getUrlMetadata } from "@theapp/schemas";
 import {
   cacheUrlMetadata,
   getCachedUrlMetadata,
@@ -45,8 +45,7 @@ export const misc = new Elysia({
       return ctx.status(200, metadata);
     },
     {
-      query: getUrlMetadataQuerySchema,
-      response: { 200: urlMetadataSchema },
+      ...getUrlMetadata,
       detail: {
         description:
           "Fetch metadata (title, description, og:image) from a URL.",

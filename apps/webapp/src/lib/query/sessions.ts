@@ -4,11 +4,10 @@ import {
   type UseSuspenseQueryOptions,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import type { SessionsResponse } from "@theapp/schemas";
 import { server } from "../api";
 
 export const sessionsQueryOptions = queryOptions<
-  SessionsResponse,
+  Treaty.Data<typeof server.api.auth.sessions.get>,
   Treaty.Error<typeof server.api.auth.sessions.get>
 >({
   queryKey: ["sessions"],
@@ -25,7 +24,7 @@ export const sessionsQueryOptions = queryOptions<
 export function useSessionsSuspenseQuery(
   options?: Omit<
     UseSuspenseQueryOptions<
-      SessionsResponse,
+      Treaty.Data<typeof server.api.auth.sessions.get>,
       Treaty.Error<typeof server.api.auth.sessions.get>
     >,
     "queryFn" | "queryKey"

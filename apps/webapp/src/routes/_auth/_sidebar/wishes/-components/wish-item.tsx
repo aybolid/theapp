@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import type { WishResponse } from "@theapp/schemas";
+import type { WishWithUsers } from "@theapp/schemas";
 import { Badge } from "@theapp/ui/components/badge";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -34,11 +34,11 @@ import type { FC } from "react";
 import { WishActionsMenu } from "./wish-actions-menu";
 
 export const WishItem: FC<{
-  wish: WishResponse;
+  wish: WishWithUsers;
   isOwnedByMe: boolean;
   isReservedByMe: boolean;
 }> = ({ wish, isOwnedByMe, isReservedByMe }) => {
-  const metadataQuery = useUrlMetadataQuery(wish.link);
+  const metadataQuery = useUrlMetadataQuery({ url: wish.link });
 
   const banner = metadataQuery.data?.banner ?? "";
 
@@ -51,9 +51,8 @@ export const WishItem: FC<{
 
   const updateReservationMutation = useUpdateWishReservationMutation({
     onSuccess: (wish) => {
-      queryClient.setQueryData<WishResponse[]>(
-        wishesQueryOptions.queryKey,
-        (prev) => prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
+      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+        prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
       );
       queryClient.invalidateQueries({
         queryKey: wishesQueryOptions.queryKey,

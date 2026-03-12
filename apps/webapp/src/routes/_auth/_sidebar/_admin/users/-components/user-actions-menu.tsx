@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import type { UserWithAccessResponse } from "@theapp/schemas";
+import type { UserWithProfileAndAccess } from "@theapp/schemas";
 import { Badge } from "@theapp/ui/components/badge";
 import {
   DropdownMenu,
@@ -24,7 +24,7 @@ const LazyEditAccessDialog = lazy(() =>
 type DropdownMenuTriggerProps = ComponentProps<typeof DropdownMenuTrigger>;
 
 export const UserActionsMenu: FC<{
-  user: UserWithAccessResponse;
+  user: UserWithProfileAndAccess;
   isMe: boolean;
   render: NonNullable<DropdownMenuTriggerProps["render"]>;
   nativeButton?: DropdownMenuTriggerProps["nativeButton"];

@@ -12,7 +12,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import type { UserResponse, WishResponse } from "@theapp/schemas";
+import type { UserWithProfile, WishWithUsers } from "@theapp/schemas";
 import {
   Alert,
   AlertDescription,
@@ -118,7 +118,7 @@ export const Route = createFileRoute("/_auth/_sidebar/wishes")({
   errorComponent: ErrorComponent,
 });
 
-type WishTableEntry = WishResponse & {
+type WishTableEntry = WishWithUsers & {
   isOwnedByMe: boolean;
   isReservedByMe: boolean;
 };
@@ -144,7 +144,7 @@ function RouteComponent() {
   );
 
   const owners = useMemo(() => {
-    const map: Record<string, UserResponse> = {};
+    const map: Record<string, UserWithProfile> = {};
     for (const wish of data) {
       map[wish.owner.userId] = wish.owner;
     }
@@ -152,7 +152,7 @@ function RouteComponent() {
   }, [data]);
 
   const reservers = useMemo(() => {
-    const map: Record<string, UserResponse> = {};
+    const map: Record<string, UserWithProfile> = {};
     for (const wish of data) {
       if (!wish.reserver) continue;
       map[wish.reserver.userId] = wish.reserver;
@@ -671,9 +671,8 @@ const COLUMNS = [
 
       const updateReservationMutation = useUpdateWishReservationMutation({
         onSuccess: (wish) => {
-          queryClient.setQueryData<WishResponse[]>(
-            wishesQueryOptions.queryKey,
-            (prev) => prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
+          queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+            prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
           );
           queryClient.invalidateQueries({
             queryKey: wishesQueryOptions.queryKey,

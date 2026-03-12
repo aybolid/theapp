@@ -1,4 +1,4 @@
-import type { AccessResponse } from "@theapp/schemas/src/accesses";
+import type { AccessMap } from "@theapp/schemas";
 import { type JWTVerifyResult, jwtVerify, SignJWT } from "jose";
 
 /** Human readable alphabet (a-z, 0-9 without l, o, 0, 1 to avoid confusion) */
@@ -8,11 +8,6 @@ const SECRET_HASH_ALGORITHM: AlgorithmIdentifier = "SHA-256";
 const PASSWORD_ALGORITHM = "argon2id";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
-
-export type AccessMap = Omit<
-  AccessResponse,
-  "userId" | "accessId" | "createdAt" | "updatedAt"
->;
 
 export function signAuthJwt(
   payload: {

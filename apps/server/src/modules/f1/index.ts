@@ -1,13 +1,9 @@
 import {
-  f1DriverChampionshipStandingsSchema,
-  f1DriversSchema,
-  f1SessionResults,
-  f1SessionSchema,
-  f1SessionsSchema,
-  getSessionByKeyNotFoundErrorSchema,
-  getSessionByKeyParamsSchema,
-  getSessionDriversParamsSchema,
-  getSessionResultsParamsSchema,
+  getF1DriverChampionshipStandings,
+  getF1Session,
+  getF1SessionDrivers,
+  getF1SessionResults,
+  getF1Sessions,
 } from "@theapp/schemas";
 import {
   fetchF1DriverChampionshipStandings,
@@ -33,9 +29,7 @@ export const f1 = new Elysia({
       return ctx.status(200, data);
     },
     {
-      response: {
-        200: f1DriverChampionshipStandingsSchema,
-      },
+      ...getF1DriverChampionshipStandings,
       detail: {
         description:
           "Get the driver championship standings for the current season.",
@@ -50,11 +44,7 @@ export const f1 = new Elysia({
       return ctx.status(200, session);
     },
     {
-      params: getSessionByKeyParamsSchema,
-      response: {
-        404: getSessionByKeyNotFoundErrorSchema,
-        200: f1SessionSchema,
-      },
+      ...getF1Session,
       detail: {
         description: "Get an F1 session by its key.",
       },
@@ -67,10 +57,7 @@ export const f1 = new Elysia({
       return ctx.status(200, drivers);
     },
     {
-      params: getSessionDriversParamsSchema,
-      response: {
-        200: f1DriversSchema,
-      },
+      ...getF1SessionDrivers,
       detail: {
         description:
           "Get drivers who participated in the session with the given session key.",
@@ -84,10 +71,7 @@ export const f1 = new Elysia({
       return ctx.status(200, results);
     },
     {
-      params: getSessionResultsParamsSchema,
-      response: {
-        200: f1SessionResults,
-      },
+      ...getF1SessionResults,
       detail: {
         description: "Get results for the session with the given session key.",
       },
@@ -100,9 +84,7 @@ export const f1 = new Elysia({
       return ctx.status(200, sessions);
     },
     {
-      response: {
-        200: f1SessionsSchema,
-      },
+      ...getF1Sessions,
       detail: {
         description: "Get F1 sessions for the current year.",
       },

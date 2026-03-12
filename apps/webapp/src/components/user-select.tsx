@@ -1,4 +1,4 @@
-import type { UserResponse } from "@theapp/schemas";
+import type { UserWithProfile } from "@theapp/schemas";
 import {
   Combobox,
   ComboboxContent,
@@ -18,9 +18,9 @@ import { normalize } from "../lib/utils";
 import { UserAvatar } from "./user-avatar";
 
 export const UserSelect: FC<{
-  users: UserResponse[];
+  users: UserWithProfile[];
   value?: string;
-  onValueChange?: (user: UserResponse | null) => void;
+  onValueChange?: (user: UserWithProfile | null) => void;
 }> = ({ users, value, onValueChange }) => {
   const valueUser = users.find((user) => user.userId === value) ?? null;
 
@@ -32,8 +32,8 @@ export const UserSelect: FC<{
       value={valueUser}
       onValueChange={onValueChange}
       items={users}
-      itemToStringLabel={(user: UserResponse) => user.profile.name}
-      itemToStringValue={(user: UserResponse) => user.userId}
+      itemToStringLabel={(user: UserWithProfile) => user.profile.name}
+      itemToStringValue={(user: UserWithProfile) => user.userId}
       filter={(user, needle) => {
         needle = normalize(needle);
         const nameMatches = normalize(user.profile.name).includes(needle);
@@ -49,7 +49,7 @@ export const UserSelect: FC<{
       <ComboboxContent>
         <ComboboxEmpty>No users found.</ComboboxEmpty>
         <ComboboxList>
-          {(user: UserResponse) => (
+          {(user: UserWithProfile) => (
             <ComboboxItem key={user.userId} value={user}>
               <Item className="flex-nowrap p-1">
                 <UserAvatar user={user} />

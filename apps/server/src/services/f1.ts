@@ -1,6 +1,6 @@
 import type {
   F1Driver,
-  F1DriverChampionshipStandings,
+  F1DriverChampionshipStanding,
   F1Session,
   F1SessionResult,
 } from "@theapp/schemas";
@@ -66,8 +66,10 @@ export async function fetchF1SessionResults(
   );
 }
 
-export async function fetchF1DriverChampionshipStandings(): Promise<F1DriverChampionshipStandings> {
-  return fetchF1Api<F1DriverChampionshipStandings>(
+export async function fetchF1DriverChampionshipStandings(): Promise<
+  F1DriverChampionshipStanding[]
+> {
+  return fetchF1Api<F1DriverChampionshipStanding[]>(
     "/v1/championship_drivers?session_key=latest",
   );
 }

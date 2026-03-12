@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import type { WishResponse } from "@theapp/schemas";
+import type { WishWithUsers } from "@theapp/schemas";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,7 +39,7 @@ const LazyEditWishDialog = lazy(() =>
 );
 
 export const WishActionsMenu: FC<{
-  wish: WishResponse;
+  wish: WishWithUsers;
   isReservedByMe: boolean;
   isOwnedByMe: boolean;
   render: NonNullable<DropdownMenuTriggerProps["render"]>;
@@ -49,9 +49,8 @@ export const WishActionsMenu: FC<{
 
   const deleteMutation = useDeleteWishMutation({
     onSuccess: (_, { wishId }) => {
-      queryClient.setQueryData<WishResponse[]>(
-        wishesQueryOptions.queryKey,
-        (prev) => prev?.filter((w) => w.wishId !== wishId),
+      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+        prev?.filter((w) => w.wishId !== wishId),
       );
       queryClient.invalidateQueries({
         queryKey: wishesQueryOptions.queryKey,
@@ -64,9 +63,8 @@ export const WishActionsMenu: FC<{
 
   const updateReservationMutation = useUpdateWishReservationMutation({
     onSuccess: (wish) => {
-      queryClient.setQueryData<WishResponse[]>(
-        wishesQueryOptions.queryKey,
-        (prev) => prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
+      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+        prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
       );
       queryClient.invalidateQueries({
         queryKey: wishesQueryOptions.queryKey,
@@ -77,9 +75,8 @@ export const WishActionsMenu: FC<{
 
   const updateMutation = useUpdateWishMutation({
     onSuccess: (wish) => {
-      queryClient.setQueryData<WishResponse[]>(
-        wishesQueryOptions.queryKey,
-        (prev) => prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
+      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+        prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
       );
       queryClient.invalidateQueries({ queryKey: wishesQueryOptions.queryKey });
     },

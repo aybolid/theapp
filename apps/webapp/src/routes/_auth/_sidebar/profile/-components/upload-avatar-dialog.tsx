@@ -1,9 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  PROFILE_PICTURE_FILE_TYPES,
-  profilePictureBodySchema,
-} from "@theapp/schemas";
+import { PROFILE_PICTURE_FILE_TYPES, uploadPicture } from "@theapp/schemas";
 import {
   Avatar,
   AvatarFallback,
@@ -88,7 +85,7 @@ export const UploadAvatarDialog: FC<{
     },
     validators: {
       onSubmit: z.object({
-        file: profilePictureBodySchema.shape.file
+        file: uploadPicture.body.shape.file
           .nullable()
           .refine((file) => file !== null, { message: "File is required" }),
       }),

@@ -1,4 +1,4 @@
-import type { AccessResponse } from "@theapp/schemas/src/accesses";
+import type { AccessKey } from "@theapp/schemas";
 import {
   type ComponentPropsWithRef,
   type FC,
@@ -9,13 +9,8 @@ import {
 import { ErrorBoundary } from "react-error-boundary";
 import { useMeSuspenseQuery } from "../lib/query/auth";
 
-export type AccessKeys = (keyof Omit<
-  AccessResponse,
-  "userId" | "accessId" | "createdAt" | "updatedAt"
->)[];
-
 export const AccessGuard: FC<
-  { access: AccessKeys } & ComponentPropsWithRef<typeof Suspense>
+  { access: AccessKey[] } & ComponentPropsWithRef<typeof Suspense>
 > = ({ children, access, ...props }) => {
   return (
     <ErrorBoundary fallback={props.fallback}>
@@ -29,7 +24,7 @@ export const AccessGuard: FC<
 };
 
 const AccessGuardImpl: FC<
-  PropsWithChildren<{ fallback?: ReactNode; access: AccessKeys }>
+  PropsWithChildren<{ fallback?: ReactNode; access: AccessKey[] }>
 > = ({ children, fallback, access }) => {
   const meQuery = useMeSuspenseQuery();
 

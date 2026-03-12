@@ -1,5 +1,5 @@
 import cron, { Patterns } from "@elysiajs/cron";
-import { sessionsResponseSchema } from "@theapp/schemas";
+import { getSessions } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
 import { lt } from "drizzle-orm";
@@ -38,9 +38,7 @@ export const sessions = new Elysia({
       return ctx.status(200, markedSessions);
     },
     {
-      response: {
-        200: sessionsResponseSchema,
-      },
+      ...getSessions,
       detail: {
         description: "Get all active sessions for the current user.",
       },

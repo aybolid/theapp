@@ -1,14 +1,4 @@
-import {
-  getUsersResponseSchema,
-  updateUserAccessBadRequestSchema,
-  updateUserAccessBodySchema,
-  updateUserAccessNotFoundErrorSchema,
-  updateUserAccessParamsSchema,
-  updateUserBodySchema,
-  updateUserNotFoundErrorSchema,
-  updateUserParamsSchema,
-  userWithAccessSchema,
-} from "@theapp/schemas";
+import { getUsers, patchUser, patchUserAccess } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -31,7 +21,7 @@ export const usersAdmin = new Elysia({
       return ctx.status(200, users);
     },
     {
-      response: { 200: getUsersResponseSchema },
+      ...getUsers,
       detail: {
         description: "Get all users with their profiles. Admin only.",
       },
@@ -63,12 +53,7 @@ export const usersAdmin = new Elysia({
       });
     },
     {
-      params: updateUserParamsSchema,
-      body: updateUserBodySchema,
-      response: {
-        200: userWithAccessSchema,
-        404: updateUserNotFoundErrorSchema,
-      },
+      ...patchUser,
       detail: {
         description: "Update a user. Admin only.",
       },
@@ -103,13 +88,7 @@ export const usersAdmin = new Elysia({
       return ctx.status(200, { ...user, access: updatedAccess });
     },
     {
-      params: updateUserAccessParamsSchema,
-      body: updateUserAccessBodySchema,
-      response: {
-        200: userWithAccessSchema,
-        404: updateUserAccessNotFoundErrorSchema,
-        400: updateUserAccessBadRequestSchema,
-      },
+      ...patchUserAccess,
       detail: {
         description: "Update a user's access config. Admin only.",
       },

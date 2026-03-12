@@ -1,22 +1,9 @@
 import {
-  createWishBodySchema,
-  createWishUnauthorizedErrorSchema,
-  deleteWishByIdParamsSchema,
-  deleteWishForbiddenErrorSchema,
-  deleteWishNotFoundErrorSchema,
-  deleteWishOkResponseSchema,
-  getWishesResponseSchema,
-  patchWishBodySchema,
-  patchWishByIdParamsSchema,
-  patchWishForbiddenErrorSchema,
-  patchWishNotFoundErrorSchema,
-  reserveWishByIdBadRequestErrorSchema,
-  reserveWishByIdForbiddenErrorSchema,
-  reserveWishByIdNotFoundErrorSchema,
-  reserveWishByIdParamsSchema,
-  reserveWishByIdQuerySchema,
-  reserveWishByIdUnauthorizedErrorSchema,
-  wishResponseSchema,
+  deleteWish,
+  getWishes,
+  patchWish,
+  postWish,
+  reserveWish,
 } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
@@ -46,7 +33,7 @@ export const wishes = new Elysia({
       return ctx.status(200, wishes);
     },
     {
-      response: { 200: getWishesResponseSchema },
+      ...getWishes,
       detail: {
         description: "Get all wishes with owner and reserver populated.",
       },
@@ -81,11 +68,7 @@ export const wishes = new Elysia({
       });
     },
     {
-      body: createWishBodySchema,
-      response: {
-        201: wishResponseSchema,
-        401: createWishUnauthorizedErrorSchema,
-      },
+      ...postWish,
       detail: {
         description: "Create new wish with current user as owner.",
       },
@@ -114,12 +97,7 @@ export const wishes = new Elysia({
       return ctx.status(200, "Wish deleted");
     },
     {
-      params: deleteWishByIdParamsSchema,
-      response: {
-        404: deleteWishNotFoundErrorSchema,
-        403: deleteWishForbiddenErrorSchema,
-        200: deleteWishOkResponseSchema,
-      },
+      ...deleteWish,
       detail: {
         description:
           "Delete a wish by ID. Only the owner can delete their wish.",
@@ -168,13 +146,7 @@ export const wishes = new Elysia({
       });
     },
     {
-      params: patchWishByIdParamsSchema,
-      body: patchWishBodySchema,
-      response: {
-        404: patchWishNotFoundErrorSchema,
-        403: patchWishForbiddenErrorSchema,
-        200: wishResponseSchema,
-      },
+      ...patchWish,
       detail: {
         description: "Update wish by id. Must be owned by current user",
       },
@@ -250,15 +222,7 @@ export const wishes = new Elysia({
       });
     },
     {
-      params: reserveWishByIdParamsSchema,
-      query: reserveWishByIdQuerySchema,
-      response: {
-        200: wishResponseSchema,
-        404: reserveWishByIdNotFoundErrorSchema,
-        401: reserveWishByIdUnauthorizedErrorSchema,
-        403: reserveWishByIdForbiddenErrorSchema,
-        400: reserveWishByIdBadRequestErrorSchema,
-      },
+      ...reserveWish,
       detail: {
         description:
           "Reserve or unreserve a wish. Use `action=start` to reserve or `action=stop` to unreserve.",

@@ -1,4 +1,4 @@
-import type { UserResponse } from "@theapp/schemas";
+import type { UserWithProfile } from "@theapp/schemas";
 import {
   Avatar,
   AvatarFallback,
@@ -10,7 +10,7 @@ import type { ComponentPropsWithoutRef, FC } from "react";
 import { s3ObjectUrl } from "../lib/utils";
 
 export const UserAvatar: FC<
-  { user: UserResponse } & ComponentPropsWithoutRef<typeof Avatar>
+  { user: UserWithProfile } & ComponentPropsWithoutRef<typeof Avatar>
 > = ({ user, ...props }) => {
   return (
     <Avatar {...props}>

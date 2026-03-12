@@ -1,10 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  createWishBodySchema,
-  MAX_WISH_NOTE_LEN_AFTER_TRIM,
-  type WishResponse,
-} from "@theapp/schemas";
+import { MAX_WISH_NOTE_LEN_AFTER_TRIM, postWish } from "@theapp/schemas";
 import { Button } from "@theapp/ui/components/button";
 import {
   Dialog,
@@ -55,10 +51,10 @@ export const NewWishDialog: FC<{
 
   const createMutation = useCreateWishMutation({
     onSuccess: (wish) => {
-      queryClient.setQueryData<WishResponse[]>(
-        wishesQueryOptions.queryKey,
-        (prev) => [wish, ...(prev ?? [])],
-      );
+      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) => [
+        wish,
+        ...(prev ?? []),
+      ]);
       queryClient.invalidateQueries({ queryKey: wishesQueryOptions.queryKey });
       form.reset();
       setOpen(false);
@@ -94,7 +90,7 @@ export const NewWishDialog: FC<{
       link: "",
     },
     validators: {
-      onSubmit: createWishBodySchema,
+      onSubmit: postWish.body,
     },
     onSubmit: ({ value }) => createMutation.mutate(value),
   });

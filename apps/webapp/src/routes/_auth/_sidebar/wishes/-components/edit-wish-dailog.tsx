@@ -2,8 +2,8 @@ import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   MAX_WISH_NOTE_LEN_AFTER_TRIM,
-  patchWishBodySchema,
-  type WishResponse,
+  patchWish,
+  type WishWithUsers,
 } from "@theapp/schemas";
 import { Button } from "@theapp/ui/components/button";
 import {
@@ -44,13 +44,13 @@ import z from "zod";
 type DialogTriggerProps = ComponentProps<typeof DialogTrigger>;
 
 const schema = z.object({
-  name: patchWishBodySchema.shape.name.nonoptional(),
-  note: patchWishBodySchema.shape.note.nonoptional(),
-  isCompleted: patchWishBodySchema.shape.isCompleted.nonoptional(),
+  name: patchWish.body.shape.name.nonoptional(),
+  note: patchWish.body.shape.note.nonoptional(),
+  isCompleted: patchWish.body.shape.isCompleted.nonoptional(),
 });
 
 export const EditWishDialog: FC<{
-  wish: WishResponse;
+  wish: WishWithUsers;
   render: NonNullable<DialogTriggerProps["render"]>;
   nativeButton?: DialogTriggerProps["nativeButton"];
 }> = ({ render, nativeButton, wish }) => {
@@ -60,9 +60,8 @@ export const EditWishDialog: FC<{
 
   const updateMutation = useUpdateWishMutation({
     onSuccess: (wish) => {
-      queryClient.setQueryData<WishResponse[]>(
-        wishesQueryOptions.queryKey,
-        (prev) => prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
+      queryClient.setQueryData(wishesQueryOptions.queryKey, (prev) =>
+        prev?.map((w) => (w.wishId === wish.wishId ? wish : w)),
       );
       queryClient.invalidateQueries({ queryKey: wishesQueryOptions.queryKey });
       setOpen(false);

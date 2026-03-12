@@ -37,7 +37,7 @@ const LinkPreviewImpl: FC<
     render: NonNullable<ComponentProps<typeof GlimpseTrigger>["render"]>;
   } & ComponentPropsWithoutRef<typeof Glimpse>
 > = ({ url, render, ...props }) => {
-  const metadataQuery = useUrlMetadataSuspenseQuery(url);
+  const metadataQuery = useUrlMetadataSuspenseQuery({ url });
 
   return (
     <Glimpse {...props}>

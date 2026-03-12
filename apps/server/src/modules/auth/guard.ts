@@ -1,7 +1,7 @@
+import type { AccessKey, AccessMap } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
 import {
-  type AccessMap,
   constantTimeEqual,
   hashSecret,
   signAuthJwt,
@@ -22,7 +22,7 @@ const ACTIVITY_UPDATE_INTERVAL_SECONDS = 60 * 60;
 /** 1 minute */
 export const JWT_EXPIRATION_SECONDS = 60;
 
-export function authGuard(config?: { access?: (keyof AccessMap)[] }) {
+export function authGuard(config?: { access?: AccessKey[] }) {
   return new Elysia({ name: "auth-guard", seed: config })
     .derive(
       async (

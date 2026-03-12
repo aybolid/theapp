@@ -13,8 +13,6 @@ const timestamps = {
     .$onUpdate(() => new Date()),
 };
 
-export const userRoleEnum = pg.pgEnum("user_role", ["admin", "viewer"]);
-
 export const userStatusEnum = pg.pgEnum("user_status", ["active", "inactive"]);
 
 export const users = pg.pgTable("users", {
@@ -35,11 +33,8 @@ export const accesses = pg.pgTable("accesses", {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
-  /** Indicates if the user can access admin features */
   admin: pg.boolean().notNull().default(false),
-  /** Indicates if the user can access wishes app features */
   wishes: pg.boolean().notNull().default(false),
-  /** Indicates if the user can access f1 app features */
   f1: pg.boolean().notNull().default(true),
   ...timestamps,
 });

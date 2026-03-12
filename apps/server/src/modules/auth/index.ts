@@ -1,16 +1,4 @@
-import {
-  signinBadRequestSchema,
-  signinBodySchema,
-  signinOkSchema,
-  signoutOkSchema,
-  signoutQuerySchema,
-  signupBodySchema,
-  signupCreatedSchema,
-  singupBadRequestErrorSchema,
-  singupConflictErrorSchema,
-  userNotFoundErrorSchema,
-  userWithAccessSchema,
-} from "@theapp/schemas";
+import { me, signin, signout, signoutAll, signup } from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
 import {
@@ -88,12 +76,7 @@ export const auth = new Elysia({
       return ctx.status(201, "User created");
     },
     {
-      body: signupBodySchema,
-      response: {
-        409: singupConflictErrorSchema,
-        201: signupCreatedSchema,
-        400: singupBadRequestErrorSchema,
-      },
+      ...signup,
       detail: {
         description:
           "Sign up with a valid email and password. Creates a new user account that needs to be activated before it can be used.",
@@ -167,11 +150,10 @@ export const auth = new Elysia({
         secure: isProduction,
       });
 
-      return ctx.status(200, "User signed in");
+      return ctx.status(200, "Signed in");
     },
     {
-      body: signinBodySchema,
-      response: { 400: signinBadRequestSchema, 200: signinOkSchema },
+      ...signin,
       detail: {
         description:
           "Sign in with email and password. Only activated user can sign in. Returns session and auth tokens.",
@@ -194,13 +176,13 @@ export const auth = new Elysia({
       });
     },
     {
-      response: { 200: userWithAccessSchema, 404: userNotFoundErrorSchema },
+      ...me,
       detail: {
         description: "Get the currently authenticated user's profile.",
       },
     },
   )
-  .post(
+  .delete(
     "/signout",
     async (ctx) => {
       if (!ctx.query.sessionId || ctx.query.sessionId === ctx.sessionId) {
@@ -209,7 +191,7 @@ export const auth = new Elysia({
         await db
           .delete(schema.sessions)
           .where(eq(schema.sessions.sessionId, ctx.sessionId));
-        return ctx.status(200, "User signed out");
+        return ctx.status(200, "Signed out");
       }
 
       await db
@@ -221,18 +203,17 @@ export const auth = new Elysia({
           ),
         );
 
-      return ctx.status(200, "Session invalidated");
+      return ctx.status(200, "Signed out");
     },
     {
-      query: signoutQuerySchema,
-      response: { 200: signoutOkSchema },
+      ...signout,
       detail: {
         description:
           "Sign out the current session or, if `sessionId` is provided, the specified session.",
       },
     },
   )
-  .post(
+  .delete(
     "/signout/all",
     async (ctx) => {
       ctx.cookie.sessionToken?.remove();
@@ -240,10 +221,10 @@ export const auth = new Elysia({
       await db
         .delete(schema.sessions)
         .where(eq(schema.sessions.userId, ctx.userId));
-      return ctx.status(200, "User signed out");
+      return ctx.status(200, "Signed out all sessions");
     },
     {
-      response: { 200: signoutOkSchema },
+      ...signoutAll,
       detail: {
         description: "Sign out all sessions for the current user.",
       },

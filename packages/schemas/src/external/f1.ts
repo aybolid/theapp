@@ -1,5 +1,5 @@
 import z from "zod";
-import { zDate } from "./zdate";
+import { zDate } from "../zdate";
 
 export const f1SessionSchema = z.object({
   circuit_key: z.number(),
@@ -17,28 +17,8 @@ export const f1SessionSchema = z.object({
   session_type: z.string(),
   year: z.number(),
 });
+
 export type F1Session = z.infer<typeof f1SessionSchema>;
-
-export const f1SessionsSchema = z.array(f1SessionSchema);
-export type F1Sessions = z.infer<typeof f1SessionsSchema>;
-
-export const getSessionByKeyParamsSchema = z.object({
-  sessionKey: z.coerce.number(),
-});
-export type GetSessionByKeyParams = z.infer<typeof getSessionByKeyParamsSchema>;
-
-export const getSessionByKeyNotFoundErrorSchema =
-  z.literal("Session not found");
-export type GetSessionByKeyNotFoundError = z.infer<
-  typeof getSessionByKeyNotFoundErrorSchema
->;
-
-export const getSessionDriversParamsSchema = z.object({
-  sessionKey: z.coerce.number().or(z.literal("latest")),
-});
-export type GetSessionDriversParams = z.infer<
-  typeof getSessionDriversParamsSchema
->;
 
 export const f1DriverSchema = z.object({
   broadcast_name: z.string().nullable(),
@@ -53,17 +33,8 @@ export const f1DriverSchema = z.object({
   team_colour: z.string().nullable(),
   team_name: z.string().nullable(),
 });
+
 export type F1Driver = z.infer<typeof f1DriverSchema>;
-
-export const f1DriversSchema = z.array(f1DriverSchema);
-export type F1Drivers = z.infer<typeof f1DriversSchema>;
-
-export const getSessionResultsParamsSchema = z.object({
-  sessionKey: z.coerce.number(),
-});
-export type GetSessionResultsParams = z.infer<
-  typeof getSessionResultsParamsSchema
->;
 
 export const f1SessionResultSchema = z.object({
   dnf: z.boolean(),
@@ -98,9 +69,6 @@ export const f1SessionResultSchema = z.object({
 });
 export type F1SessionResult = z.infer<typeof f1SessionResultSchema>;
 
-export const f1SessionResults = z.array(f1SessionResultSchema);
-export type F1SessionResults = z.infer<typeof f1SessionResults>;
-
 export const f1DriverChampionshipStandingSchema = z.object({
   driver_number: z.number(),
   meeting_key: z.number(),
@@ -110,13 +78,7 @@ export const f1DriverChampionshipStandingSchema = z.object({
   position_start: z.number().nullable(),
   session_key: z.number(),
 });
+
 export type F1DriverChampionshipStanding = z.infer<
   typeof f1DriverChampionshipStandingSchema
->;
-
-export const f1DriverChampionshipStandingsSchema = z.array(
-  f1DriverChampionshipStandingSchema,
-);
-export type F1DriverChampionshipStandings = z.infer<
-  typeof f1DriverChampionshipStandingsSchema
 >;
