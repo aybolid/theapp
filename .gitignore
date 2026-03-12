@@ -14,5 +14,4 @@ tmp
 docker/volumes/garage
 docker/garage.toml
 docker/volumes/db
-docker/volumes/mailpit
 docker/volumes/caddy
