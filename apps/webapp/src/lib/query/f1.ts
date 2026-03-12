@@ -11,7 +11,9 @@ export const {
   queryOptions: f1SessionsQueryOptions,
   useQuery: useF1SessionsQuery,
   useSuspenseQuery: useF1SessionsSuspenseQuery,
-} = createQueries(["f1", "sessions"], () => server.api.f1.sessions.get());
+} = createQueries(["f1", "sessions"], () => server.api.f1.sessions.get(), {
+  staleTime: Infinity,
+});
 
 export const {
   queryOptions: f1SessionByKeyQueryOptions,
@@ -21,6 +23,7 @@ export const {
   ["f1", "session"],
   (params: z.infer<typeof getF1Session.params>) =>
     server.api.f1.sessions(params).get(),
+  { staleTime: Infinity },
 );
 
 export const {
@@ -31,6 +34,7 @@ export const {
   ["f1", "session", "drivers"],
   (params: z.infer<typeof getF1SessionDrivers.params>) =>
     server.api.f1.sessions(params).drivers.get(),
+  { staleTime: Infinity },
 );
 
 export const {
@@ -41,12 +45,15 @@ export const {
   ["f1", "session", "results"],
   (params: z.infer<typeof getF1SessionResults.params>) =>
     server.api.f1.sessions(params).results.get(),
+  { staleTime: Infinity },
 );
 
 export const {
   queryOptions: f1DriverChampionshipStandingsQueryOptions,
   useQuery: useF1DriverChampionshipStandingsQuery,
   useSuspenseQuery: useF1DriverChampionshipStandingsSuspenseQuery,
-} = createQueries(["f1", "championship", "drivers"], () =>
-  server.api.f1.championship.drivers.get(),
+} = createQueries(
+  ["f1", "championship", "drivers"],
+  () => server.api.f1.championship.drivers.get(),
+  { staleTime: Infinity },
 );

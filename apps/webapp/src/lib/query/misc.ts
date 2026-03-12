@@ -9,8 +9,11 @@ export const {
   queryOptions: urlMetadataQueryOptions,
   useQuery: useUrlMetadataQuery,
   useSuspenseQuery: useUrlMetadataSuspenseQuery,
-} = createQueries(["metadata"], (query: z.infer<typeof getUrlMetadata.query>) =>
-  server.api.misc["url-metadata"].get({ query }),
+} = createQueries(
+  ["metadata"],
+  (query: z.infer<typeof getUrlMetadata.query>) =>
+    server.api.misc["url-metadata"].get({ query }),
+  { staleTime: Infinity },
 );
 
 export function useGetUrlMetadataMutation(
