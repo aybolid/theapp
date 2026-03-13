@@ -1,14 +1,18 @@
 import { isProduction } from "elysia/error";
 import pino from "pino";
 
-export const logger = pino({
-  level: isProduction ? "info" : "debug",
-  transport: isProduction
-    ? undefined
+export const logger = pino(
+  isProduction
+    ? {
+        level: "info",
+      }
     : {
-        target: "pino-pretty",
-        options: {
-          colorize: true,
+        level: "debug",
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+          },
         },
       },
-});
+);

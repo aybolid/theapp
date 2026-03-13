@@ -1,22 +1,22 @@
 import openapi from "@elysiajs/openapi";
-import { auth } from "@theapp/server/modules/auth";
-import { profiles } from "@theapp/server/modules/profiles";
 import { Elysia } from "elysia";
 import { isProduction } from "elysia/error";
 import z from "zod";
+
 import { pool } from "./db";
 import { prepareDatabase } from "./db/prepare";
 import { checkEnv } from "./env";
+import { auth } from "./modules/auth";
 import { f1 } from "./modules/f1";
 import { misc } from "./modules/misc";
+import { profiles } from "./modules/profiles";
 import { users } from "./modules/users";
 import { wishes } from "./modules/wishes";
 import { logger } from "./utils/logger";
 
-checkEnv();
-
 const PORT = 3000;
 
+checkEnv();
 await prepareDatabase();
 
 const api = new Elysia({ prefix: "/api" })
@@ -29,34 +29,29 @@ const api = new Elysia({ prefix: "/api" })
 
 const app = new Elysia({ allowUnsafeValidationDetails: true })
   .on("stop", async () => {
-    logger.info("Closing database connection...");
+    logger.info("Server stopping. Closing database connections...");
     await pool.end();
-    logger.info("Database connection closed.");
+    logger.info("Database connection pool closed.");
     process.exit(0);
   })
   .onRequest(({ request }) => {
     logger.info(
       { method: request.method, url: request.url },
-      "Incoming request",
+      "Incoming request.",
     );
   })
   .onAfterResponse(({ request, set }) => {
     logger.info(
       { method: request.method, url: request.url, status: set.status },
-      "Response sent",
+      "Response sent.",
     );
   })
   .onError((ctx) => {
+    const logData = { code: ctx.code, error: ctx.error, url: ctx.request.url };
     if (typeof ctx.code !== "number" && ctx.code !== "VALIDATION") {
-      logger.error(
-        { code: ctx.code, error: ctx.error, url: ctx.request.url },
-        "Request failed",
-      );
+      logger.error(logData, "Request failed.");
     } else {
-      logger.debug(
-        { code: ctx.code, error: ctx.error, url: ctx.request.url },
-        "Request failed",
-      );
+      logger.debug(logData, "Request failed (expected).");
     }
   })
   .use(
@@ -69,9 +64,17 @@ const app = new Elysia({ allowUnsafeValidationDetails: true })
   .use(api)
   .listen(PORT);
 
-logger.info(`Server is running at ${app.server?.hostname}:${app.server?.port}`);
+logger.info(
+  `Server is running at ${app.server?.hostname}:${app.server?.port}.`,
+);
 
-process.on("SIGINT", app.stop);
-process.on("SIGTERM", app.stop);
+process.on("SIGINT", () => {
+  logger.info("Received SIGINT. Stopping...");
+  app.stop();
+});
+process.on("SIGTERM", () => {
+  logger.info("Received SIGTERM. Stopping...");
+  app.stop();
+});
 
 export type App = typeof app;

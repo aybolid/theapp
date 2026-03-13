@@ -1,43 +1,63 @@
 import type { AccessMap } from "@theapp/schemas";
-import { type JWTVerifyResult, jwtVerify, SignJWT } from "jose";
+import {
+  type JWTPayload,
+  type JWTVerifyResult,
+  jwtVerify,
+  SignJWT,
+} from "jose";
 
-/** Human readable alphabet (a-z, 0-9 without l, o, 0, 1 to avoid confusion) */
-const HUMAN_READABLE_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
-const SECRET_HASH_ALGORITHM: AlgorithmIdentifier = "SHA-256";
-
-const PASSWORD_ALGORITHM = "argon2id";
+/**
+ * Authentication JWT payload structure.
+ */
+export type AuthJwtPayload = JWTPayload & {
+  userId: string;
+  sessionId: string;
+  access: AccessMap;
+};
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+const JWT_ALGORITHM = "HS256";
+const PASSWORD_ALGORITHM = "argon2id";
+const SECRET_HASH_ALGORITHM: AlgorithmIdentifier = "SHA-256";
 
-export function signAuthJwt(
-  payload: {
-    userId: string;
-    sessionId: string;
-    access: AccessMap;
-  },
+/**
+ * Human readable alphabet (a-z, 0-9 without l, o, 0, 1 to avoid confusion).
+ */
+const HUMAN_READABLE_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
+
+/**
+ * Signs an authentication JWT.
+ */
+export async function signAuthJwt(
+  payload: AuthJwtPayload,
   expirationSeconds: number,
 ): Promise<string> {
   return new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime(Date.now() / 1000 + expirationSeconds)
+    .setProtectedHeader({ alg: JWT_ALGORITHM })
+    .setExpirationTime(Math.floor(Date.now() / 1000) + expirationSeconds)
     .setIssuedAt()
     .sign(JWT_SECRET);
 }
 
-export function verifyAuthJwt(token: string): Promise<
-  JWTVerifyResult<{
-    userId: string;
-    sessionId: string;
-    access: AccessMap;
-  }>
-> {
+/**
+ * Verifies an authentication JWT.
+ */
+export async function verifyAuthJwt(
+  token: string,
+): Promise<JWTVerifyResult<AuthJwtPayload>> {
   return jwtVerify(token, JWT_SECRET);
 }
 
+/**
+ * Hashes a password using Bun's native hashing utilities.
+ */
 export function hashPassword(password: string): Promise<string> {
   return Bun.password.hash(password, PASSWORD_ALGORITHM);
 }
 
+/**
+ * Verifies a password against its hash.
+ */
 export function verifyPassword(data: {
   hash: string;
   password: string;
@@ -45,20 +65,25 @@ export function verifyPassword(data: {
   return Bun.password.verify(data.password, data.hash, PASSWORD_ALGORITHM);
 }
 
+/**
+ * Generates a secure random string (~120 bits of entropy).
+ * Uses a human-readable alphabet to reduce ambiguity.
+ */
 export function generateSecureRandomString(): string {
-  // Generate 24 bytes = 192 bits of entropy.
-  // We're only going to use 5 bits per byte so the total entropy will be 192 * 5 / 8 = 120 bits
   const bytes = new Uint8Array(24);
   crypto.getRandomValues(bytes);
 
   let id = "";
   for (const byte of bytes) {
-    // >> 3 "removes" the right-most 3 bits of the byte
+    // 32 chars = 5 bits. byte >> 3 takes the 5 most significant bits.
     id += HUMAN_READABLE_ALPHABET[byte >> 3];
   }
   return id;
 }
 
+/**
+ * Hashes a secret value for storage or comparison.
+ */
 export async function hashSecret(secret: string): Promise<Uint8Array> {
   const secretBytes = new TextEncoder().encode(secret);
   const secretHashBuffer = await crypto.subtle.digest(
@@ -68,14 +93,16 @@ export async function hashSecret(secret: string): Promise<Uint8Array> {
   return new Uint8Array(secretHashBuffer);
 }
 
+/**
+ * Constant-time equality check to prevent timing attacks on sensitive data.
+ */
 export function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.byteLength !== b.byteLength) {
-    return false;
-  }
-  let c = 0;
+  if (a.byteLength !== b.byteLength) return false;
+
+  let result = 0;
   for (let i = 0; i < a.byteLength; i++) {
-    // biome-ignore lint/style/noNonNullAssertion: i is < a.byteLength, a and b length is equal
-    c |= a[i]! ^ b[i]!;
+    // biome-ignore lint/style/noNonNullAssertion: safe access within byteLength
+    result |= a[i]! ^ b[i]!;
   }
-  return c === 0;
+  return result === 0;
 }
