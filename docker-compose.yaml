@@ -3,10 +3,10 @@ services:
     env_file: ./docker/.env
     image: postgres:18.2
     container_name: theapp_db
-    restart: always
+    restart: unless-stopped
     shm_size: 128mb
     volumes:
-      - ./docker/volumes/db/data:/var/lib/postgresql
+      - ./docker/volumes:/var/lib/postgresql:Z,U
     ports:
       - 5432:5432
     healthcheck:
@@ -25,9 +25,9 @@ services:
       - 3902:3902
       - 3903:3903
     volumes:
-      - ./docker/garage.toml:/etc/garage.toml:ro
-      - ./docker/volumes/garage/meta:/tmp/meta
-      - ./docker/volumes/garage/data:/tmp/data
+      - ./docker/garage.toml:/etc/garage.toml:ro,Z
+      - ./docker/volumes:/tmp/meta:Z,U
+      - ./docker/volumes:/tmp/data:Z,U
     environment:
       RUST_LOG: info
 
@@ -76,12 +76,12 @@ services:
     container_name: theapp_caddy
     restart: unless-stopped
     ports:
-      - 80:80
-      - 443:443
+      - 8080:80
+      - 8443:443
     volumes:
-      - ./docker/Caddyfile:/etc/caddy/Caddyfile
-      - ./docker/volumes/caddy/data:/data
-      - ./docker/volumes/caddy/config:/config
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro,Z
+      - ./docker/volumes:/data:Z,U
+      - ./docker/volumes:/config:Z,U
     depends_on:
       - webapp
 
@@ -94,7 +94,7 @@ services:
     container_name: theapp_garage-ui
     restart: unless-stopped
     volumes:
-      - ./docker/garage.toml:/etc/garage.toml:ro
+      - ./docker/garage.toml:/etc/garage.toml:ro,Z
     ports:
       - 3909:3909
     environment:
