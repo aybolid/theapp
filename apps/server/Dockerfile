@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS pruner
+FROM docker.io/oven/bun:1 AS pruner
 WORKDIR /app
 
 RUN bun install -g turbo

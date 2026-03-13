@@ -1,12 +1,12 @@
 services:
   db:
     env_file: ./docker/.env
-    image: postgres:18.2
+    image: docker.io/postgres:18.2
     container_name: theapp_db
     restart: unless-stopped
     shm_size: 128mb
     volumes:
-      - ./docker/volumes:/var/lib/postgresql:Z,U
+      - ./docker/volumes/db:/var/lib/postgresql:Z,U
     ports:
       - 5432:5432
     healthcheck:
@@ -16,7 +16,7 @@ services:
       retries: 5
 
   garage:
-    image: dxflrs/garage:v2.2.0
+    image: docker.io/dxflrs/garage:v2.2.0
     container_name: theapp_garage
     restart: unless-stopped
     ports:
@@ -26,13 +26,13 @@ services:
       - 3903:3903
     volumes:
       - ./docker/garage.toml:/etc/garage.toml:ro,Z
-      - ./docker/volumes:/tmp/meta:Z,U
-      - ./docker/volumes:/tmp/data:Z,U
+      - ./docker/volumes/garage_meta:/tmp/meta:Z,U
+      - ./docker/volumes/garage_data:/tmp/data:Z,U
     environment:
       RUST_LOG: info
 
   valkey:
-    image: valkey/valkey
+    image: docker.io/valkey/valkey
     container_name: theapp_valkey
     restart: unless-stopped
     ports:
@@ -72,7 +72,7 @@ services:
     profiles:
       - prod
     env_file: ./docker/.env
-    image: caddy:latest
+    image: docker.io/caddy:latest
     container_name: theapp_caddy
     restart: unless-stopped
     ports:
@@ -80,8 +80,8 @@ services:
       - 8443:443
     volumes:
       - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro,Z
-      - ./docker/volumes:/data:Z,U
-      - ./docker/volumes:/config:Z,U
+      - ./docker/volumes/caddy_data:/data:Z,U
+      - ./docker/volumes/caddy_config:/config:Z,U
     depends_on:
       - webapp
 
@@ -90,7 +90,7 @@ services:
   garage_ui:
     profiles:
       - dev
-    image: khairul169/garage-webui:latest
+    image: docker.io/khairul169/garage-webui:latest
     container_name: theapp_garage-ui
     restart: unless-stopped
     volumes:

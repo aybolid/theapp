@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS pruner
+FROM docker.io/oven/bun:1 AS pruner
 WORKDIR /app
 
 RUN bun install -g turbo
@@ -21,7 +21,7 @@ COPY --from=pruner /app/out/full/ .
 WORKDIR /app/apps/webapp
 RUN bun run build
 
-FROM nginx:alpine
+FROM docker.io/nginx:alpine
 
 RUN printf "server { \n\
     listen 80; \n\
