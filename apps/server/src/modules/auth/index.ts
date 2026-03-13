@@ -1,4 +1,14 @@
-import { me, signin, signout, signoutAll, signup } from "@theapp/schemas";
+import cron, { Patterns } from "@elysiajs/cron";
+import {
+  getSessions,
+  type MarkedSession,
+  me,
+  type Session,
+  signin,
+  signout,
+  signoutAll,
+  signup,
+} from "@theapp/schemas";
 import { db } from "@theapp/server/db";
 import { schema } from "@theapp/server/db/schema";
 import {
@@ -9,7 +19,7 @@ import {
   verifyPassword,
 } from "@theapp/server/utils/crypto";
 import { parseUserAgent } from "@theapp/server/utils/ua";
-import { and, eq } from "drizzle-orm";
+import { and, eq, lt } from "drizzle-orm";
 import Elysia from "elysia";
 import { isProduction } from "elysia/error";
 import {
@@ -18,7 +28,6 @@ import {
   JWT_EXPIRATION_SECONDS,
   SESSION_TOKEN_DELIMITER,
 } from "./guard";
-import { sessions } from "./sessions";
 
 export const auth = new Elysia({
   prefix: "/auth",
@@ -26,7 +35,20 @@ export const auth = new Elysia({
     tags: ["auth"],
   },
 })
-  .use(sessions)
+  .use(
+    cron({
+      name: "delete-inactive-sessions",
+      pattern: Patterns.EVERY_DAY_AT_MIDNIGHT,
+      run: async () => {
+        const cutoff = new Date(Date.now() - INACTIVITY_TIMEOUT_SECONDS * 1000);
+        return db
+          .delete(schema.sessions)
+          .where(lt(schema.sessions.lastUsedAt, cutoff))
+          .returning()
+          .then((rows) => rows.map(makeSafeSession));
+      },
+    }),
+  )
   .post(
     "/signup",
     async (ctx) => {
@@ -182,27 +204,40 @@ export const auth = new Elysia({
       },
     },
   )
+  .get(
+    "/sessions",
+    async (ctx) => {
+      const markedSessions = await db.query.sessions
+        .findMany({
+          where: { userId: { eq: ctx.userId }, user: { status: "active" } },
+          orderBy: { lastUsedAt: "desc" },
+          columns: { secretHash: false },
+        })
+        .then((sessions) => markCurrentSession(sessions, ctx.sessionId));
+      return ctx.status(200, markedSessions);
+    },
+    {
+      ...getSessions,
+      detail: {
+        description: "Get all active sessions for the current user.",
+      },
+    },
+  )
   .delete(
     "/signout",
     async (ctx) => {
       if (!ctx.query.sessionId || ctx.query.sessionId === ctx.sessionId) {
         ctx.cookie.sessionToken?.remove();
         ctx.cookie.authToken?.remove();
-        await db
-          .delete(schema.sessions)
-          .where(eq(schema.sessions.sessionId, ctx.sessionId));
-        return ctx.status(200, "Signed out");
       }
-
       await db
         .delete(schema.sessions)
         .where(
           and(
-            eq(schema.sessions.sessionId, ctx.query.sessionId),
+            eq(schema.sessions.sessionId, ctx.query.sessionId ?? ctx.sessionId),
             eq(schema.sessions.userId, ctx.userId),
           ),
         );
-
       return ctx.status(200, "Signed out");
     },
     {
@@ -230,3 +265,20 @@ export const auth = new Elysia({
       },
     },
   );
+
+function makeSafeSession<T extends { secretHash: Buffer }>(
+  session: T,
+): Omit<T, "secretHash"> {
+  const { secretHash: _, ...safeSession } = session;
+  return safeSession;
+}
+
+function markCurrentSession(
+  sessions: Session[],
+  currentSessionId: string,
+): MarkedSession[] {
+  return sessions.map((s) => ({
+    ...s,
+    isCurrent: s.sessionId === currentSessionId,
+  }));
+}

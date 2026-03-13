@@ -1,4 +1,5 @@
 import z from "zod";
+import { sessionSchema } from "../db/session";
 import { userWithProfileAndAccessSchema } from "../db/user";
 
 export const signup = {
@@ -52,5 +53,17 @@ export const signout = {
 export const signoutAll = {
   response: {
     200: z.literal("Signed out all sessions"),
+  },
+};
+
+export const markedSessionsSchema = sessionSchema.extend({
+  isCurrent: z.boolean(),
+});
+
+export type MarkedSession = z.infer<typeof markedSessionsSchema>;
+
+export const getSessions = {
+  response: {
+    200: z.array(markedSessionsSchema),
   },
 };

@@ -2,7 +2,6 @@ export * from "./api/auth";
 export * from "./api/f1";
 export * from "./api/misc";
 export * from "./api/profiles";
-export * from "./api/sessions";
 export * from "./api/users";
 export * from "./api/wishes";
 

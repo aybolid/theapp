@@ -69,6 +69,7 @@ export async function fetchF1SessionResults(
 export async function fetchF1DriverChampionshipStandings(): Promise<
   F1DriverChampionshipStanding[]
 > {
+  // FIXME: this route supports only race sessions while latest can be any session
   return fetchF1Api<F1DriverChampionshipStanding[]>(
     "/v1/championship_drivers?session_key=latest",
   );
