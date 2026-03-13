@@ -7,7 +7,7 @@ COPY . .
 
 RUN turbo prune --scope=@theapp/server --docker
 
-FROM oven/bun:1 AS builder
+FROM docker.io/oven/bun:1 AS builder
 WORKDIR /app
 
 COPY --from=pruner /app/out/json/ .
