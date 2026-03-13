@@ -5,87 +5,89 @@ import { logger } from "../utils/logger";
 import { db } from ".";
 import { schema } from "./schema";
 
+/**
+ * Prepares the database by running migrations and seeding the default admin user.
+ */
 export async function prepareDatabase() {
-  logger.info("Preparing database");
+  logger.info("Preparing database...");
   try {
-    logger.info("Running migrations");
-    const failResponse = await runMigrations();
-    if (failResponse) {
-      logger.error(failResponse, "Migration failed");
-      throw failResponse;
-    }
-    logger.info("Migrations complete");
-
-    await createAdminUserIfNotExists();
+    await runMigrations();
+    await seedAdminUser();
+    logger.info("Database preparation complete.");
   } catch (error) {
-    logger.fatal(error, "Database preparation failed");
+    logger.fatal(error, "Database preparation failed. Terminating process.");
     process.exit(1);
   }
 }
 
+/**
+ * Runs database migrations based on the environment.
+ */
 async function runMigrations() {
-  return migrate(db, {
-    migrationsFolder: isProduction ? "migrations" : "drizzle",
-  });
+  logger.info("Running migrations...");
+  const migrationsFolder = isProduction ? "migrations" : "drizzle";
+
+  const migrationError = await migrate(db, { migrationsFolder });
+
+  if (migrationError) {
+    logger.error(migrationError, "Migration failed");
+    throw migrationError;
+  }
+
+  logger.info("Migrations complete.");
 }
 
-async function createAdminUserIfNotExists() {
-  logger.info("Checking if admin user exists");
+/**
+ * Ensures at least one admin user exists in the database.
+ * If none are found, creates a default admin from environment variables.
+ */
+async function seedAdminUser() {
+  logger.info("Checking for existing active admin users...");
+
   const admins = await db.query.users.findMany({
     where: {
       status: "active",
       access: { admin: true },
     },
   });
-  const adminsCount = admins.length;
-  if (adminsCount > 0) {
-    logger.info("Admin user already exists");
+
+  if (admins.length > 0) {
+    logger.info("Active admin user already exists.");
     return;
   }
 
-  logger.info("Creating admin user and profile");
+  const email = process.env.ADMIN_EMAIL?.toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
 
-  const email = process.env.ADMIN_EMAIL.toLowerCase();
-  const passwordHash = await hashPassword(process.env.ADMIN_PASSWORD);
+  logger.info({ email }, "Creating default admin user...");
+  const passwordHash = await hashPassword(password);
 
-  await db.transaction(async (tx) => {
-    logger.info("Creating admin user");
-    const user = await tx
-      .insert(schema.users)
-      .values({ email, passwordHash, status: "active" })
-      .returning()
-      .then((rows) => rows[0]);
-    if (!user) {
-      logger.error("Failed to create admin user");
-      return tx.rollback();
-    }
-    logger.info("Admin user created");
+  try {
+    await db.transaction(async (tx) => {
+      const [user] = await tx
+        .insert(schema.users)
+        .values({ email, passwordHash, status: "active" })
+        .returning();
 
-    logger.info("Creating admin access");
-    const access = await tx
-      .insert(schema.accesses)
-      .values({
+      if (!user) throw new Error("Failed to create admin user row");
+
+      await tx.insert(schema.accesses).values({
         userId: user.userId,
         admin: true,
-      })
-      .returning()
-      .then((rows) => rows[0]);
-    if (!access) {
-      logger.error("Failed to create admin access");
-      return tx.rollback();
-    }
-    logger.info("Admin access created");
+      });
 
-    logger.info("Creating admin profile");
-    const profile = await tx
-      .insert(schema.profiles)
-      .values({ userId: user.userId, name: "Admin User" })
-      .returning()
-      .then((rows) => rows[0]);
-    if (!profile) {
-      logger.error("Failed to create admin profile");
-      return tx.rollback();
-    }
-    logger.info("Admin profile created");
-  });
+      await tx.insert(schema.profiles).values({
+        userId: user.userId,
+        name: "Admin User",
+      });
+    });
+
+    logger.info("Default admin user created successfully.");
+  } catch (error) {
+    logger.error(
+      error,
+      "Failed to seed default admin user during transaction.",
+    );
+    throw error;
+  }
 }
