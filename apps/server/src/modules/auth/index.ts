@@ -15,18 +15,19 @@ import {
   generateSecureRandomString,
   hashPassword,
   hashSecret,
-  signAuthJwt,
   verifyPassword,
 } from "@theapp/server/utils/crypto";
 import { parseUserAgent } from "@theapp/server/utils/ua";
 import { and, eq, lt } from "drizzle-orm";
 import Elysia from "elysia";
-import { isProduction } from "elysia/error";
 import {
   authGuard,
+  buildSessionToken,
+  getAccessMap,
   INACTIVITY_TIMEOUT_SECONDS,
-  JWT_EXPIRATION_SECONDS,
-  SESSION_TOKEN_DELIMITER,
+  setAuthTokenCookie,
+  setSessionTokenCookie,
+  signAuthJwt,
 } from "./guard";
 
 export const auth = new Elysia({
@@ -141,36 +142,17 @@ export const auth = new Elysia({
         .then((rows) => rows[0]);
       if (!session) throw new Error("Failed to create session");
 
-      const token = `${sessionId}${SESSION_TOKEN_DELIMITER}${secret}`;
+      const sessionToken = buildSessionToken({ secret, sessionId });
+      const access = getAccessMap(candidate.access);
 
-      const jwt = await signAuthJwt(
-        {
-          sessionId,
-          userId: candidate.userId,
-          access: {
-            admin: candidate.access.admin,
-            wishes: candidate.access.wishes,
-            f1: candidate.access.f1,
-          },
-        },
-        JWT_EXPIRATION_SECONDS,
-      );
+      const jwt = await signAuthJwt({
+        sessionId,
+        userId: candidate.userId,
+        access,
+      });
 
-      ctx.cookie.sessionToken?.set({
-        httpOnly: true,
-        sameSite: "strict",
-        value: token,
-        path: "/",
-        maxAge: INACTIVITY_TIMEOUT_SECONDS,
-        secure: isProduction,
-      });
-      ctx.cookie.authToken?.set({
-        httpOnly: true,
-        sameSite: "strict",
-        value: jwt,
-        path: "/",
-        secure: isProduction,
-      });
+      setSessionTokenCookie(ctx.cookie, sessionToken);
+      setAuthTokenCookie(ctx.cookie, jwt);
 
       return ctx.status(200, "Signed in");
     },

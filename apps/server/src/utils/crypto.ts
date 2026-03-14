@@ -1,22 +1,3 @@
-import type { AccessMap } from "@theapp/schemas";
-import {
-  type JWTPayload,
-  type JWTVerifyResult,
-  jwtVerify,
-  SignJWT,
-} from "jose";
-
-/**
- * Authentication JWT payload structure.
- */
-export type AuthJwtPayload = JWTPayload & {
-  userId: string;
-  sessionId: string;
-  access: AccessMap;
-};
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
-const JWT_ALGORITHM = "HS256";
 const PASSWORD_ALGORITHM = "argon2id";
 const SECRET_HASH_ALGORITHM: AlgorithmIdentifier = "SHA-256";
 
@@ -24,29 +5,6 @@ const SECRET_HASH_ALGORITHM: AlgorithmIdentifier = "SHA-256";
  * Human readable alphabet (a-z, 0-9 without l, o, 0, 1 to avoid confusion).
  */
 const HUMAN_READABLE_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
-
-/**
- * Signs an authentication JWT.
- */
-export async function signAuthJwt(
-  payload: AuthJwtPayload,
-  expirationSeconds: number,
-): Promise<string> {
-  return new SignJWT(payload)
-    .setProtectedHeader({ alg: JWT_ALGORITHM })
-    .setExpirationTime(Math.floor(Date.now() / 1000) + expirationSeconds)
-    .setIssuedAt()
-    .sign(JWT_SECRET);
-}
-
-/**
- * Verifies an authentication JWT.
- */
-export async function verifyAuthJwt(
-  token: string,
-): Promise<JWTVerifyResult<AuthJwtPayload>> {
-  return jwtVerify(token, JWT_SECRET);
-}
 
 /**
  * Hashes a password using Bun's native hashing utilities.
