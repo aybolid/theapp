@@ -43,7 +43,7 @@ export function checkEnv(): void {
     const { issues } = result.error;
     logger.error("Invalid environment variables:");
     for (const issue of issues) {
-      logger.error(`  - ${issue.path.join(".")}: ${issue.message}`);
+      logger.error(`${issue.path.join(".")}: ${issue.message}`);
     }
     process.exit(1);
   }

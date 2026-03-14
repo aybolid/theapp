@@ -2,8 +2,7 @@ import openapi from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { isProduction } from "elysia/error";
 import z from "zod";
-
-import { pool } from "./db";
+import { lifecycleHandler, requestLogger } from "./app";
 import { prepareDatabase } from "./db/prepare";
 import { checkEnv } from "./env";
 import { auth } from "./modules/auth";
@@ -14,10 +13,10 @@ import { users } from "./modules/users";
 import { wishes } from "./modules/wishes";
 import { logger } from "./utils/logger";
 
-const PORT = 3000;
-
 checkEnv();
 await prepareDatabase();
+
+const PORT = 3000;
 
 const api = new Elysia({ prefix: "/api" })
   .use(auth)
@@ -28,32 +27,8 @@ const api = new Elysia({ prefix: "/api" })
   .use(f1);
 
 const app = new Elysia({ allowUnsafeValidationDetails: true })
-  .on("stop", async () => {
-    logger.info("Server stopping. Closing database connections...");
-    await pool.end();
-    logger.info("Database connection pool closed.");
-    process.exit(0);
-  })
-  .onRequest(({ request }) => {
-    logger.info(
-      { method: request.method, url: request.url },
-      "Incoming request.",
-    );
-  })
-  .onAfterResponse(({ request, set }) => {
-    logger.info(
-      { method: request.method, url: request.url, status: set.status },
-      "Response sent.",
-    );
-  })
-  .onError((ctx) => {
-    const logData = { code: ctx.code, error: ctx.error, url: ctx.request.url };
-    if (typeof ctx.code !== "number" && ctx.code !== "VALIDATION") {
-      logger.error(logData, "Request failed.");
-    } else {
-      logger.debug(logData, "Request failed (expected).");
-    }
-  })
+  .use(lifecycleHandler)
+  .use(requestLogger)
   .use(
     openapi({
       enabled: !isProduction,
