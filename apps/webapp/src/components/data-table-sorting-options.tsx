@@ -15,18 +15,16 @@ import {
   ChevronsUpDown,
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
-import type { ComponentPropsWithoutRef } from "react";
+import { cn } from "@theapp/ui/lib/utils";
+import type { ComponentPropsWithoutRef, FC } from "react";
 
-export function DataTableSortingOptions<TData>({
-  table,
-  labelsMap = {},
-  onlyIcon = false,
-  ...props
-}: {
-  table: Table<TData>;
-  labelsMap?: Record<string, string>;
-  onlyIcon?: boolean;
-} & ComponentPropsWithoutRef<typeof Button>) {
+export const DataTableSortingOptions: FC<
+  {
+    table: Table<unknown>;
+    labelsMap?: Record<string, string>;
+    onlyIcon?: boolean;
+  } & ComponentPropsWithoutRef<typeof Button>
+> = ({ table, labelsMap = {}, onlyIcon = false, ...props }) => {
   "use no memo";
 
   const columns = table.getAllColumns().filter((column) => column.getCanSort());
@@ -47,11 +45,13 @@ export function DataTableSortingOptions<TData>({
           <DropdownMenuSeparator />
           {columns.map((column) => {
             const sorting = column.getIsSorted();
+            const label = labelsMap[column.id];
             return (
               <DropdownMenuItem
                 key={column.id}
                 closeOnClick={false}
                 onClick={() => column.toggleSorting(sorting !== "desc")}
+                className={cn(!label && "text-destructive")}
               >
                 {sorting === "desc" ? (
                   <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} />
@@ -64,7 +64,7 @@ export function DataTableSortingOptions<TData>({
                     strokeWidth={2}
                   />
                 )}
-                {labelsMap[column.id] || column.id}
+                {label || column.id}
               </DropdownMenuItem>
             );
           })}
@@ -72,4 +72,4 @@ export function DataTableSortingOptions<TData>({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};

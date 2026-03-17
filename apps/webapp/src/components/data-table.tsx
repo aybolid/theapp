@@ -1,5 +1,4 @@
 import { flexRender, type Table as TTable } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -10,25 +9,25 @@ import {
   TableRow,
 } from "@theapp/ui/components/table";
 import { cn } from "@theapp/ui/lib/utils";
-import type { ReactNode } from "react";
+import type { FC, ReactNode } from "react";
 
-export function DataTable<T>({
-  table,
-  className,
-  caption,
-}: {
-  table: TTable<T>;
+export const DataTable: FC<{
+  table: TTable<unknown>;
   className?: string;
   caption?: ReactNode;
-}) {
+}> = ({ table, className, caption }) => {
   "use no memo";
+
+  const headerGroups = table.getHeaderGroups();
+  const rows = table.getCoreRowModel().rows ?? [];
+  const columns = table.getAllColumns();
 
   return (
     <div className={cn("overflow-hidden", className)}>
       <Table>
         {caption && <TableCaption>{caption}</TableCaption>}
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
+          {headerGroups.map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
@@ -46,26 +45,30 @@ export function DataTable<T>({
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                className="group/row"
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
+          {rows.length ? (
+            rows.map((row) => {
+              const isSelected = row.getIsSelected();
+              const cells = row.getVisibleCells();
+              return (
+                <TableRow
+                  className="group/row"
+                  key={row.id}
+                  data-state={isSelected && "selected"}
+                >
+                  {cells.map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
+            })
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={table.getAllColumns().length}
-                className="h-24 text-center"
-              >
+              <TableCell colSpan={columns.length} className="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>
@@ -74,4 +77,4 @@ export function DataTable<T>({
       </Table>
     </div>
   );
-}
+};

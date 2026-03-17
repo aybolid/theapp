@@ -11,17 +11,18 @@ import {
 } from "@theapp/ui/components/dropdown-menu";
 import { Settings01Icon } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
-import type { ComponentPropsWithoutRef } from "react";
+import { cn } from "@theapp/ui/lib/utils";
+import type { ComponentPropsWithoutRef, FC } from "react";
 
-export function DataTableViewOptions<TData>({
-  table,
-  labelsMap = {},
-  ...props
-}: {
-  table: Table<TData>;
-  labelsMap?: Record<string, string>;
-} & ComponentPropsWithoutRef<typeof Button>) {
+export const DataTableViewOptions: FC<
+  {
+    table: Table<unknown>;
+    labelsMap?: Record<string, string>;
+  } & ComponentPropsWithoutRef<typeof Button>
+> = ({ table, labelsMap = {}, ...props }) => {
   "use no memo";
+
+  const columns = table.getAllColumns().filter((column) => column.getCanHide());
 
   return (
     <DropdownMenu>
@@ -37,25 +38,21 @@ export function DataTableViewOptions<TData>({
         <DropdownMenuGroup>
           <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {table
-            .getAllColumns()
-            .filter(
-              (column) =>
-                typeof column.accessorFn !== "undefined" && column.getCanHide(),
-            )
-            .map((column) => {
-              return (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                >
-                  {labelsMap[column.id] || column.id}
-                </DropdownMenuCheckboxItem>
-              );
-            })}
+          {columns.map((column) => {
+            const label = labelsMap[column.id];
+            return (
+              <DropdownMenuCheckboxItem
+                key={column.id}
+                checked={column.getIsVisible()}
+                onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                className={cn(!label && "text-destructive")}
+              >
+                {label || column.id}
+              </DropdownMenuCheckboxItem>
+            );
+          })}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};

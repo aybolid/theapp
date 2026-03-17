@@ -15,19 +15,14 @@ import {
 } from "@theapp/ui/icons/huge";
 import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { cn } from "@theapp/ui/lib/utils";
-import type { HTMLAttributes } from "react";
+import type { FC, HTMLAttributes } from "react";
 
-type Props<TData, TValue> = {
-  column: Column<TData, TValue>;
-  title: string;
-} & HTMLAttributes<HTMLDivElement>;
-
-export function DataTableColumnHeader<TData, TValue>({
-  column,
-  title,
-  className,
-  ...props
-}: Props<TData, TValue>) {
+export const DataTableColumnHeader: FC<
+  {
+    column: Column<unknown, unknown>;
+    title: string;
+  } & HTMLAttributes<HTMLDivElement>
+> = ({ column, title, className, ...props }) => {
   "use no memo";
 
   const canSort = column.getCanSort();
@@ -91,4 +86,4 @@ export function DataTableColumnHeader<TData, TValue>({
       </DropdownMenu>
     </div>
   );
-}
+};
