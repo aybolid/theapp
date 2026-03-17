@@ -29,6 +29,8 @@ export function DataTableSortingOptions<TData>({
 } & ComponentPropsWithoutRef<typeof Button>) {
   "use no memo";
 
+  const columns = table.getAllColumns().filter((column) => column.getCanSort());
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -43,36 +45,29 @@ export function DataTableSortingOptions<TData>({
         <DropdownMenuGroup>
           <DropdownMenuLabel>Toggle sorting</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {table
-            .getAllColumns()
-            .filter(
-              (column) =>
-                typeof column.accessorFn !== "undefined" && column.getCanSort(),
-            )
-            .map((column) => {
-              return (
-                <DropdownMenuItem
-                  key={column.id}
-                  closeOnClick={false}
-                  onClick={() =>
-                    column.toggleSorting(column.getIsSorted() !== "desc")
-                  }
-                >
-                  {column.getIsSorted() === "desc" ? (
-                    <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} />
-                  ) : column.getIsSorted() === "asc" ? (
-                    <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
-                  ) : (
-                    <HugeiconsIcon
-                      className="opacity-0"
-                      icon={ChevronsUpDown}
-                      strokeWidth={2}
-                    />
-                  )}
-                  {labelsMap[column.id] || column.id}
-                </DropdownMenuItem>
-              );
-            })}
+          {columns.map((column) => {
+            const sorting = column.getIsSorted();
+            return (
+              <DropdownMenuItem
+                key={column.id}
+                closeOnClick={false}
+                onClick={() => column.toggleSorting(sorting !== "desc")}
+              >
+                {sorting === "desc" ? (
+                  <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} />
+                ) : sorting === "asc" ? (
+                  <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
+                ) : (
+                  <HugeiconsIcon
+                    className="opacity-0"
+                    icon={ChevronsUpDown}
+                    strokeWidth={2}
+                  />
+                )}
+                {labelsMap[column.id] || column.id}
+              </DropdownMenuItem>
+            );
+          })}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
