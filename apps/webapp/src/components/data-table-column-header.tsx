@@ -17,7 +17,7 @@ import { HugeiconsIcon } from "@theapp/ui/icons/huge-react";
 import { cn } from "@theapp/ui/lib/utils";
 import type { HTMLAttributes } from "react";
 
-type DataTableColumnHeaderProps<TData, TValue> = {
+type Props<TData, TValue> = {
   column: Column<TData, TValue>;
   title: string;
 } & HTMLAttributes<HTMLDivElement>;
@@ -26,15 +26,25 @@ export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
-}: DataTableColumnHeaderProps<TData, TValue>) {
+  ...props
+}: Props<TData, TValue>) {
   "use no memo";
 
-  if (!column.getCanSort()) {
-    return <div className={cn(className)}>{title}</div>;
+  const canSort = column.getCanSort();
+  const canHide = column.getCanHide();
+
+  if (!canSort && !canHide) {
+    return (
+      <div className={cn("text-muted-foreground", className)} {...props}>
+        {title}
+      </div>
+    );
   }
 
+  const sorting = column.getIsSorted();
+
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center gap-2", className)} {...props}>
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
@@ -43,28 +53,34 @@ export function DataTableColumnHeader<TData, TValue>({
               className="-ml-3 h-8 data-[state=open]:bg-accent"
             >
               <span>{title}</span>
-              {column.getIsSorted() === "desc" ? (
-                <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} />
-              ) : column.getIsSorted() === "asc" ? (
-                <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
-              ) : (
-                <HugeiconsIcon icon={ChevronsUpDown} strokeWidth={2} />
-              )}
+              {canSort ? (
+                sorting === "desc" ? (
+                  <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} />
+                ) : sorting === "asc" ? (
+                  <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
+                ) : (
+                  <HugeiconsIcon icon={ChevronsUpDown} strokeWidth={2} />
+                )
+              ) : null}
             </Button>
           }
         />
         <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-            <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} />
-            <span>Asc</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-            <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
-            <span>Desc</span>
-          </DropdownMenuItem>
-          {column.getCanHide() && (
+          {canSort && (
             <>
-              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+                <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} />
+                <span>Asc</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+                <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
+                <span>Desc</span>
+              </DropdownMenuItem>
+            </>
+          )}
+          {canHide && (
+            <>
+              {canSort && <DropdownMenuSeparator />}
               <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
                 <HugeiconsIcon icon={EyeOff} strokeWidth={2} />
                 <span>Hide</span>
