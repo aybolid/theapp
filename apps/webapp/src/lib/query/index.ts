@@ -4,11 +4,20 @@ import {
   useMutation as _useMutation,
   useQuery as _useQuery,
   useSuspenseQuery as _useSuspenseQuery,
+  QueryClient,
   type QueryKey,
   type UseMutationOptions,
   type UseQueryOptions,
   type UseSuspenseQueryOptions,
 } from "@tanstack/react-query";
+
+const QUERY_STALE_TIME_SECONS = 3 * 60;
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false, staleTime: QUERY_STALE_TIME_SECONS * 1000 },
+  },
+});
 
 export function createMutation<
   K extends QueryKey,

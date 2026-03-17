@@ -1,37 +1,13 @@
 import "@theapp/ui/globals.css";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { RouterProvider } from "@tanstack/react-router";
 import { TooltipProvider } from "@theapp/ui/components/tooltip";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ThemeContextProvider } from "./contexts/theme";
-import { routeTree } from "./routeTree.gen";
-
-const QUERY_STALE_TIME_SECONS = 3 * 60;
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { retry: false, staleTime: QUERY_STALE_TIME_SECONS * 1000 },
-  },
-});
-
-const router = createRouter({
-  routeTree,
-  context: {
-    queryClient,
-  },
-  defaultPreload: "intent",
-  defaultPreloadStaleTime: 0,
-  scrollRestoration: true,
-  notFoundMode: "root",
-});
-
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
+import { queryClient } from "./lib/query";
+import { router } from "./lib/router";
 
 const root = document.getElementById("root");
 if (!root) {
