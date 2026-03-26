@@ -61,31 +61,27 @@ export const WishItem: FC<{
     onError: () => toast.error("Failed to reserve wish"),
   });
 
-  const showUpdatedAt = wish.createdAt.toString() !== wish.updatedAt.toString();
-
   return (
-    <Card size="sm" className="relative overflow-hidden">
+    <Card className="relative overflow-hidden">
       {banner && (
         <>
           <div
-            className="absolute inset-0 z-0 m-3 overflow-hidden rounded-lg bg-center bg-cover bg-no-repeat"
+            className="absolute inset-0 z-0 m-3 overflow-hidden rounded-lg bg-center bg-cover bg-no-repeat brightness-300 dark:brightness-100 dark:grayscale"
             style={{ backgroundImage: `url(${banner})` }}
           />
-          <div className="absolute inset-0 z-0 bg-card/80 backdrop-blur-lg" />
+          <div className="absolute inset-0 z-0 bg-card/80 backdrop-blur-md" />
         </>
       )}
       <CardHeader className="z-10">
-        <CardTitle className="flex flex-wrap items-center gap-2">
+        <CardTitle className="flex flex-wrap items-baseline gap-2">
           {wish.isCompleted ? (
             <Badge>Completed</Badge>
           ) : (
             <Badge variant="secondary">Pending</Badge>
           )}
-          <span className="max-w-86 truncate">{wish.name}</span>
+          <span>{wish.name}</span>
         </CardTitle>
-        {wish.note && (
-          <CardDescription className="text-xs">{wish.note}</CardDescription>
-        )}
+        {wish.note && <CardDescription>{wish.note}</CardDescription>}
         <CardAction>
           <WishActionsMenu
             wish={wish}
@@ -101,7 +97,7 @@ export const WishItem: FC<{
       </CardHeader>
       <CardContent className="z-10 flex h-full flex-col">
         <div className="flex-1" />
-        <ItemGroup className="grid gap-2 sm:grid-cols-2">
+        <ItemGroup className="grid gap-2">
           <Item variant="muted" className="items-start">
             <ItemContent>
               <ItemTitle>Whose wish</ItemTitle>
@@ -137,14 +133,12 @@ export const WishItem: FC<{
               {dayjs(wish.createdAt).format("MMM DD, YYYY, HH:mm")}
             </ItemDescription>
           </Item>
-          {showUpdatedAt && (
-            <Item className="justify-between p-0">
-              <ItemTitle className="text-xs">Updated on</ItemTitle>
-              <ItemDescription className="text-xs">
-                {dayjs(wish.updatedAt).format("MMM DD, YYYY, HH:mm")}
-              </ItemDescription>
-            </Item>
-          )}
+          <Item className="justify-between p-0">
+            <ItemTitle className="text-xs">Updated on</ItemTitle>
+            <ItemDescription className="text-xs">
+              {dayjs(wish.updatedAt).format("MMM DD, YYYY, HH:mm")}
+            </ItemDescription>
+          </Item>
         </ItemGroup>
       </CardContent>
       <CardFooter className="z-10">

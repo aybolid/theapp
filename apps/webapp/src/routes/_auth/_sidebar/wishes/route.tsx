@@ -376,7 +376,7 @@ function RouteComponent() {
           </Activity>
           <Activity mode={view === "cards" ? "visible" : "hidden"}>
             {tableWishes.length ? (
-              <div className="grid gap-4 pt-0.5 xl:grid-cols-2 2xl:grid-cols-3">
+              <div className="grid gap-4 pt-0.5 xl:grid-cols-3 2xl:grid-cols-4">
                 {tableWishes.map((wish) => (
                   <WishItem
                     key={wish.wishId}
@@ -746,6 +746,8 @@ const COLUMNS = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Actions" />
     ),
+    enableSorting: false,
+    enableHiding: false,
     enableGlobalFilter: false,
     cell: (props) => {
       const wish = props.row.original;
