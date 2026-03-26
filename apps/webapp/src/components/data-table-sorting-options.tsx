@@ -20,7 +20,8 @@ import type { ComponentPropsWithoutRef, FC } from "react";
 
 export const DataTableSortingOptions: FC<
   {
-    table: Table<unknown>;
+    // biome-ignore lint/suspicious/noExplicitAny: we dont care about table data
+    table: Table<any>;
     labelsMap?: Record<string, string>;
     onlyIcon?: boolean;
   } & ComponentPropsWithoutRef<typeof Button>

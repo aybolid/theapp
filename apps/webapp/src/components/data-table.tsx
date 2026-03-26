@@ -12,7 +12,8 @@ import { cn } from "@theapp/ui/lib/utils";
 import type { FC, ReactNode } from "react";
 
 export const DataTable: FC<{
-  table: TTable<unknown>;
+  // biome-ignore lint/suspicious/noExplicitAny: we dont care about table data
+  table: TTable<any>;
   className?: string;
   caption?: ReactNode;
 }> = ({ table, className, caption }) => {

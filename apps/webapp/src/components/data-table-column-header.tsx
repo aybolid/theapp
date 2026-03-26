@@ -19,7 +19,8 @@ import type { FC, HTMLAttributes } from "react";
 
 export const DataTableColumnHeader: FC<
   {
-    column: Column<unknown, unknown>;
+    // biome-ignore lint/suspicious/noExplicitAny: we dont care about table data
+    column: Column<any, any>;
     title: string;
   } & HTMLAttributes<HTMLDivElement>
 > = ({ column, title, className, ...props }) => {

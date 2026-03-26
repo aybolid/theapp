@@ -16,7 +16,8 @@ import type { ComponentPropsWithoutRef, FC } from "react";
 
 export const DataTableViewOptions: FC<
   {
-    table: Table<unknown>;
+    // biome-ignore lint/suspicious/noExplicitAny: we dont care about table data
+    table: Table<any>;
     labelsMap?: Record<string, string>;
   } & ComponentPropsWithoutRef<typeof Button>
 > = ({ table, labelsMap = {}, ...props }) => {
